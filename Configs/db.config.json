@@ -1,0 +1,13 @@
+{
+    "server" : "localhost",
+    "port" : "5432",
+    "owner" : "postgres",
+    "password" : "post",
+    "database" : "crm",
+    "connectionString" : "postgresql://<db_user>:<password>@<db_server>:<port>/<name_of_db>",
+    "tables" : {
+        "Credentials" : "credentials",
+        "Admin" : "admin",
+        "Customer" : "customer"
+    }
+}

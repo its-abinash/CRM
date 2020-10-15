@@ -1,0 +1,15 @@
+{
+    "endpoints" : {
+        "server" : "http://localhost:3000/"
+    },
+    "routes" : {
+        "reg" : "register",
+        "login" : "login",
+        "contact" : "contact",
+        "edit" : "edit",
+        "add" : "insert",
+        "delete" : "delete",
+        "email" : "email",
+        "chat" : "chat"
+    }
+}

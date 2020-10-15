@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./css/cards.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" >
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+        .modalbdy {
+            overflow-y: auto;
+        }
+
+    .xyz {
+    margin: 0 auto;
+    max-width: 800px;
+    padding: 0 20px;
+    overflow-x: hidden; 
+            overflow-y: auto; 
+    }
+
+    .chat_container {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+    }
+
+    .darker {
+    border-color: #ccc;
+    background-color: #ddd;
+    }
+
+    .chat_container::after {
+    content: "";
+    clear: both;
+    display: table;
+    }
+
+    .time-right {
+    float: right;
+    color: #aaa;
+    }
+
+    .time-left {
+    float: left;
+    color: #999;
+    }
+    </style>
+</head>
+<body>
+
+<% if(msg === "failure") { %>
+    <script>
+        alert('error!!! Try again')
+    </script>
+<% } %>
+<% if(msg === "exception") { %>
+    <script>
+        alert('Ufffzzz! Sorry, this is a server exception')
+    </script>
+<% } %>
+
+<div class="row">
+    <% for(var i = 0; i < customerData.length; i++) { %>
+        <div class="column">
+            <div class="card">
+                <p><%= customerData[i].name %></p>
+                <button onclick='remove("<%= customerData[i].email %>")' style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
+                <button onclick='edit("<%= customerData[i].email %>")' style="width:auto;"><i class="fa fa-edit"></i></button>
+                <button onclick='message("<%= customerData[i].email %>")' style="width:auto;background-color:blueviolet"><i class="fa fa-envelope"></i></button>
+                <button onclick='chat("<%= customerData[i].email %>")' style="width:auto;background-color:darkcyan"><i class="fa fa-arrow-right"></i></button>
+                <div id="id01" class="modal">
+                    <form class="modal-content animate" action="<%= editEndpoint %>" method="post">
+                        <div class="container">
+                            <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
+                            <input type="text" placeholder="name" name="name">
+                            <p></p><br>
+                            <input type="text" placeholder="phone" name="phone">
+                            <p></p><br>
+                            <input type="text" placeholder="reminder frequency" name="remfreq">
+                            <p></p><br>
+                            <button type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="id02" class="modal">
+                    <form class="modal-content animate" action="<%= deleteEndpoint %>" method="post">
+                        <div class="container">
+                            <input id="deletemail" type="hidden" value="" name="email" readonly="readonly"/>
+                            <button type="submit" style="background-color: cadetblue;"><i class="fa fa-warning" style="font-size:28px;color:red"> Delete</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div id="id03" class="modal">
+                    <form class="modal-content animate" action="<%= emailEndpoint %>" method="post">
+                        <div class="container">
+                            <div>
+                                <div>
+                                    <input type="text" id="sendmail" name="email" value="" readonly>
+                                    <p></p><br>
+                                </div>
+                                <div>
+                                    <input type="text" name="subject" placeholder="subject" required>
+                                    <p></p><br>
+                                </div>
+                                <div>
+                                    <textarea type="textarea" name="body" placeholder="Message body Here" rows="7" cols="69"></textarea>
+                                    <p></p><br>
+                                </div>
+                                <button type="submit" style="background-color: darkviolet;"><p style="color: white;font-size:100%;"><b>Send</b></p></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="id04" class="modal modalbdy">
+                    <form class="modal-content animate" action="<%= emailEndpoint %>" method="post">
+                        <div class="container">
+                            <div>
+                                <div class="xyz">
+                                    <div class="chat_container">
+                                    <p>Hello. How are you today?</p>
+                                    <span class="time-right">11:00</span>
+                                    </div>
+                                    <div class="chat_container darker">
+                                    <p>Hey! I'm fine. Thanks for asking!</p>
+                                    <span class="time-left">11:01</span>
+                                    </div>
+                                    <div class="chat_container darker">
+                                        <p>Hey! I'm fine. Thanks for asking!</p>
+                                        <span class="time-left">11:01</span>
+                                        </div>
+                                        <div class="chat_container darker">
+                                            <p>Hey! I'm fine. Thanks for asking!</p>
+                                            <span class="time-left">11:01</span>
+                                            </div>
+                                            <div class="chat_container darker">
+                                                <p>Hey! I'm fine. Thanks for asking!</p>
+                                                <span class="time-left">11:01</span>
+                                                </div>
+                                                <div class="chat_container darker">
+                                                    <p>Hey! I'm fine. Thanks for asking!</p>
+                                                    <span class="time-left">11:01</span>
+                                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <% } %>
+    <!-- an extra colum to add new customer -->
+    <div class="column">
+        <div class="card">
+            <p>Add new Customer</p>
+            <button onclick="add()" style="width:auto;background-color:chartreuse"><i class="fa fa-plus-square"></i></button>
+            <div id="id05" class="modal">
+                <form class="modal-content animate" action="<%= addEndpoint %>" method="post">
+                    <div class="container">
+                        <input type="text" placeholder="name" name="name" required/>
+                        <input type="text" placeholder="email" name="email" required/>
+                        <input type="text" placeholder="phone" name="phone" required/>
+                        <input type="text" placeholder="GST Number" name="gst" required/>
+                        <input type="text" placeholder="reminder frequency" name="remfreq">
+                        <button type="submit">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Get the modal
+var modal1 = document.getElementById('id01');
+var modal2 = document.getElementById('id02');
+var modal3 = document.getElementById('id03');
+var modal4 = document.getElementById('id04');
+var modal5 = document.getElementById('id05');
+var updatemail = document.getElementById("updatemail")
+var deletemail = document.getElementById('deletemail')
+var sendmail = document.getElementById('sendmail')
+var customerEmail = document.getElementById('customerEmail')
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal1) {
+        modal1.style.display = "none";
+    }
+    if(event.target == modal2) {
+        modal2.style.display = "none";
+    }
+    if(event.target == modal3) {
+        modal3.style.display = "none";
+    }
+    if(event.target == modal4) {
+        modal4.style.display = "none";
+    }
+    if(event.target == modal5) {
+        modal5.style.display = "none";
+    }
+}
+function edit(email) {
+    modal1.style.display='block';
+    console.log(email)
+    updatemail.value=email;
+}
+
+function remove(email) {
+    modal2.style.display='block';
+    console.log(email)
+    deletemail.value=email
+}
+
+function message(email) {
+    modal3.style.display='block';
+    console.log(email)
+    sendmail.value=email
+}
+
+function add() {
+    modal5.style.display='block';
+}
+
+function chat(email) {
+    modal4.style.display='block';
+    console.log(email)
+    customerEmail.value = email;
+}
+
+</script>
+</body>
+</html>
