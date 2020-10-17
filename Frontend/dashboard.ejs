@@ -11,16 +11,29 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <style>
-        .modalbdy {
-            overflow-y: auto;
-        }
+    .modalbdy {
+    position: fixed;
+    width: 70%;
+    text-align: center;
+    top: 5%;
+    left: 50%;
+    padding: 10px;
+    transform: translate(-50%, -5%);
+    overflow-x: hidden;
+    overflow-y: auto;
+    }
 
     .xyz {
-    margin: 0 auto;
-    max-width: 800px;
-    padding: 0 20px;
-    overflow-x: hidden; 
-            overflow-y: auto; 
+    position: fixed;
+    width: 70%;
+    text-align: center;
+    top: 10%;
+    bottom: 5%;
+    left: 50%;
+    padding: 10px;
+    transform: translate(-50%, 0);
+    overflow-x: hidden;
+    overflow-y: auto;
     }
 
     .chat_container {
@@ -119,35 +132,17 @@
                     </form>
                 </div>
                 <div id="id04" class="modal modalbdy">
-                    <form class="modal-content animate" action="<%= emailEndpoint %>" method="post">
-                        <div class="container">
-                            <div>
-                                <div class="xyz">
-                                    <div class="chat_container">
-                                    <p>Hello. How are you today?</p>
-                                    <span class="time-right">11:00</span>
-                                    </div>
-                                    <div class="chat_container darker">
-                                    <p>Hey! I'm fine. Thanks for asking!</p>
-                                    <span class="time-left">11:01</span>
-                                    </div>
-                                    <div class="chat_container darker">
-                                        <p>Hey! I'm fine. Thanks for asking!</p>
-                                        <span class="time-left">11:01</span>
-                                        </div>
-                                        <div class="chat_container darker">
-                                            <p>Hey! I'm fine. Thanks for asking!</p>
-                                            <span class="time-left">11:01</span>
-                                            </div>
-                                            <div class="chat_container darker">
-                                                <p>Hey! I'm fine. Thanks for asking!</p>
-                                                <span class="time-left">11:01</span>
-                                                </div>
-                                                <div class="chat_container darker">
-                                                    <p>Hey! I'm fine. Thanks for asking!</p>
-                                                    <span class="time-left">11:01</span>
-                                                    </div>
+                    <form class="modal-content animate" action="<%= chatEndpoint %>" method="post">
+                        <div class="xyz">
+                            <input id="customerEmail" type="hidden" value="" name="email" readonly="readonly"/>
+                            <% for(var i = 0; i < chat.length; i++) { %>
+                                <div class="chat_container">
+                                    <p> <%= chat[i].msg %> </p>
+                                    <span class="<%= chat[i].time_loc %>"> <%= customerData[i].name %> </span>
                                 </div>
+                            <% } %>
+                            <div>
+                                <input type="text" name="chatmsg" placeholder="Type Message" required> <input type="submit" style="float: right;">
                             </div>
                         </div>
                     </form>

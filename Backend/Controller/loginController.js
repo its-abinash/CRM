@@ -26,13 +26,6 @@ exports.getLoginPage = async function(req, res) {
     })
 }
 
-// exports.getContactPage = async function(req, res) {
-//     console.log('### Inside controller->loginController->getContactPage ###')
-//     res.render('contact', {
-//         contacts : await getContacts()
-//     })
-// }
-
 exports.login = async function(req, res) {
     try {
         console.log(req.body)

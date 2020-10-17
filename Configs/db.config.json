@@ -4,7 +4,7 @@
     "owner" : "postgres",
     "password" : "post",
     "database" : "crm",
-    "connectionString" : "postgresql://<db_user>:<password>@<db_server>:<port>/<name_of_db>",
+    "connectionString" : "postgresql://postgres:post@localhost:/crm",
     "tables" : {
         "Credentials" : "credentials",
         "Admin" : "admin",
