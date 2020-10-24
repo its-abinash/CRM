@@ -133,16 +133,16 @@
                 </div>
                 <div id="id04" class="modal modalbdy">
                     <form class="modal-content animate" action="<%= chatEndpoint %>" method="post">
-                        <div class="xyz">
+                        <div class="xyz" id="chat-div">
                             <input id="customerEmail" type="hidden" value="" name="email" readonly="readonly"/>
-                            <% for(var i = 0; i < chat.length; i++) { %>
-                                <div class="chat_container">
-                                    <p> <%= chat[i].msg %> </p>
-                                    <span class="<%= chat[i].time_loc %>"> <%= customerData[i].name %> </span>
+                            <% for(var itr = 0; itr < chat.length; itr++) { %>
+                                <div class="chat_container <%= chat[itr].color %>">
+                                    <p> <%= chat[itr].msg %> </p>
+                                    <span class="<%= chat[itr].time_loc %>"> <%= customerData[i].name %> ( <%= chat[itr].timestamp %> ) </span>
                                 </div>
                             <% } %>
                             <div>
-                                <input type="text" name="chatmsg" placeholder="Type Message" required> <input type="submit" style="float: right;">
+                                <input type="text" name="chatmsg" placeholder="Type Message" required> <input type="submit" onclick="updateDiv()" style="float: right;">
                             </div>
                         </div>
                     </form>
@@ -226,6 +226,11 @@ function chat(email) {
     modal4.style.display='block';
     console.log(email)
     customerEmail.value = email;
+}
+
+
+function updateDiv() {
+    $("#chat-div").load(window.location.href + " #chat-div" );
 }
 
 </script>
