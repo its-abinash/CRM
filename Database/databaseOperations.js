@@ -1,7 +1,7 @@
 const { Pool, Client } = require('pg')
 var fs = require('fs')
 
-var ENV = JSON.parse(fs.readFileSync("../Configs/db.config.json", "utf8"));
+var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
 
 const pool = new Pool({
     connectionString: `${ENV.connectionString}`
@@ -167,10 +167,12 @@ var removeAtCustomer = async function(pk_name, pk_value) {
 }
 
 var insertAtConversation = async function(data) {
+    var jobDone = false;
     try {
         const db = await pool.connect();
         const query = `INSERT INTO conversation (sender, receiver, msg, timestamp) values ($1, $2, $3, current_timestamp)`;
         await db.query(query, data);
+        jobDone = true;
         db.release();
         return true;
     } catch(ex) {
@@ -178,11 +180,15 @@ var insertAtConversation = async function(data) {
         console.log(ex)
         return false;
     } finally {
-        console.log("finally finished inserting data")
+        if(jobDone) {
+            console.log("finally finished inserting data")
+        }else {
+            console.log("Couldn't finish inserting data")
+        }
     }
 }
 
-var fetchConversation = async function(sender, receiver) {
+var fetchConversations = async function(sender, receiver) {
     try {
         const db = await pool.connect();
         const query = `select sender, receiver, msg, timestamp from conversation where sender = $1 and receiver = $2 order by timestamp`;
@@ -195,6 +201,31 @@ var fetchConversation = async function(sender, receiver) {
         return [];
     } finally {
         console.log("finally finished fetching data")
+    }
+}
+
+var fetchLimitedConversations = async function(sender, receiver) {
+    var result = false;
+    try {
+        const db = await pool.connect();
+        const query = `select sender, receiver, msg, timestamp from (
+            select * from conversation 
+            where sender = $1 and receiver = $2 or sender = $2 and receiver = $1) sub
+            order by timestamp;`;
+        var data = await db.query(query, [sender, receiver]);
+        db.release();
+        result = true;
+        return data.rows;
+    } catch(ex) {
+        console.log("error in fetching row")
+        console.log(ex)
+        return [];
+    } finally {
+        if(result) {
+            console.log("finally finished fetching data")
+        }else {
+            console.log("Not able to fetch data")
+        }
     }
 }
 
@@ -212,7 +243,7 @@ exports.fetch = async function(database_id, fetch_type, pk_name=null, pk_value=n
         case 3:
             return fetch_type === 1 ? await fetchAllFromCustomer() : await fetchSpecificFromCustomer(pk_name, pk_value);
         case 4:
-            return await fetchConversation(pk_name, pk_value);
+            return fetch_type === 1 ? await fetchConversations(pk_name, pk_value) : await fetchLimitedConversations(pk_name, pk_value);
     }
 }
 
