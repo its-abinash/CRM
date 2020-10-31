@@ -225,8 +225,6 @@ $(document).ready(function() {
     $('#chat-btn').click(function() {
         var msg = document.getElementById('chat-msg').value
         var receiver = document.getElementById('customerEmail').value
-        console.log(`chat submit button clicked. Now calling Chat Post Method`)
-        console.log(`Receiver : ${receiver} and message = ${msg}`)
         if($.trim(msg) != '') {
             $.ajax({
                 url : "<%= chatEndpoint %>",
@@ -235,7 +233,6 @@ $(document).ready(function() {
                 dataType: "text",
                 success : function(data) {
                     document.getElementById('chat-msg').value = ""
-                    console.log('its success bro!!!!!!!!!')
                 },
                 error: function() {
                     // Handle this with more interactive way -- todo --
