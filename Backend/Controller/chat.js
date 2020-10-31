@@ -11,8 +11,23 @@ router.use(express.json());
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(cors());
 
-var getConversation = async function(sender, receiver) {
-    return await db.fetch(4, 2, sender, receiver)
+exports.getConversation = async function(req, res) {
+    console.log("GET/Chat Request :::: Inside chat->getConversation")
+    try {
+        var sender = req.session.user
+        var receiver = req.params.receiverId
+        var chat = await db.fetch(4, 2, sender, receiver)
+        /* Fetching previous conversation */
+        for(var i = 0; i < chat.length; i++) {
+            chat[i].timestamp = new Date((chat[i].timestamp).toString()).toLocaleTimeString()
+            chat[i]['time_loc'] = chat[i].sender === sender ? 'time-right' : 'time-left';
+            chat[i]['color'] = chat[i].sender === sender ? '' : 'darker';
+        }
+        res.send(chat)
+    } catch (ex) {
+        req.session.msg = "exception"
+        res.redirect('/dashboard')
+    }
 }
 
 var saveConversation = async function(data) {
@@ -35,18 +50,6 @@ exports.chat = async function(req, res) {
             req.session.msg = "failure"
             res.redirect('/dashboard')
         }
-
-        /* Fetching previous conversation */
-
-        var chat = await getConversation(sender, receiver);
-        for(var i = 0; i < chat.length; i++) {
-            console.log(new Date((chat[i].timestamp).toString()).toLocaleDateString())
-            chat[i].timestamp = new Date((chat[i].timestamp).toString()).toLocaleTimeString()
-            chat[i]['time_loc'] = chat[i].sender === sender ? 'time-right' : 'time-left';
-            chat[i]['color'] = chat[i].sender === sender ? '' : 'darker';
-        }
-        console.log(chat)
-        req.session.chats = chat
         req.session.msg = "success"
         res.redirect('/dashboard')
     } catch(ex) {

@@ -132,20 +132,13 @@
                     </form>
                 </div>
                 <div id="id04" class="modal modalbdy">
-                    <form class="modal-content animate" action="<%= chatEndpoint %>" method="post">
-                        <div class="xyz" id="chat-div">
-                            <input id="customerEmail" type="hidden" value="" name="email" readonly="readonly"/>
-                            <% for(var itr = 0; itr < chat.length; itr++) { %>
-                                <div class="chat_container <%= chat[itr].color %>">
-                                    <p> <%= chat[itr].msg %> </p>
-                                    <span class="<%= chat[itr].time_loc %>"> <%= customerData[i].name %> ( <%= chat[itr].timestamp %> ) </span>
-                                </div>
-                            <% } %>
-                            <div>
-                                <input type="text" name="chatmsg" placeholder="Type Message" required> <input type="submit" onclick="updateDiv()" style="float: right;">
-                            </div>
+                    <div class="xyz" id="chat-div">
+                        <input id="customerEmail" type="hidden" value="" name="email" id="receiver-id" readonly="readonly"/>
+                        <div id="load-chat"></div>
+                        <div>
+                            <input type="text" name="chatmsg" placeholder="Type Message" id="chat-msg" required> <input type="submit" id="chat-btn" style="float: right;">
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -228,10 +221,49 @@ function chat(email) {
     customerEmail.value = email;
 }
 
-
-function updateDiv() {
-    $("#chat-div").load(window.location.href + " #chat-div" );
-}
+$(document).ready(function() {
+    $('#chat-btn').click(function() {
+        var msg = document.getElementById('chat-msg').value
+        var receiver = document.getElementById('customerEmail').value
+        console.log(`chat submit button clicked. Now calling Chat Post Method`)
+        console.log(`Receiver : ${receiver} and message = ${msg}`)
+        if($.trim(msg) != '') {
+            $.ajax({
+                url : "<%= chatEndpoint %>",
+                method: "POST",
+                data: {'email': receiver, 'chatmsg' : msg},
+                dataType: "text",
+                success : function(data) {
+                    document.getElementById('chat-msg').value = ""
+                    console.log('its success bro!!!!!!!!!')
+                },
+                error: function() {
+                    // Handle this with more interactive way -- todo --
+                    alert('exception')
+                }
+            })
+        }
+    })
+    setInterval(function() {
+        var receiver = document.getElementById('customerEmail').value
+        $.ajax({
+            url : `<%= chatEndpoint %>/${receiver}`,
+            method : "GET",
+            dataType: "json",
+            success: function(chat) {
+                var html_file = ""
+                for(var i = 0; i < chat.length; i++) {
+                    html_file +=
+                            `<div class="chat_container ${chat[i].color}">
+                                <p> ${chat[i].msg} </p>
+                                <span class=${chat[i].time_loc}> ( ${chat[i].timestamp} ) </span>
+                            </div>`
+                }
+                $('#load-chat').html(html_file).fadeIn('slow')
+            }
+        })
+    }, 2000)
+})
 
 </script>
 </body>
