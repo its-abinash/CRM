@@ -64,6 +64,33 @@
     float: left;
     color: #999;
     }
+
+    .alert {
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+      }
+
+      .alert.success {background-color: #4CAF50;}
+
+      .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .closebtn:hover {
+        color: black;
+      }
+
     </style>
 </head>
 <body>
@@ -83,24 +110,26 @@
     <% for(var i = 0; i < customerData.length; i++) { %>
         <div class="column">
             <div class="card">
+                <div id="card-name"></div>
                 <p><%= customerData[i].name %></p>
                 <button onclick='remove("<%= customerData[i].email %>")' style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
                 <button onclick='edit("<%= customerData[i].email %>")' style="width:auto;"><i class="fa fa-edit"></i></button>
                 <button onclick='message("<%= customerData[i].email %>")' style="width:auto;background-color:blueviolet"><i class="fa fa-envelope"></i></button>
                 <button onclick='chat("<%= customerData[i].email %>")' style="width:auto;background-color:darkcyan"><i class="fa fa-arrow-right"></i></button>
                 <div id="id01" class="modal">
-                    <form class="modal-content animate" action="<%= editEndpoint %>" method="post">
-                        <div class="container">
+                    <!-- <form class="modal-content animate" action="<%= editEndpoint %>" method="post"> -->
+                        <div class="container modal-content animate">
+                            <div id="id01-status"></div>
                             <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
-                            <input type="text" placeholder="name" name="name">
+                            <input type="text" placeholder="name" id="id01-name" name="name">
                             <p></p><br>
-                            <input type="text" placeholder="phone" name="phone">
+                            <input type="text" placeholder="phone" id="id01-phone" name="phone">
                             <p></p><br>
-                            <input type="text" placeholder="reminder frequency" name="remfreq">
+                            <input type="text" placeholder="reminder frequency" id="id01-rem" name="remfreq">
                             <p></p><br>
-                            <button type="submit">Update</button>
+                            <button type="submit" id="update-btn">Update</button>
                         </div>
-                    </form>
+                    <!-- </form> -->
                 </div>
                 <div id="id02" class="modal">
                     <form class="modal-content animate" action="<%= deleteEndpoint %>" method="post">
@@ -111,25 +140,24 @@
                     </form>
                 </div>
                 <div id="id03" class="modal">
-                    <form class="modal-content animate" action="<%= emailEndpoint %>" method="post">
-                        <div class="container">
+                    <div class="container modal-content animate">
+                        <div id="email-status"></div>
+                        <div>
                             <div>
-                                <div>
-                                    <input type="text" id="sendmail" name="email" value="" readonly>
-                                    <p></p><br>
-                                </div>
-                                <div>
-                                    <input type="text" name="subject" placeholder="subject" required>
-                                    <p></p><br>
-                                </div>
-                                <div>
-                                    <textarea type="textarea" name="body" placeholder="Message body Here" rows="7" cols="69"></textarea>
-                                    <p></p><br>
-                                </div>
-                                <button type="submit" style="background-color: darkviolet;"><p style="color: white;font-size:100%;"><b>Send</b></p></button>
+                                <input type="text" id="sendmail" name="email" value="" readonly>
+                                <p></p><br>
                             </div>
+                            <div>
+                                <input type="text" name="subject" id="email-subject" placeholder="subject" required>
+                                <p></p><br>
+                            </div>
+                            <div>
+                                <textarea type="textarea" name="body" id="email-body" placeholder="Message body Here" rows="7" cols="69"></textarea>
+                                <p></p><br>
+                            </div>
+                            <button type="submit" id="email-btn" style="background-color: darkviolet;"><p style="color: white;font-size:100%;"><b>Send</b></p></button>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div id="id04" class="modal modalbdy">
                     <div class="xyz" id="chat-div">
@@ -174,6 +202,7 @@ var updatemail = document.getElementById("updatemail")
 var deletemail = document.getElementById('deletemail')
 var sendmail = document.getElementById('sendmail')
 var customerEmail = document.getElementById('customerEmail')
+var close = document.getElementsByClassName("closebtn");
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
@@ -221,6 +250,18 @@ function chat(email) {
     customerEmail.value = email;
 }
 
+// To close the close button of alert(used in EMAIL, ADD, UPDATE)
+
+for (var i = 0; i < close.length; i++) {
+    close[i].onclick = function() {
+        var div = this.parentElement;
+        div.style.opacity = "0";
+        setTimeout(function(){
+            div.style.display = "none";
+        }, 2000);
+    }
+}
+
 $(document).ready(function() {
     $('#chat-btn').click(function() {
         var msg = document.getElementById('chat-msg').value
@@ -241,6 +282,66 @@ $(document).ready(function() {
             })
         }
     })
+    $('#email-btn').click(function() {
+        var receiver = document.getElementById('sendmail').value
+        var subject = document.getElementById("email-subject").value
+        var email_body = document.getElementById("email-body").value
+        if($.trim(subject) != '' && $.trim(email_body) != '' && $.trim(receiver) != '') {
+            $.ajax({
+                url : "<%= emailEndpoint %>",
+                method: "POST",
+                data: {'email': receiver, 'subject' : subject, "body" : email_body},
+                dataType: "text",
+                success : function(data) {
+                    var html_file =
+                    `<div class="alert success">
+                        <span class="closebtn">&times;</span>
+                        <strong>Success!</strong> Your email has been sent to <i>${receiver}</i>.
+                      </div>`
+                    $('#email-status').html(html_file).fadeIn('slow')
+                },
+                error: function() {
+                    var html_file =
+                    `<div class="alert">
+                        <span class="closebtn">&times;</span>
+                        <strong>Dang!</strong> Failed to send email to ${receiver}.
+                      </div>`
+                    $('#email-status').html(html_file).fadeIn('slow')
+                }
+            })
+        }
+    })
+
+    $('#update-btn').click(function() {
+        var name = document.getElementById('id01-name').value
+        var email = document.getElementById("updatemail").value
+        var phone = document.getElementById('id01-phone').value
+        var rem_freq = document.getElementById("id01-rem").value
+        if($.trim(email) != '' && ($.trim(name) != '' || $.trim(phone) != '' || $.trim(rem_freq) != '')) {
+            $.ajax({
+                url : "<%= editEndpoint %>",
+                method: "POST",
+                data: {'name':name, 'email':email, 'phone':phone, 'remfreq':rem_freq},
+                dataType: "text",
+                success : function(data) {
+                    var html_file =
+                    `<div class="alert success">
+                        <span class="closebtn">&times;</span>
+                        <strong>Success!</strong> Data of <i>${email}</i> has been updated.
+                      </div>`
+                    $('#id01-status').html(html_file).fadeIn('slow')
+                },
+                error: function() {
+                    var html_file =
+                    `<div class="alert">
+                        <span class="closebtn">&times;</span>
+                        <strong>Dang!</strong> Failed to update data of <i>${receiver}</i>.
+                      </div>`
+                    $('#id01-status').html(html_file).fadeIn('slow')
+                }
+            })
+        }
+    })
     setInterval(function() {
         var receiver = document.getElementById('customerEmail').value
         $.ajax({
@@ -257,6 +358,19 @@ $(document).ready(function() {
                             </div>`
                 }
                 $('#load-chat').html(html_file).fadeIn('slow')
+            }
+        })
+        $.ajax({
+            url : "<%= dashboardEndpoint %>",
+            method : "GET",
+            dataType: "json",
+            success: function(customers) {
+                var html_file = ""
+                console.log(`res: ${JSON.stringify(customers.values)}`)
+                for(var i = 0; i < customers.values.length; i++) {
+                    html_file += `<p> ${customers.values[i].name} </p>`
+                }
+                $('#card-name').html(html_file).fadeIn('slow')
             }
         })
     }, 2000)

@@ -23,10 +23,9 @@ exports.getConversation = async function(req, res) {
             chat[i]['time_loc'] = chat[i].sender === sender ? 'time-right' : 'time-left';
             chat[i]['color'] = chat[i].sender === sender ? '' : 'darker';
         }
-        res.send(chat)
+        res.status(200).send({'reason':'success', 'values':chat})
     } catch (ex) {
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        res.status(400).send({'reason':'Exception', 'values':[]})
     }
 }
 

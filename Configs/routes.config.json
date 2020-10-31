@@ -10,6 +10,7 @@
         "add" : "insert",
         "delete" : "delete",
         "email" : "email",
-        "chat" : "chat"
+        "chat" : "chat",
+        "dashboard":"dashboard/getCustomer"
     }
 }
