@@ -11,59 +11,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <style>
-    .modalbdy {
-    position: fixed;
-    width: 70%;
-    text-align: center;
-    top: 5%;
-    left: 50%;
-    padding: 10px;
-    transform: translate(-50%, -5%);
-    overflow-x: hidden;
-    overflow-y: auto;
-    }
-
-    .xyz {
-    position: fixed;
-    width: 70%;
-    text-align: center;
-    top: 10%;
-    bottom: 5%;
-    left: 50%;
-    padding: 10px;
-    transform: translate(-50%, 0);
-    overflow-x: hidden;
-    overflow-y: auto;
-    }
-
-    .chat_container {
-    border: 2px solid #dedede;
-    background-color: #f1f1f1;
-    border-radius: 5px;
-    padding: 10px;
-    margin: 10px 0;
-    }
-
-    .darker {
-    border-color: #ccc;
-    background-color: #ddd;
-    }
-
-    .chat_container::after {
-    content: "";
-    clear: both;
-    display: table;
-    }
-
-    .time-right {
-    float: right;
-    color: #aaa;
-    }
-
-    .time-left {
-    float: left;
-    color: #999;
-    }
+        .modalbdy {
+            position: fixed;
+            width: 70%;
+            text-align: center;
+            top: 5%;
+            left: 50%;
+            padding: 10px;
+            transform: translate(-50%, -5%);
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -92,13 +50,13 @@
                     <form class="modal-content animate" action="<%= editEndpoint %>" method="post">
                         <div class="container">
                             <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
-                            <input type="text" placeholder="name" name="name">
+                            <input type="text" placeholder="name" id="id01-name" name="name">
                             <p></p><br>
-                            <input type="text" placeholder="phone" name="phone">
+                            <input type="text" placeholder="phone" id="id01-phone" name="phone">
                             <p></p><br>
-                            <input type="text" placeholder="reminder frequency" name="remfreq">
+                            <input type="text" placeholder="reminder frequency" id="id01-rem" name="remfreq">
                             <p></p><br>
-                            <button type="submit">Update</button>
+                            <button type="submit" id="update-btn">Update</button>
                         </div>
                     </form>
                 </div>
@@ -111,25 +69,24 @@
                     </form>
                 </div>
                 <div id="id03" class="modal">
-                    <form class="modal-content animate" action="<%= emailEndpoint %>" method="post">
-                        <div class="container">
+                    <div class="container modal-content animate">
+                        <div id="email-status"></div>
+                        <div>
                             <div>
-                                <div>
-                                    <input type="text" id="sendmail" name="email" value="" readonly>
-                                    <p></p><br>
-                                </div>
-                                <div>
-                                    <input type="text" name="subject" placeholder="subject" required>
-                                    <p></p><br>
-                                </div>
-                                <div>
-                                    <textarea type="textarea" name="body" placeholder="Message body Here" rows="7" cols="69"></textarea>
-                                    <p></p><br>
-                                </div>
-                                <button type="submit" style="background-color: darkviolet;"><p style="color: white;font-size:100%;"><b>Send</b></p></button>
+                                <input type="text" id="sendmail" name="email" value="" readonly>
+                                <p></p><br>
                             </div>
+                            <div>
+                                <input type="text" name="subject" id="email-subject" placeholder="subject" required>
+                                <p></p><br>
+                            </div>
+                            <div>
+                                <textarea type="textarea" name="body" id="email-body" placeholder="Message body Here" rows="7" cols="69"></textarea>
+                                <p></p><br>
+                            </div>
+                            <button type="submit" id="email-btn" style="background-color: darkviolet;"><p style="color: white;font-size:100%;"><b>Send</b></p></button>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div id="id04" class="modal modalbdy">
                     <div class="xyz" id="chat-div">
@@ -174,6 +131,7 @@ var updatemail = document.getElementById("updatemail")
 var deletemail = document.getElementById('deletemail')
 var sendmail = document.getElementById('sendmail')
 var customerEmail = document.getElementById('customerEmail')
+var close = document.getElementsByClassName("closebtn");
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
@@ -221,6 +179,18 @@ function chat(email) {
     customerEmail.value = email;
 }
 
+// To close the close button of alert(used in EMAIL, ADD, UPDATE) -- todo --
+
+for (var i = 0; i < close.length; i++) {
+    close[i].onclick = function() {
+        var div = this.parentElement;
+        div.style.opacity = "0";
+        setTimeout(function(){
+            div.style.display = "none";
+        }, 2000);
+    }
+}
+
 $(document).ready(function() {
     $('#chat-btn').click(function() {
         var msg = document.getElementById('chat-msg').value
@@ -241,13 +211,43 @@ $(document).ready(function() {
             })
         }
     })
+    $('#email-btn').click(function() {
+        var receiver = document.getElementById('sendmail').value
+        var subject = document.getElementById("email-subject").value
+        var email_body = document.getElementById("email-body").value
+        if($.trim(subject) != '' && $.trim(email_body) != '' && $.trim(receiver) != '') {
+            $.ajax({
+                url : "<%= emailEndpoint %>",
+                method: "POST",
+                data: {'email': receiver, 'subject' : subject, "body" : email_body},
+                dataType: "text",
+                success : function(data) {
+                    var html_file =
+                    `<div class="alert success">
+                        <span class="closebtn">&times;</span>
+                        <strong>Success!</strong> Your email has been sent to <i>${receiver}</i>.
+                      </div>`
+                    $('#email-status').html(html_file).fadeIn('slow')
+                },
+                error: function() {
+                    var html_file =
+                    `<div class="alert">
+                        <span class="closebtn">&times;</span>
+                        <strong>Dang!</strong> Failed to send email to ${receiver}.
+                      </div>`
+                    $('#email-status').html(html_file).fadeIn('slow')
+                }
+            })
+        }
+    })
     setInterval(function() {
         var receiver = document.getElementById('customerEmail').value
         $.ajax({
             url : `<%= chatEndpoint %>/${receiver}`,
             method : "GET",
             dataType: "json",
-            success: function(chat) {
+            success: function(response) {
+                var chat = response.values
                 var html_file = ""
                 for(var i = 0; i < chat.length; i++) {
                     html_file +=
@@ -259,7 +259,7 @@ $(document).ready(function() {
                 $('#load-chat').html(html_file).fadeIn('slow')
             }
         })
-    }, 2000)
+    }, 1000)
 })
 
 </script>

@@ -16,8 +16,8 @@ var getPassCode = async function(email) {
 }
 
 exports.email = async function(req, res) {
+    console.log(`Inside POST/email ::: email.js->email`)
     try {
-        console.log(`body : ${JSON.stringify(req.body)}`)
         var data = [req.session.user, req.body.email, req.body.subject, req.body.body]
         console.log(`data = ${data}`)
         var transporter = mailer.createTransport({
@@ -36,12 +36,9 @@ exports.email = async function(req, res) {
         };
 
         await transporter.sendMail(mailOptions);
-
-        req.session.msg = "success"
-        res.redirect('/dashboard')
+        res.status(200).send({"reason":"success"})
     } catch (ex) {
         console.log(ex)
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        res.status(400).send({"reason":"Exception"})
     }
 }

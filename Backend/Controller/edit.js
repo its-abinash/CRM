@@ -10,12 +10,13 @@ router.use(bodyParser.urlencoded({extended: true}));
 router.use(cors());
 
 exports.edit = async function(req, res) {
+    console.log(`In POST/edit ::: edit.js->edit`)
     try {
         console.log(`body : ${JSON.stringify(req.body)}`)
         var name = req.body.name;
         var email = req.body.email;
         var phone = req.body.phone;
-        var remfreq = req.body.remfreq;
+        var rem_freq = req.body.remfreq;
         var fields = [];
         var data = [];
         if(name !== "") {
@@ -26,9 +27,9 @@ exports.edit = async function(req, res) {
             fields.push("phone");
             data.push(phone);
         }
-        if(remfreq !== "") {
+        if(rem_freq !== "") {
             fields.push("remfreq");
-            data.push(remfreq);
+            data.push(rem_freq);
         }
         console.log(`fields: ${fields}, data: ${data}`)
         var jobDone = await db.update(3, "email", email, fields, data);

@@ -16,6 +16,16 @@ var getContacts = async function() {
     return contacts;
 }
 
+exports.getCustomers = async function(req, res) {
+    console.log(`GET: dashboard/getCustomer ::: Inside dashboard.getCustomers`)
+    try {
+        var customers = await getContacts();
+        res.status(200).send({'reason':'success', 'values':customers})
+    }catch(ex) {
+        res.status(400).send({'reason':'Exception', 'values':[]})
+    }
+}
+
 exports.getDashboardPage = async function(req, res) {
     console.log('### Inside controller->dashboard->getDashboardPage ###')
     var msg = "";
@@ -37,6 +47,7 @@ exports.getDashboardPage = async function(req, res) {
         emailEndpoint : ENV.endpoints.server + ENV.routes.email,
         deleteEndpoint : ENV.endpoints.server + ENV.routes.delete,
         chatEndpoint : ENV.endpoints.server + ENV.routes.chat,
+        dashboardEndpoint: ENV.endpoints.server + ENV.routes.dashboard,
         customerData : await getContacts(),
         chat : chat
     })
