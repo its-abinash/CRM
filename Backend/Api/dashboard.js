@@ -1,6 +1,5 @@
 var express = require('express');
 var controller = require('../Controller/dashboard');
-const { route } = require('./edit');
 
 var router = express.Router();
 
