@@ -11,86 +11,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <style>
-    .modalbdy {
-    position: fixed;
-    width: 70%;
-    text-align: center;
-    top: 5%;
-    left: 50%;
-    padding: 10px;
-    transform: translate(-50%, -5%);
-    overflow-x: hidden;
-    overflow-y: auto;
-    }
-
-    .xyz {
-    position: fixed;
-    width: 70%;
-    text-align: center;
-    top: 10%;
-    bottom: 5%;
-    left: 50%;
-    padding: 10px;
-    transform: translate(-50%, 0);
-    overflow-x: hidden;
-    overflow-y: auto;
-    }
-
-    .chat_container {
-    border: 2px solid #dedede;
-    background-color: #f1f1f1;
-    border-radius: 5px;
-    padding: 10px;
-    margin: 10px 0;
-    }
-
-    .darker {
-    border-color: #ccc;
-    background-color: #ddd;
-    }
-
-    .chat_container::after {
-    content: "";
-    clear: both;
-    display: table;
-    }
-
-    .time-right {
-    float: right;
-    color: #aaa;
-    }
-
-    .time-left {
-    float: left;
-    color: #999;
-    }
-
-    .alert {
-        padding: 20px;
-        background-color: #f44336;
-        color: white;
-        opacity: 1;
-        transition: opacity 0.6s;
-        margin-bottom: 15px;
-      }
-
-      .alert.success {background-color: #4CAF50;}
-
-      .closebtn {
-        margin-left: 15px;
-        color: white;
-        font-weight: bold;
-        float: right;
-        font-size: 22px;
-        line-height: 20px;
-        cursor: pointer;
-        transition: 0.3s;
-      }
-
-      .closebtn:hover {
-        color: black;
-      }
-
+        .modalbdy {
+            position: fixed;
+            width: 70%;
+            text-align: center;
+            top: 5%;
+            left: 50%;
+            padding: 10px;
+            transform: translate(-50%, -5%);
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -110,16 +41,14 @@
     <% for(var i = 0; i < customerData.length; i++) { %>
         <div class="column">
             <div class="card">
-                <div id="card-name"></div>
                 <p><%= customerData[i].name %></p>
                 <button onclick='remove("<%= customerData[i].email %>")' style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
                 <button onclick='edit("<%= customerData[i].email %>")' style="width:auto;"><i class="fa fa-edit"></i></button>
                 <button onclick='message("<%= customerData[i].email %>")' style="width:auto;background-color:blueviolet"><i class="fa fa-envelope"></i></button>
                 <button onclick='chat("<%= customerData[i].email %>")' style="width:auto;background-color:darkcyan"><i class="fa fa-arrow-right"></i></button>
                 <div id="id01" class="modal">
-                    <!-- <form class="modal-content animate" action="<%= editEndpoint %>" method="post"> -->
-                        <div class="container modal-content animate">
-                            <div id="id01-status"></div>
+                    <form class="modal-content animate" action="<%= editEndpoint %>" method="post">
+                        <div class="container">
                             <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
                             <input type="text" placeholder="name" id="id01-name" name="name">
                             <p></p><br>
@@ -129,7 +58,7 @@
                             <p></p><br>
                             <button type="submit" id="update-btn">Update</button>
                         </div>
-                    <!-- </form> -->
+                    </form>
                 </div>
                 <div id="id02" class="modal">
                     <form class="modal-content animate" action="<%= deleteEndpoint %>" method="post">
@@ -250,7 +179,7 @@ function chat(email) {
     customerEmail.value = email;
 }
 
-// To close the close button of alert(used in EMAIL, ADD, UPDATE)
+// To close the close button of alert(used in EMAIL, ADD, UPDATE) -- todo --
 
 for (var i = 0; i < close.length; i++) {
     close[i].onclick = function() {
@@ -311,44 +240,14 @@ $(document).ready(function() {
             })
         }
     })
-
-    $('#update-btn').click(function() {
-        var name = document.getElementById('id01-name').value
-        var email = document.getElementById("updatemail").value
-        var phone = document.getElementById('id01-phone').value
-        var rem_freq = document.getElementById("id01-rem").value
-        if($.trim(email) != '' && ($.trim(name) != '' || $.trim(phone) != '' || $.trim(rem_freq) != '')) {
-            $.ajax({
-                url : "<%= editEndpoint %>",
-                method: "POST",
-                data: {'name':name, 'email':email, 'phone':phone, 'remfreq':rem_freq},
-                dataType: "text",
-                success : function(data) {
-                    var html_file =
-                    `<div class="alert success">
-                        <span class="closebtn">&times;</span>
-                        <strong>Success!</strong> Data of <i>${email}</i> has been updated.
-                      </div>`
-                    $('#id01-status').html(html_file).fadeIn('slow')
-                },
-                error: function() {
-                    var html_file =
-                    `<div class="alert">
-                        <span class="closebtn">&times;</span>
-                        <strong>Dang!</strong> Failed to update data of <i>${receiver}</i>.
-                      </div>`
-                    $('#id01-status').html(html_file).fadeIn('slow')
-                }
-            })
-        }
-    })
     setInterval(function() {
         var receiver = document.getElementById('customerEmail').value
         $.ajax({
             url : `<%= chatEndpoint %>/${receiver}`,
             method : "GET",
             dataType: "json",
-            success: function(chat) {
+            success: function(response) {
+                var chat = response.values
                 var html_file = ""
                 for(var i = 0; i < chat.length; i++) {
                     html_file +=
@@ -360,20 +259,7 @@ $(document).ready(function() {
                 $('#load-chat').html(html_file).fadeIn('slow')
             }
         })
-        $.ajax({
-            url : "<%= dashboardEndpoint %>",
-            method : "GET",
-            dataType: "json",
-            success: function(customers) {
-                var html_file = ""
-                console.log(`res: ${JSON.stringify(customers.values)}`)
-                for(var i = 0; i < customers.values.length; i++) {
-                    html_file += `<p> ${customers.values[i].name} </p>`
-                }
-                $('#card-name').html(html_file).fadeIn('slow')
-            }
-        })
-    }, 2000)
+    }, 1000)
 })
 
 </script>

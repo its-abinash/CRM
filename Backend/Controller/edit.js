@@ -34,12 +34,15 @@ exports.edit = async function(req, res) {
         console.log(`fields: ${fields}, data: ${data}`)
         var jobDone = await db.update(3, "email", email, fields, data);
         if(jobDone) {
-            res.status(200).send({"reason" : "success"})
+            req.session.msg = "success"
+            res.redirect('/dashboard')
         }else {
-            res.status(400).send({"reason" : "success"})
+            req.session.msg = "failure"
+            res.redirect('/dashboard')
         }
     } catch (ex) {
         console.log(ex)
-        res.status(500).send({"reason" : "success"})
+        req.session.msg = "exception"
+        res.redirect('/dashboard')
     }
 }
