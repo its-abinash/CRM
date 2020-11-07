@@ -242,23 +242,25 @@ $(document).ready(function() {
     })
     setInterval(function() {
         var receiver = document.getElementById('customerEmail').value
-        $.ajax({
-            url : `<%= chatEndpoint %>/${receiver}`,
-            method : "GET",
-            dataType: "json",
-            success: function(response) {
-                var chat = response.values
-                var html_file = ""
-                for(var i = 0; i < chat.length; i++) {
-                    html_file +=
-                            `<div class="chat_container ${chat[i].color}">
-                                <p> ${chat[i].msg} </p>
-                                <span class=${chat[i].time_loc}> ( ${chat[i].timestamp} ) </span>
-                            </div>`
+        if(modal4.style.display === 'block') {
+            $.ajax({
+                url : `<%= chatEndpoint %>/${receiver}`,
+                method : "GET",
+                dataType: "json",
+                success: function(response) {
+                    var chat = response.values
+                    var html_file = ""
+                    for(var i = 0; i < chat.length; i++) {
+                        html_file +=
+                                `<div class="chat_container ${chat[i].color}">
+                                    <p> ${chat[i].msg} </p>
+                                    <span class=${chat[i].time_loc}> ( ${chat[i].timestamp} ) </span>
+                                </div>`
+                    }
+                    $('#load-chat').html(html_file).fadeIn('slow')
                 }
-                $('#load-chat').html(html_file).fadeIn('slow')
-            }
-        })
+            })
+        }
     }, 1000)
 })
 
