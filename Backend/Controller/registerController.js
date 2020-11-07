@@ -3,42 +3,56 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 var cors = require('cors')
 var db = require('../../Database/databaseOperations')
-
+var logger = require('../Logger/log')
 router.use(express.json());
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(cors());
 
 var existingUser = async function(email) {
+    logger.info("Execution of \'isExistingUser\' method begins")
     var res = await db.isExistingUser("email", email);
-    console.log(`res = ${res} and type = ${typeof res}`)
     return res;
 }
 
 exports.register = async function(req, res) {
     try {
-        console.log(req.body)
+        logger.info("POST /register begins")
+        logger.info(`POST /register body ===> ${JSON.stringify(req.body)}`)
         var email = req.body.email
         var username = req.body.username
+        var phoneNum = req.body.phonenum
+        var gstNum = req.body.gstnum
+        var remFreq = req.body.remfreq
         var password = req.body.password
         var passcode = req.body.passcode
+        logger.info("Calling \'existingUser\' method")
         var isExisting = await existingUser(email)
-        console.log(`IS_EXISTING : ${isExisting}`)
+        logger.info(`Execution of \'isExistingUser\' method ends with result = ${isExisting}`)
         if(isExisting) {
             res.redirect('/login')
         }else {
-            var jobDone = await db.insert(1, [email, password, passcode]);
+            var credData = [email, password, passcode]
+            var userData = [username, email, phoneNum, gstNum, remFreq]
+            logger.info(`credData to be saved ===> ${credData} and userData to be saved ===> ${userData}`)
+            // Save user cred in db
+            logger.info("Execution of \'insert\' method in \'credentials\' db begins")
+            var credSaved = await db.insert(1, credData);
+            logger.info(`Execution of \'insert\' method in \'credentials\' db ends with result = ${credSaved}`)
+            // Save user data in db
+            logger.info("Execution of \'insert\' method in \'conversations\' db begins")
+            var dataSaved = await db.insert(3, userData)
+            logger.info(`Execution of \'insert\' method in \'conversations\' db ends with result = ${dataSaved}`)
             console.log("registration Completed")
-            if(jobDone) {
+            if(credSaved && dataSaved) {
+                logger.info("All data saved, so redirecting back to login")
                 res.redirect('/login');
             }else {
+                logger.error("Saving data failed, so redirecting back to login")
                 res.redirect('/login')
             }
         }
     } catch (ex) {
-        console.log(ex)
-        // swal('Server Unreachable - 500', {
-        //     buttons: ["Okay!"],
-        // });
+        logger.error(`POST /register Captured Error ===> ${ex}`)
         res.redirect('/login')
     }
 }

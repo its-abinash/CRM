@@ -1,6 +1,6 @@
 const { Pool, Client } = require('pg')
 var fs = require('fs')
-
+var logger = require('../Backend/Logger/log')
 var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
 
 const pool = new Pool({
@@ -9,223 +9,296 @@ const pool = new Pool({
 
 var insertAtCred = async function(data) {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
         const query = `INSERT INTO credentials (email, password, passcode) VALUES ($1, $2, $3)`;
+        logger.info("Executing query in \'credentials\' database")
         await db.query(query, data);
+        logger.info("Execution successful, so disconnecting database")
         db.release()
         return true;
     } catch(ex) {
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished inserting data")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var insertAtCustomer = async function(data) {
     try {
+        logger.info("Connecting to \'customer\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'customer\' database")
         const query = `INSERT INTO customer (name, email, phone, gst, remfreq) VALUES ($1, $2, $3, $4, $5)`;
+        logger.info("Executing query in \'customer\' database")
         await db.query(query, data);
+        logger.info("Execution successful, so disconnecting database")
         db.release()
         return true;
     } catch(ex) {
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished inserting data")
+        console.log("Task in \'customer\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchAllFromCred = async function() {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
         const query = `SELECT * FROM credentials`;
+        logger.info("Executing query in \'credentials\' database")
         var res = await db.query(query);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         console.log(res.rows)
         return res.rows;
     } catch(ex) {
-        console.log("error in fetching all data")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        console.log("finally finished fetching data")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchAllFromCustomer = async function() {
     try {
+        logger.info("Connecting to \'customer\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'customer\' database")
         const query = `SELECT * FROM customer`;
+        logger.info("Executing query in \'customer\' database")
         var res = await db.query(query);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         console.log(res.rows)
         return res.rows;
     } catch(ex) {
-        console.log("error in fetching all data")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        console.log("finally finished fetching data")
+        console.log("Task in \'customer\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchSpecificFromCustomer = async function(pk_name, pk_value) {
     try {
+        logger.info("Connecting to \'customer\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'customer\' database")
         const query = `SELECT * FROM customer WHERE ${pk_name} = $1`;
+        logger.info("Executing query in \'customer\' database")
         var res = await db.query(query, [pk_value]);
+        logger.info("Execution successful, so disconnecting database")
         db.release()
-        console.log(res.rows)
         return res.rows;
     } catch(ex) {
-        console.log("error in fetching specific data")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        console.log("finally finished fetching data")
+        console.log("Task in \'customer\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchSpecificFromCred = async function(pk_name, pk_value) {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
         const query = `SELECT * FROM credentials WHERE ${pk_name} = $1`;
+        logger.info("Executing query in \'credentials\' database")
         var res = await db.query(query, [pk_value]);
+        logger.info("Execution successful, so disconnecting database")
         db.release()
-        console.log(res.rows)
         return res.rows;
     } catch(ex) {
-        console.log("error in fetching specific data")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        console.log("finally finished fetching data")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var updateAtCred = async function(pk_name, pk_value, fields, data) {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
+        logger.info("Executing query in \'credentials\' database")
         for(var i = 0; i < fields.length; i++) {
             const query = `UPDATE credentials SET ${fields[i]} = $1 WHERE ${pk_name} = $2`;
             await db.query(query, [data[i], pk_value]);
         }
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return true;
     } catch(ex) {
-        console.log("error in updating data")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished updating data")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var updateAtCustomer = async function(pk_name, pk_value, fields, data) {
     try {
+        logger.info("Connecting to \'customer\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'customer\' database")
+        logger.info("Executing query in \'customer\' database")
         for(var i = 0; i < fields.length; i++) {
             const query = `UPDATE customer SET ${fields[i]} = $1 WHERE ${pk_name} = $2`;
             await db.query(query, [data[i], pk_value]);
         }
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return true;
     } catch(ex) {
-        console.log("error in updating data")
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished updating data operation")
+        console.log("Task in \'customer\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var removeAtCred = async function(pk_name, pk_value) {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
         const query = `DELETE FROM credentials WHERE ${pk_name} = $1`;
+        logger.info("Executing query in \'credentials\' database")
         await db.query(query, [pk_value]);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return true;
     } catch(ex) {
-        console.log("error in deleting row")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished removing data")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var removeAtCustomer = async function(pk_name, pk_value) {
     try {
+        logger.info("Connecting to \'customer\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'customer\' database")
         const query = `DELETE FROM customer WHERE ${pk_name} = $1`;
+        logger.info("Executing query in \'customer\' database")
         await db.query(query, [pk_value]);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return true;
     } catch(ex) {
-        console.log("error in deleting row")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished removing data")
+        console.log("Task in \'customer\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var insertAtConversation = async function(data) {
-    var jobDone = false;
     try {
+        logger.info("Connecting to \'conversation\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'conversation\' database")
         const query = `INSERT INTO conversation (sender, receiver, msg, timestamp) values ($1, $2, $3, current_timestamp)`;
+        logger.info("Executing query in \'conversation\' database")
         await db.query(query, data);
-        jobDone = true;
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return true;
     } catch(ex) {
-        console.log("error in inserting row")
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        if(jobDone) {
-            console.log("finally finished inserting data")
-        }else {
-            console.log("Couldn't finish inserting data")
-        }
+        console.log("Task in \'conversation\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchConversations = async function(sender, receiver) {
     try {
+        logger.info("Connecting to \'conversation\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'conversation\' database")
         const query = `select sender, receiver, msg, timestamp from conversation where sender = $1 and receiver = $2 order by timestamp`;
+        logger.info("Executing query in \'conversation\' database")
         var data = await db.query(query, [sender, receiver]);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
         return data.rows;
     } catch(ex) {
-        console.log("error in fetching row")
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        console.log("finally finished fetching data")
+        console.log("Task in \'conversation\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 var fetchLimitedConversations = async function(sender, receiver) {
-    var result = false;
     try {
+        logger.info("Connecting to \'conversation\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'conversation\' database")
         const query = `select sender, receiver, msg, timestamp from (
             select * from conversation 
             where sender = $1 and receiver = $2 or sender = $2 and receiver = $1) sub
             order by timestamp;`;
+        logger.info("Executing query in \'conversation\' database")
         var data = await db.query(query, [sender, receiver]);
+        logger.info("Execution successful, so disconnecting database")
         db.release();
-        result = true;
         return data.rows;
     } catch(ex) {
-        console.log("error in fetching row")
-        console.log(ex)
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`)
         return [];
     } finally {
-        if(result) {
-            console.log("finally finished fetching data")
-        }else {
-            console.log("Not able to fetch data")
-        }
+        console.log("Task in \'conversation\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
@@ -289,36 +362,37 @@ exports.remove = async function(database_id, pk_name, pk_value) {
 
 exports.isExistingUser = async function(pk_name, pk_value) {
     try {
+        logger.info("Connecting to \'credentials\' database")
         const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'credentials\' database")
         const query = `select exists (select * from credentials where ${pk_name} = $1)`;
+        logger.info("Executing query in \'credentials\' database")
         var res = await db.query(query, [pk_value]);
+        logger.info("Execution successful, so disconnecting database")
         db.release()
         return res.rows[0].exists;
     } catch(ex) {
-        console.log("error in verifying user")
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished checking existing user")
+        console.log("Task in \'credentials\' database has been done. Now it Quits")
+        logger.info('***************************************')
     }
 }
 
 exports.isValidUser = async function(pk_name, pk_value, password) {
     try {
+        logger.info("Execution begins for \'isValidUser\' method")
         var userData = await fetchSpecificFromCred(pk_name, pk_value, "email", "password");
-        console.log(`data = ${JSON.stringify(userData)}`)
+        logger.info("Execution ends for \'isValidUser\' method")
+        logger.info(`Fetched data = ${JSON.stringify(userData)}`)
         return userData[0].email === pk_value && userData[0].password === password;
     } catch(ex) {
-        console.log("error in verifying user")
+        logger.error(`Error in verifying user. Captured Error ===> ${JSON.stringify(ex)}`)
         return false;
     } finally {
-        console.log("finally finished validating user")
+        logger.info("finally finished validating user")
     }
 }
-
-/*
-async function f() {
-    var data = await fetchConversation("a1", "c1");
-    console.log(`data = ${JSON.stringify(data)}`)
-}
-f()
-*/

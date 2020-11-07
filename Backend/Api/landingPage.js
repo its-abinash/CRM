@@ -5,6 +5,4 @@ var router = express.Router();
 
 router.get('/landingPage', controller.landingPage);
 
-// router.post('/postUserData', controller.postUserData)
-
 module.exports = router;

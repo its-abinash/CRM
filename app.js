@@ -2,7 +2,7 @@ const express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var session = require('express-session')
-
+var logger = require('./Backend/Logger/log')
 const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -31,5 +31,5 @@ app.use('/', register, login, edit, add, remove, dashboard, email, chat);
 app.get('/', controller.landingPage)
 
 app.listen(3000, () => {
-    console.log(`app is running at http://localhost:3000}`);
+    logger.info(`app is running at http://localhost:3000}`);
 })
