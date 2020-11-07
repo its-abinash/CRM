@@ -4,15 +4,15 @@ var bodyParser = require('body-parser');
 var cors = require('cors')
 var db = require("../../Database/databaseOperations")
 var session = require('express-session')
-
+var logger = require('../Logger/log')
 router.use(express.json());
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(cors());
 
 exports.edit = async function(req, res) {
-    console.log(`In POST/edit ::: edit.js->edit`)
     try {
-        console.log(`body : ${JSON.stringify(req.body)}`)
+        logger.info("POST /edit begins")
+        logger.info(`POST /edit body ===> ${JSON.stringify(req.body)}`)
         var name = req.body.name;
         var email = req.body.email;
         var phone = req.body.phone;
@@ -31,17 +31,21 @@ exports.edit = async function(req, res) {
             fields.push("remfreq");
             data.push(rem_freq);
         }
-        console.log(`fields: ${fields}, data: ${data}`)
+        logger.info(`fields: ${fields}, data: ${data}`)
+        logger.info("Execution of \'update\' method begins")
         var jobDone = await db.update(3, "email", email, fields, data);
+        logger.info("Execution of \'update\' method ends")
         if(jobDone) {
+            logger.info("Edit successful, so redirecting back to dashboard")
             req.session.msg = "success"
             res.redirect('/dashboard')
         }else {
+            logger.error("Edit failed, so redirecting back to dashboard")
             req.session.msg = "failure"
             res.redirect('/dashboard')
         }
     } catch (ex) {
-        console.log(ex)
+        logger.error(`POST /edit Captured Error ===> ${ex}`)
         req.session.msg = "exception"
         res.redirect('/dashboard')
     }

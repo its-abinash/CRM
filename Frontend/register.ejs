@@ -11,9 +11,13 @@
 			<div class="form-container sign-up-container">
 				<form action="<%= regEndpoint %>", method="POST">
 					<h1>Create Account</h1>
-					<input type="password" placeholder="Google App Password" name="passcode" autocomplete="off" required/>
+					<input type="text" placeholder="Name" name="username" autocomplete="off" required/>
+					<input type="tel" placeholder="Mobile Number", name="phonenum", autocomplete="off", required/>
 					<input type="email" placeholder="Email" name="email" autocomplete="off" required/>
+					<input type="text" name="gstnum" placeholder="GST Number" autocomplete="off" required/>
+					<input type="number" placeholder="Reminder Frequency" name="remfreq" autocomplete="off" required>
 					<input type="password" placeholder="Password" name="password" autocomplete="off" required/>
+					<input type="password" placeholder="Google App Password" name="passcode" autocomplete="off" required/>
 					<button>Sign Up</button>
 				</form>
 			</div>
