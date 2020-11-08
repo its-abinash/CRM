@@ -14,11 +14,17 @@ exports.delete = async function(req, res) {
         logger.info("POST /delete begins")
         logger.info(`POST /delete body ===> ${JSON.stringify(req.body)}`)
         var email = req.body.email;
-        logger.info("Execution of \'remove\' method begins")
-        var jobDone = await db.remove(3, "email", email);
-        logger.info("Execution of \'remove\' method ends")
-        if(jobDone) {
-            logger.info("User removal successful, so redirecting back to dashboard")
+        logger.info(`Removing '${email}' as customer begins`)
+        var removedCustomer = await db.remove(3, "email", email);
+        logger.info(`Removing '${email}' as customer ends`)
+        logger.info(`Removing Conversation of '${email}' begins`)
+        var removedConversation = await db.remove(4, ['sender', 'receiver'], [req.session.user, email])
+        logger.info(`Removing Conversation of '${email}' ends`)
+        logger.info(`Removing Credentials of '${email}' begins`)
+        var removedCredentials = await db.remove(1, 'email', email)
+        logger.info(`Removing Credentials of '${email}' ends`)
+        if(removedCustomer && removedConversation && removedCredentials) {
+            logger.info("Removed user successfully, so redirecting back to dashboard")
             req.session.msg = "success"
             res.redirect('/dashboard')
         }else {
