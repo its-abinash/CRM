@@ -233,6 +233,33 @@ var removeAtCustomer = async function(pk_name, pk_value) {
     }
 }
 
+var removeAtConversation = async function(pk_name, pk_value) {
+    /*
+        :param pk_name is an array of keys [sender, receiver]
+        :param pk_value is an array of values [sender_email_id, receiver_email_id]
+    */
+    try {
+        logger.info("Connecting to \'conversation\' database")
+        const db = await pool.connect();
+        logger.info('***************************************')
+        logger.info("Connection established to \'conversation\' database")
+        const query = `DELETE FROM conversation WHERE 
+                       ${pk_name[0]} = $1 and ${pk_name[1]} = $2 or ${pk_name[0]} = $2 and ${pk_name[1]} = $1`;
+        logger.info("Executing query in \'conversation\' database")
+        await db.query(query, [pk_value[0], pk_value[1]]);
+        logger.info("Execution successful, so disconnecting database")
+        db.release();
+        return true;
+    } catch(ex) {
+        logger.info('***************************************')
+        logger.error(`Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`)
+        return false;
+    } finally {
+        console.log("Task in \'conversation\' database has been done. Now it Quits")
+        logger.info('***************************************')
+    }
+}
+
 var insertAtConversation = async function(data) {
     try {
         logger.info("Connecting to \'conversation\' database")
@@ -348,7 +375,7 @@ exports.update = async function(database_id, pk_name, pk_value, fields, data) {
 }
 
 exports.remove = async function(database_id, pk_name, pk_value) {
-    /* param :: database_ids are 1(Credentials), 2(Admin), or 3(Customer).
+    /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer), 4(Conversation).
        param :: pk_name = primary key name (eg: email)
        param :: pk_value = primary key value (eg: abc@domain.com)
     */
@@ -357,6 +384,8 @@ exports.remove = async function(database_id, pk_name, pk_value) {
             return await removeAtCred(pk_name, pk_value);
         case 3:
             return await removeAtCustomer(pk_name, pk_value);
+        case 4:
+            return await removeAtConversation(pk_name, pk_value)
     }
 }
 

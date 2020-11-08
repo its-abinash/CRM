@@ -56,7 +56,7 @@ exports.chat = async function(req, res) {
             req.session.msg = "failure"
             res.redirect('/dashboard')
         }else {
-            logger.error("Success status from database, so redirecting back to dashboard")
+            logger.info("Success status from database, so redirecting back to dashboard")
             req.session.msg = "success"
             res.redirect('/dashboard')
         }
