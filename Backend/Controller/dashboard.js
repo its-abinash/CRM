@@ -33,25 +33,13 @@ exports.getCustomers = async function(req, res) {
 
 exports.getDashboardPage = async function(req, res) {
     logger.info('GET /dashboard begins')
-    var msg = "";
-    var chat = "";
-    if(req.session.hasOwnProperty('msg')) {
-        msg = req.session.msg;
-    }
-    if(req.session.hasOwnProperty('chats')) {
-        chat = req.session.chats;
-    }
-    req.session.msg = null; // removing session value
     res.render('dashboard', {
         contactEndpoint : ENV.endpoints.server + ENV.routes.contact,
-        msg : msg,
         addEndpoint : ENV.endpoints.server + ENV.routes.add,
         editEndpoint : ENV.endpoints.server + ENV.routes.edit,
         emailEndpoint : ENV.endpoints.server + ENV.routes.email,
         deleteEndpoint : ENV.endpoints.server + ENV.routes.delete,
         chatEndpoint : ENV.endpoints.server + ENV.routes.chat,
-        dashboardEndpoint: ENV.endpoints.server + ENV.routes.dashboard,
-        customerData : await getContacts(),
-        chat : chat
+        dashboardEndpoint: ENV.endpoints.server + ENV.routes.dashboard
     })
 }
