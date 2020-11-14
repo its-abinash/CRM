@@ -16,6 +16,7 @@ exports.getConversation = async function(req, res) {
         logger.info("GET /Chat begins")
         var sender = req.session.user
         var receiver = req.params.receiverId
+        logger.info(`Sender = \'${sender}\', Receiver = \'${receiver}\'`)
         var chat = await db.fetch(4, 2, sender, receiver)
         logger.info(`GET /Chat Data Fetched ===> ${JSON.stringify(chat)}`)
         /* Fetching previous conversation */
@@ -27,8 +28,8 @@ exports.getConversation = async function(req, res) {
         logger.info("GET /Chat ends")
         res.status(200).send({'reason':'success', 'values':chat})
     } catch (ex) {
-        logger.error(`Tracked error in GET /Chat ${JSON.stringify(ex)}`)
-        res.status(400).send({'reason':'Exception', 'values':[]})
+        logger.exceptions(`Tracked error in GET /Chat ${JSON.stringify(ex)}`)
+        res.status(400).send({'reason':'exception', 'values':[]})
     }
 }
 
@@ -53,16 +54,13 @@ exports.chat = async function(req, res) {
         logger.info("Execution of \'saveConversation\' method ends")
         if(jobDone === false) {
             logger.error("Failure status from database, so redirecting back to dashboard")
-            req.session.msg = "failure"
-            res.redirect('/dashboard')
+            res.status(400).send({'reason':'failure'})
         }else {
             logger.info("Success status from database, so redirecting back to dashboard")
-            req.session.msg = "success"
-            res.redirect('/dashboard')
+            res.status(200).send({'reason':'success'})
         }
     } catch(ex) {
-        logger.error("Exception status from database, so redirecting back to dashboard")
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        logger.exceptions("Exception status from database, so redirecting back to dashboard")
+        res.status(500).send({'reason':'exception'})
     }
 }

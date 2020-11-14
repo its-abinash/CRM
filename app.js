@@ -13,7 +13,8 @@ app.set('views', './Frontend/')
 app.use(session({
     secret: "Shh, its a secret!",
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { maxAge: 8 * 60 * 60 * 1000 },  // 8 hours
 }));
 
 var login = require('./Backend/Api/login')

@@ -37,16 +37,13 @@ exports.edit = async function(req, res) {
         logger.info("Execution of \'update\' method ends")
         if(jobDone) {
             logger.info("Edit successful, so redirecting back to dashboard")
-            req.session.msg = "success"
-            res.redirect('/dashboard')
+            res.status(200).send({'reason':'success'})
         }else {
             logger.error("Edit failed, so redirecting back to dashboard")
-            req.session.msg = "failure"
-            res.redirect('/dashboard')
+            res.status(400).send({'reason':'failure'})
         }
     } catch (ex) {
-        logger.error(`POST /edit Captured Error ===> ${ex}`)
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        logger.exceptions(`POST /edit Captured Error ===> ${ex}`)
+        res.status(500).send({'reason':'exception'})
     }
 }

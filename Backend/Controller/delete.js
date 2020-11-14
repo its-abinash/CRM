@@ -25,16 +25,13 @@ exports.delete = async function(req, res) {
         logger.info(`Removing Credentials of '${email}' ends`)
         if(removedCustomer && removedConversation && removedCredentials) {
             logger.info("Removed user successfully, so redirecting back to dashboard")
-            req.session.msg = "success"
-            res.redirect('/dashboard')
+            res.status(200).send({'reason':'success'})
         }else {
             logger.error("User removal failed, so redirecting back to dashboard")
-            req.session.msg = "failure"
-            res.redirect('/dashboard')
+            res.status(400).send({'reason':'failure'})
         }
     } catch (ex) {
-        logger.error(`POST /delete Captured Error ===> ${ex}`)
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        logger.exceptions(`POST /delete Captured Error ===> ${ex}`)
+        res.status(500).send({'reason':'exception'})
     }
 }

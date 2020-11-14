@@ -20,16 +20,13 @@ exports.insert = async function(req, res) {
         logger.info("Execution of \'insert\' method ends")
         if(jobDone) {
             logger.info("User data insertion successful, so redirecting back to dashboard")
-            req.session.msg = "success"
-            res.redirect('/dashboard')
+            res.status(200).send({'reason':'success'})
         }else {
             logger.error("User data insertion failed, so redirecting back to dashboard")
-            req.session.msg = "failure"
-            res.redirect('/dashboard')
+            res.status(400).send({'reason':'failure'})
         }
     } catch (ex) {
-        logger.error(`POST /insert Captured Error ===> ${ex}`)
-        req.session.msg = "exception"
-        res.redirect('/dashboard')
+        logger.exceptions(`POST /insert Captured Error ===> ${ex}`)
+        res.status(500).send({'reason':'exception'})
     }
 }
