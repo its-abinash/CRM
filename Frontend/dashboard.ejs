@@ -165,10 +165,17 @@ function getdashBoard() {
     })
 }
 
-$(document).on('click', '#email-btn', function() {
+async function getEncryptedValue(key) {
+    var encrypted = "", decrypted = ""
+    await $.getScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js")
+    encrypted = CryptoJS.AES.encrypt(key, '#').toString()
+    return encrypted
+}
+
+$(document).on('click', '#email-btn', async function() {
     var receiver = document.getElementById('sendmail').value
-    var subject = document.getElementById("email-subject").value
-    var email_body = document.getElementById("email-body").value
+    var subject = await getEncryptedValue(document.getElementById("email-subject").value)
+    var email_body = await getEncryptedValue(document.getElementById("email-body").value)
     if($.trim(subject) != '' && $.trim(email_body) != '' && $.trim(receiver) != '') {
         $.ajax({
             url : "<%= emailEndpoint %>",
@@ -196,10 +203,9 @@ $(document).on('click', '#email-btn', function() {
         })
     }
 })
-$(document).on('click', '#chat-btn', function() {
-    var msg = document.getElementById('chat-msg').value
+$(document).on('click', '#chat-btn', async function() {
+    var msg = await getEncryptedValue(document.getElementById('chat-msg').value)
     var receiver = document.getElementById('customerEmail').value
-    console.log(`msg = ${JSON.stringify(msg)}, receiver = ${receiver}`)
     if($.trim(msg) != '') {
         $.ajax({
             url : "<%= chatEndpoint %>",
@@ -207,22 +213,20 @@ $(document).on('click', '#chat-btn', function() {
             data: {'email': receiver, 'chatmsg' : msg},
             dataType: "text",
             success : function(data) {
-                console.log(`data received = ${JSON.stringify(data)}`)
                 document.getElementById('chat-msg').value = ""
             },
-            error: function() {
+            error: function(err) {
                 // Handle this with more interactive way -- todo --
                 alert('exception')
             }
         })
     }
 })
-$(document).on('click', '#update-btn', function() {
+$(document).on('click', '#update-btn', async function() {
     var email_of_customer = document.getElementById('updatemail').value
     var new_name = document.getElementById('id01-name').value
     var new_phone_num = document.getElementById('id01-phone').value
     var new_remainder = document.getElementById('id01-rem').value
-    console.log(`new_name = ${new_name}, new_phone_num = ${new_phone_num}, new_remainder = ${new_remainder}`)
     if($.trim(email_of_customer) != '') {
         $.ajax({
             url : "<%= editEndpoint %>",
@@ -243,7 +247,7 @@ $(document).on('click', '#update-btn', function() {
     }
 })
 
-$(document).on('click', '#delete-btn', function() {
+$(document).on('click', '#delete-btn', async function() {
     var email_of_customer = document.getElementById('deletemail').value
     if($.trim(email_of_customer) != '') {
         $.ajax({
@@ -262,7 +266,7 @@ $(document).on('click', '#delete-btn', function() {
     }
 })
 
-$(document).on('click', '#insert-btn', function() {
+$(document).on('click', '#insert-btn', async function() {
     var email = document.getElementById('id05_email').value
     var name = document.getElementById('id05_name').value
     var phone = document.getElementById('id05_phone').value
