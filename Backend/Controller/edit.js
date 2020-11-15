@@ -43,7 +43,7 @@ exports.edit = async function(req, res) {
             res.status(400).send({'reason':'failure'})
         }
     } catch (ex) {
-        logger.exceptions(`POST /edit Captured Error ===> ${ex}`)
+        logger.error(`POST /edit Captured Error ===> ${ex}`)
         res.status(500).send({'reason':'exception'})
     }
 }

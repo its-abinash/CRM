@@ -31,7 +31,7 @@ exports.delete = async function(req, res) {
             res.status(400).send({'reason':'failure'})
         }
     } catch (ex) {
-        logger.exceptions(`POST /delete Captured Error ===> ${ex}`)
+        logger.error(`POST /delete Captured Error ===> ${ex}`)
         res.status(500).send({'reason':'exception'})
     }
 }
