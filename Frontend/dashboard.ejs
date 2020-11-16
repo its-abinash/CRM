@@ -1,92 +1,103 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./css/cards.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" >
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./css/cards.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+    />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+      integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+      crossorigin="anonymous"
+    ></script>
     <style>
-        .modalbdy {
-            position: fixed;
-            width: 70%;
-            text-align: center;
-            top: 5%;
-            left: 50%;
-            padding: 10px;
-            transform: translate(-50%, -5%);
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
+      .modalbdy {
+        position: fixed;
+        width: 70%;
+        text-align: center;
+        top: 5%;
+        left: 50%;
+        padding: 10px;
+        transform: translate(-50%, -5%);
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="row" id="row"></div>
 
-<div class="row" id="row"></div>
+    <script>
+      // When the user clicks anywhere outside of the modal, close it
+      $(document).mouseup(function (event) {
+        if (event.target.id === $("#id01").attr("id")) {
+          $("#id01").css("display", "none");
+        }
+        if (event.target.id === $("#id02").attr("id")) {
+          $("#id02").css("display", "none");
+        }
+        if (event.target.id === $("#id03").attr("id")) {
+          $("#id03").css("display", "none");
+        }
+        if (event.target.id === $("#id04").attr("id")) {
+          $("#id04").css("display", "none");
+        }
+        if (event.target.id === $("#id05").attr("id")) {
+          $("#id05").css("display", "none");
+        }
+      });
 
-<script>
-    // When the user clicks anywhere outside of the modal, close it
-$(document).mouseup(function(event) {
-    if (event.target.id === $('#id01').attr('id')) {
-        $('#id01').css('display', 'none')
-    }
-    if (event.target.id === $('#id02').attr('id')) {
-        $('#id02').css('display', 'none')
-    }
-    if (event.target.id === $('#id03').attr('id')) {
-        $('#id03').css('display', 'none')
-    }
-    if (event.target.id === $('#id04').attr('id')) {
-        $('#id04').css('display', 'none')
-    }
-    if (event.target.id === $('#id05').attr('id')) {
-        $('#id05').css('display', 'none')
-    }
-});
+      function edit(email) {
+        $("#id01").css("display", "block");
+        console.log(email);
+        $("#updatemail").attr("value", email);
+      }
 
-function edit(email) {
-    $('#id01').css('display', 'block')
-    console.log(email)
-    $('#updatemail').attr('value', email)
-}
+      function remove(email) {
+        $("#id02").css("display", "block");
+        console.log(email);
+        $("#deletemail").attr("value", email);
+      }
 
-function remove(email) {
-    $('#id02').css('display', 'block')
-    console.log(email)
-    $('#deletemail').attr('value', email)
-}
+      function message(email) {
+        $("#id03").css("display", "block");
+        console.log(email);
+        $("#sendmail").attr("value", email);
+      }
 
-function message(email) {
-    $('#id03').css('display', 'block')
-    console.log(email)
-    $('#sendmail').attr('value', email)
-}
+      function add() {
+        $("#id05").css("display", "block");
+      }
 
-function add() {
-    $('#id05').css('display', 'block')
-}
+      function chat(email) {
+        $("#id04").css("display", "block");
+        console.log(email);
+        $("#customerEmail").attr("value", email);
+      }
 
-function chat(email) {
-    $('#id04').css('display', 'block')
-    console.log(email)
-    $('#customerEmail').attr('value', email)
-}
-
-function getdashBoard() {
-    $.ajax({
-        url: `<%= dashboardEndpoint %>`,
-        method: 'GET',
-        dataType: 'json',
-        success: function(response) {
+      function getdashBoard() {
+        $.ajax({
+          url: `<%= dashboardEndpoint %>`,
+          method: "GET",
+          dataType: "json",
+          success: function (response) {
             var responseValue = response.values;
-            var html_file = ""
-            for(var i = 0; i < responseValue.length; i++) {
-                html_file +=
-                    `<div class="column">
+            var html_file = "";
+            for (var i = 0; i < responseValue.length; i++) {
+              html_file += `<div class="column">
                         <div class="card">
                             <p> ${responseValue[i].name} </p>
                             <button onclick=remove('${responseValue[i].email}') style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
@@ -141,7 +152,7 @@ function getdashBoard() {
                                 </div>
                             </div>
                         </div>
-                    </div>`
+                    </div>`;
             }
             html_file += `
                 <div class="column">
@@ -159,162 +170,179 @@ function getdashBoard() {
                             </div>
                         </div>
                     </div>
-                </div>`
-            $('#row').html(html_file)
+                </div>`;
+            $("#row").html(html_file);
+          },
+        });
+      }
+
+      async function getEncryptedValue(key) {
+        await $.getScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+        );
+        var encrypted = CryptoJS.AES.encrypt(key, "#").toString();
+        return encrypted;
+      }
+
+      $(document).on("click", "#email-btn", async function () {
+        var payload = {
+          email: document.getElementById("sendmail").value,
+          subject: await getEncryptedValue(
+            document.getElementById("email-subject").value
+          ),
+          body: await getEncryptedValue(
+            document.getElementById("email-body").value
+          ),
+        };
+        if (
+          $.trim(payload.subject) != "" &&
+          $.trim(payload.body) != "" &&
+          $.trim(payload.email) != ""
+        ) {
+          $.ajax({
+            url: "<%= emailEndpoint %>",
+            method: "POST",
+            data: payload,
+            dataType: "text",
+            success: function (data) {
+              document.getElementById("email-subject").value = "";
+              document.getElementById("email-body").value = "";
+              var html_file = `<div class="alert success">
+                    <span class="closebtn">&times;</span>
+                    <strong>Success!</strong> Your email has been sent to <i>${payload.email}</i>.
+                    </div>`;
+              $("#email-status").html(html_file).fadeIn("slow");
+            },
+            error: function () {
+              var html_file = `<div class="alert">
+                    <span class="closebtn">&times;</span>
+                    <strong>Dang!</strong> Failed to send email to ${payload.email}.
+                    </div>`;
+              $("#email-status").html(html_file).fadeIn("slow");
+            },
+          });
         }
-    })
-}
-
-async function getEncryptedValue(key) {
-    var encrypted = "", decrypted = ""
-    await $.getScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js")
-    encrypted = CryptoJS.AES.encrypt(key, '#').toString()
-    return encrypted
-}
-
-$(document).on('click', '#email-btn', async function() {
-    var receiver = document.getElementById('sendmail').value
-    var subject = await getEncryptedValue(document.getElementById("email-subject").value)
-    var email_body = await getEncryptedValue(document.getElementById("email-body").value)
-    if($.trim(subject) != '' && $.trim(email_body) != '' && $.trim(receiver) != '') {
-        $.ajax({
-            url : "<%= emailEndpoint %>",
+      });
+      $(document).on("click", "#chat-btn", async function () {
+        var payload = {
+          email: document.getElementById("customerEmail").value,
+          chatmsg: await getEncryptedValue(
+            document.getElementById("chat-msg").value
+          ),
+        };
+        if ($.trim(payload.chatmsg) != "") {
+          $.ajax({
+            url: "<%= chatEndpoint %>",
             method: "POST",
-            data: {'email': receiver, 'subject' : subject, "body" : email_body},
+            data: payload,
             dataType: "text",
-            success : function(data) {
-                document.getElementById("email-subject").value = ""
-                document.getElementById("email-body").value = ""
-                var html_file =
-                `<div class="alert success">
-                    <span class="closebtn">&times;</span>
-                    <strong>Success!</strong> Your email has been sent to <i>${receiver}</i>.
-                    </div>`
-                $('#email-status').html(html_file).fadeIn('slow')
+            success: function (data) {
+              document.getElementById("chat-msg").value = "";
             },
-            error: function() {
-                var html_file =
-                `<div class="alert">
-                    <span class="closebtn">&times;</span>
-                    <strong>Dang!</strong> Failed to send email to ${receiver}.
-                    </div>`
-                $('#email-status').html(html_file).fadeIn('slow')
-            }
-        })
-    }
-})
-$(document).on('click', '#chat-btn', async function() {
-    var msg = await getEncryptedValue(document.getElementById('chat-msg').value)
-    var receiver = document.getElementById('customerEmail').value
-    if($.trim(msg) != '') {
-        $.ajax({
-            url : "<%= chatEndpoint %>",
+            error: function (err) {
+              // Handle this with more interactive way -- todo --
+              alert("exception");
+            },
+          });
+        }
+      });
+      $(document).on("click", "#update-btn", async function () {
+        var payload = {
+          name: document.getElementById("id01-name").value,
+          email: document.getElementById("updatemail").value,
+          phone: document.getElementById("id01-phone").value,
+          remfreq: document.getElementById("id01-rem").value,
+        };
+        if ($.trim(payload.email) != "") {
+          $.ajax({
+            url: "<%= editEndpoint %>",
             method: "POST",
-            data: {'email': receiver, 'chatmsg' : msg},
-            dataType: "text",
-            success : function(data) {
-                document.getElementById('chat-msg').value = ""
+            data: payload,
+            dataType: "json",
+            success: function (data) {
+              payload.name = "";
+              payload.phone = "";
+              payload.remfreq = "";
+              getdashBoard(); // Loading Dashboard
             },
-            error: function(err) {
-                // Handle this with more interactive way -- todo --
-                alert('exception')
-            }
-        })
-    }
-})
-$(document).on('click', '#update-btn', async function() {
-    var email_of_customer = document.getElementById('updatemail').value
-    var new_name = document.getElementById('id01-name').value
-    var new_phone_num = document.getElementById('id01-phone').value
-    var new_remainder = document.getElementById('id01-rem').value
-    if($.trim(email_of_customer) != '') {
-        $.ajax({
-            url : "<%= editEndpoint %>",
-            method: "POST",
-            data: {'name': new_name, 'email' : email_of_customer, "phone" : new_phone_num, "remfreq" : new_remainder},
-            dataType: "text",
-            success : function(data) {
-                new_name = ""
-                new_phone_num = ""
-                new_remainder = ""
-                getdashBoard() // Loading Dashboard
+            error: function () {
+              // Handle this with more interactive way -- todo --
+              alert("exception");
             },
-            error: function() {
-                // Handle this with more interactive way -- todo --
-                alert('exception')
-            }
-        })
-    }
-})
+          });
+        }
+      });
 
-$(document).on('click', '#delete-btn', async function() {
-    var email_of_customer = document.getElementById('deletemail').value
-    if($.trim(email_of_customer) != '') {
-        $.ajax({
-            url : "<%= deleteEndpoint %>",
+      $(document).on("click", "#delete-btn", async function () {
+        var payload = {
+          email: document.getElementById("deletemail").value,
+        };
+        if ($.trim(payload.email) != "") {
+          $.ajax({
+            url: "<%= deleteEndpoint %>",
             method: "POST",
-            data: {'email' : email_of_customer},
+            data: payload,
             dataType: "text",
-            success : function(data) {
-                getdashBoard() // Loading Dashboard
+            success: function (data) {
+              getdashBoard(); // Loading Dashboard
             },
-            error: function() {
-                // Handle this with more interactive way -- todo --
-                alert('exception')
-            }
-        })
-    }
-})
+            error: function () {
+              // Handle this with more interactive way -- todo --
+              alert("exception");
+            },
+          });
+        }
+      });
 
-$(document).on('click', '#insert-btn', async function() {
-    var email = document.getElementById('id05_email').value
-    var name = document.getElementById('id05_name').value
-    var phone = document.getElementById('id05_phone').value
-    var gst = document.getElementById('id05_gst').value
-    var remfreq = document.getElementById('id05_remfreq').value
-    if($.trim(email) != '') {
-        $.ajax({
-            url : "<%= addEndpoint %>",
+      $(document).on("click", "#insert-btn", async function () {
+        var payload = {
+          email: document.getElementById("id05_email").value,
+          name: document.getElementById("id05_name").value,
+          phone: document.getElementById("id05_phone").value,
+          gst: document.getElementById("id05_gst").value,
+          remfreq: document.getElementById("id05_remfreq").value,
+        };
+        if ($.trim(payload.email) != "") {
+          $.ajax({
+            url: "<%= addEndpoint %>",
             method: "POST",
-            data: {'email' : email, 'name' : name, 'phone' : phone, 'gst' : gst, 'remfreq' : remfreq},
+            data: payload,
             dataType: "text",
-            success : function(data) {
-                getdashBoard() // Loading Dashboard
+            success: function (data) {
+              getdashBoard(); // Loading Dashboard
             },
-            error: function() {
-                // Handle this with more interactive way -- todo --
-                alert('exception')
-            }
-        })
-    }
-})
+            error: function () {
+              // Handle this with more interactive way -- todo --
+              alert("exception");
+            },
+          });
+        }
+      });
 
-$(document).ready(function() {
-    getdashBoard() // Loading Dashboard
-    setInterval(function() {
-        if($('#id04').css('display') === 'block') {
-            var receiver = $('#customerEmail').attr('value')
+      $(document).ready(function () {
+        getdashBoard(); // Loading Dashboard
+        setInterval(function () {
+          if ($("#id04").css("display") === "block") {
+            var receiver = $("#customerEmail").attr("value");
             $.ajax({
-                url : `<%= chatEndpoint %>/${receiver}`,
-                method : "GET",
-                dataType: "json",
-                success: function(response) {
-                    var chat = response.values
-                    var html_file = ""
-                    for(var i = 0; i < chat.length; i++) {
-                        html_file +=
-                                `<div class="chat_container ${chat[i].color}">
+              url: `<%= chatEndpoint %>/${receiver}`,
+              method: "GET",
+              dataType: "json",
+              success: function (response) {
+                var chat = response.values;
+                var html_file = "";
+                for (var i = 0; i < chat.length; i++) {
+                  html_file += `<div class="chat_container ${chat[i].color}">
                                     <p> ${chat[i].msg} </p>
                                     <span class=${chat[i].time_loc}> ( ${chat[i].timestamp} ) </span>
-                                </div>`
-                    }
-                    $('#load-chat').html(html_file).fadeIn('slow')
+                                </div>`;
                 }
-            })
-        }
-    }, 1000)
-})
-
-</script>
-</body>
+                $("#load-chat").html(html_file).fadeIn("slow");
+              },
+            });
+          }
+        }, 1000);
+      });
+    </script>
+  </body>
 </html>

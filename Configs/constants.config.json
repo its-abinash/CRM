@@ -1,0 +1,26 @@
+{
+  "db": {
+    "FETCH_ALL": 1,
+    "FETCH_SPECIFIC": 2,
+    "CREDENTIALS": 1,
+    "CUSTOMER": 3,
+    "CONVERSATION": 4
+  },
+  "css": {
+    "CHAT_TIME_LOC": "time_loc",
+    "CHAT_COL": "color",
+    "CHAT_FLOAT_RIGHT": "time-right",
+    "CHAT_FLOAT_LEFT": "time-left",
+    "CHAT_SENDER_COL": "",
+    "CHAT_RECEIVER_COL": "darker"
+  },
+  "cypher": {
+    "ENCRYPTION_KEY": "#",
+    "DECRYPTION_KEY": "#"
+  },
+  "statusCode": {
+    "SUCCESS": 200,
+    "BAD_REQUEST": 400,
+    "INTERNAL_SERVER_ERROR": 500
+  }
+}
