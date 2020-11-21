@@ -8,6 +8,7 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
+var {DATABASE, STATUSCODE} = require('../../Configs/constants.config')
 
 exports.edit = async function (req, res) {
   try {
@@ -33,17 +34,17 @@ exports.edit = async function (req, res) {
     }
     logger.info(`fields: ${fields}, data: ${data}`);
     logger.info("Execution of 'update' method begins");
-    var jobDone = await db.update(3, "email", email, fields, data);
+    var jobDone = await db.update(DATABASE.CUSTOMER, "email", email, fields, data);
     logger.info("Execution of 'update' method ends");
     if (jobDone) {
       logger.info("Edit successful, so redirecting back to dashboard");
-      res.status(200).send({ reason: "success" });
+      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
     } else {
       logger.error("Edit failed, so redirecting back to dashboard");
-      res.status(400).send({ reason: "failure" });
+      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
     }
   } catch (ex) {
     logger.exceptions(`POST /edit Captured Error ===> ${ex}`);
-    res.status(500).send({ reason: "exception" });
+    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
   }
 };

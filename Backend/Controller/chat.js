@@ -8,6 +8,12 @@ var fs = require("fs");
 var logger = require("../Logger/log");
 var AES = require("crypto-js/aes"); // Advanced Encryption Standard
 var CryptoJs = require("crypto-js");
+var {
+  DATABASE,
+  CSS,
+  CYPHER,
+  STATUSCODE,
+} = require("../../Configs/constants.config");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -22,29 +28,39 @@ exports.getConversation = async function (req, res) {
     var sender = req.session.user;
     var receiver = req.params.receiverId;
     logger.info(`Sender = \'${sender}\', Receiver = \'${receiver}\'`);
-    var chat = await db.fetch(4, 2, sender, receiver);
+    var chat = await db.fetch(
+      DATABASE.CONVERSATION,
+      DATABASE.FETCH_SPECIFIC,
+      sender,
+      receiver
+    );
     logger.info(`GET /Chat Data Fetched ===> ${JSON.stringify(chat)}`);
     /* Fetching previous conversation */
     for (var i = 0; i < chat.length; i++) {
-      chat[i].msg = AES.decrypt(chat[i].msg, "#").toString(CryptoJs.enc.Utf8);
+      chat[i].msg = AES.decrypt(chat[i].msg, CYPHER.DECRYPTION_KEY).toString(
+        CryptoJs.enc.Utf8
+      );
       chat[i].timestamp = new Date(
         chat[i].timestamp.toString()
       ).toLocaleTimeString();
-      chat[i]["time_loc"] =
-        chat[i].sender === sender ? "time-right" : "time-left";
-      chat[i]["color"] = chat[i].sender === sender ? "" : "darker";
+      chat[i][CSS.CHAT_TIME_LOC] =
+        chat[i].sender === sender ? CSS.CHAT_FLOAT_RIGHT : CSS.CHAT_FLOAT_LEFT;
+      chat[i][CSS.CHAT_COL] =
+        chat[i].sender === sender ? CSS.CHAT_SENDER_COL : CSS.CHAT_RECEIVER_COL;
     }
     logger.info("GET /Chat ends");
-    res.status(200).send({ reason: "success", values: chat });
+    res.status(STATUSCODE.SUCCESS).send({ reason: "success", values: chat });
   } catch (ex) {
     logger.error(`Tracked error in GET /Chat ${JSON.stringify(ex)}`);
-    res.status(400).send({ reason: "exception", values: [] });
+    res
+      .status(STATUSCODE.BAD_REQUEST)
+      .send({ reason: "exception", values: [] });
   }
 };
 
 var saveConversation = async function (data) {
   logger.info("Execution of 'saveConversation' method begins");
-  return await db.insert(4, data);
+  return await db.insert(DATABASE.CONVERSATION, data);
 };
 
 exports.chat = async function (req, res) {
@@ -69,17 +85,17 @@ exports.chat = async function (req, res) {
       logger.error(
         "Failure status from database, so redirecting back to dashboard"
       );
-      res.status(400).send({ reason: "failure" });
+      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
     } else {
       logger.info(
         "Success status from database, so redirecting back to dashboard"
       );
-      res.status(200).send({ reason: "success" });
+      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
     }
   } catch (ex) {
     logger.error(
       "Exception status from database, so redirecting back to dashboard"
     );
-    res.status(500).send({ reason: "exception" });
+    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
   }
 };

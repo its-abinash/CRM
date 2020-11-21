@@ -7,6 +7,7 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
+var { DATABASE } = require("../../Configs/constants.config");
 
 var existingUser = async function (email) {
   logger.info("Execution of 'isExistingUser' method begins");
@@ -40,13 +41,13 @@ exports.register = async function (req, res) {
       );
       // Save user cred in db
       logger.info("Execution of 'insert' method in 'credentials' db begins");
-      var credSaved = await db.insert(1, credData);
+      var credSaved = await db.insert(DATABASE.CREDENTIALS, credData);
       logger.info(
         `Execution of \'insert\' method in \'credentials\' db ends with result = ${credSaved}`
       );
       // Save user data in db
       logger.info("Execution of 'insert' method in 'conversations' db begins");
-      var dataSaved = await db.insert(3, userData);
+      var dataSaved = await db.insert(DATABASE.CUSTOMER, userData);
       logger.info(
         `Execution of \'insert\' method in \'conversations\' db ends with result = ${dataSaved}`
       );
