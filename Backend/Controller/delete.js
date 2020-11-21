@@ -8,6 +8,7 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
+var {DATABASE, STATUSCODE} = require('../../Configs/constants.config')
 
 exports.delete = async function (req, res) {
   try {
@@ -15,29 +16,29 @@ exports.delete = async function (req, res) {
     logger.info(`POST /delete body ===> ${JSON.stringify(req.body)}`);
     var email = req.body.email;
     logger.info(`Removing '${email}' as customer begins`);
-    var removedCustomer = await db.remove(3, "email", email);
+    var removedCustomer = await db.remove(DATABASE.CUSTOMER, "email", email);
     logger.info(`Removing '${email}' as customer ends`);
     logger.info(`Removing Conversation of '${email}' begins`);
     var removedConversation = await db.remove(
-      4,
+      DATABASE.CONVERSATION,
       ["sender", "receiver"],
       [req.session.user, email]
     );
     logger.info(`Removing Conversation of '${email}' ends`);
     logger.info(`Removing Credentials of '${email}' begins`);
-    var removedCredentials = await db.remove(1, "email", email);
+    var removedCredentials = await db.remove(DATABASE.CREDENTIALS, "email", email);
     logger.info(`Removing Credentials of '${email}' ends`);
     if (removedCustomer && removedConversation && removedCredentials) {
       logger.info(
         "Removed user successfully, so redirecting back to dashboard"
       );
-      res.status(200).send({ reason: "success" });
+      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
     } else {
       logger.error("User removal failed, so redirecting back to dashboard");
-      res.status(400).send({ reason: "failure" });
+      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
     }
   } catch (ex) {
     logger.exceptions(`POST /delete Captured Error ===> ${ex}`);
-    res.status(500).send({ reason: "exception" });
+    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
   }
 };

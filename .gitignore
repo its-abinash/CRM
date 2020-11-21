@@ -1,3 +1,4 @@
 node_modules
 package-lock.json
 logs/app.log
+Configs/constants.config.js

@@ -8,6 +8,11 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
+var {
+  DATABASE,
+  STATUSCODE,
+  CYPHER,
+} = require("../../Configs/constants.config");
 
 exports.insert = async function (req, res) {
   try {
@@ -22,21 +27,21 @@ exports.insert = async function (req, res) {
     ];
     logger.info(`data to be inserted ===> ${data}`);
     logger.info("Execution of 'insert' method begins");
-    var jobDone = await db.insert(3, data);
+    var jobDone = await db.insert(DATABASE.CUSTOMER, data);
     logger.info("Execution of 'insert' method ends");
     if (jobDone) {
       logger.info(
         "User data insertion successful, so redirecting back to dashboard"
       );
-      res.status(200).send({ reason: "success" });
+      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
     } else {
       logger.error(
         "User data insertion failed, so redirecting back to dashboard"
       );
-      res.status(400).send({ reason: "failure" });
+      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
     }
   } catch (ex) {
     logger.exceptions(`POST /insert Captured Error ===> ${ex}`);
-    res.status(500).send({ reason: "exception" });
+    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
   }
 };

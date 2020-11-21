@@ -2,6 +2,7 @@ const { Pool, Client } = require("pg");
 var fs = require("fs");
 var logger = require("../Backend/Logger/log");
 var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
+var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
   connectionString: `${ENV.connectionString}`,
@@ -372,16 +373,16 @@ exports.fetch = async function (
        -> NOTE : for `fetchConversation` (pk_name, pk_value) = (sender, receiver), as no primary key set for conversation table
     */
   switch (database_id) {
-    case 1:
-      return fetch_type === 1
+    case DATABASE.CREDENTIALS:
+      return fetch_type === DATABASE.FETCH_ALL
         ? await fetchAllFromCred()
         : await fetchSpecificFromCred(pk_name, pk_value);
-    case 3:
-      return fetch_type === 1
+    case DATABASE.CUSTOMER:
+      return fetch_type === DATABASE.FETCH_ALL
         ? await fetchAllFromCustomer()
         : await fetchSpecificFromCustomer(pk_name, pk_value);
-    case 4:
-      return fetch_type === 1
+    case DATABASE.CONVERSATION:
+      return fetch_type === DATABASE.FETCH_ALL
         ? await fetchConversations(pk_name, pk_value)
         : await fetchLimitedConversations(pk_name, pk_value);
   }
@@ -390,11 +391,11 @@ exports.fetch = async function (
 exports.insert = async function (database_id, data) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer). 4(conversation) */
   switch (database_id) {
-    case 1:
+    case DATABASE.CREDENTIALS:
       return await insertAtCred(data);
-    case 3:
+    case DATABASE.CUSTOMER:
       return await insertAtCustomer(data);
-    case 4:
+    case DATABASE.CONVERSATION:
       return await insertAtConversation(data);
   }
 };
@@ -407,9 +408,9 @@ exports.update = async function (database_id, pk_name, pk_value, fields, data) {
        param :: list of json to be updated in corresponding field
     */
   switch (database_id) {
-    case 1:
+    case DATABASE.CREDENTIALS:
       return await updateAtCred(pk_name, pk_value, fields, data);
-    case 3:
+    case DATABASE.CUSTOMER:
       return await updateAtCustomer(pk_name, pk_value, fields, data);
   }
 };
@@ -420,11 +421,11 @@ exports.remove = async function (database_id, pk_name, pk_value) {
        param :: pk_value = primary key value (eg: abc@domain.com)
     */
   switch (database_id) {
-    case 1:
+    case DATABASE.CREDENTIALS:
       return await removeAtCred(pk_name, pk_value);
-    case 3:
+    case DATABASE.CUSTOMER:
       return await removeAtCustomer(pk_name, pk_value);
-    case 4:
+    case DATABASE.CONVERSATION:
       return await removeAtConversation(pk_name, pk_value);
   }
 };
