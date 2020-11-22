@@ -15,6 +15,14 @@ var existingUser = async function (email) {
   return res;
 };
 
+/**
+ * @httpMethod POST
+ * @function register
+ * @async
+ * @description Registering a user
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.register = async function (req, res) {
   try {
     logger.info("POST /register begins");

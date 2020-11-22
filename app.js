@@ -24,6 +24,9 @@ var email = require("./Backend/Api/email");
 var chat = require("./Backend/Api/chat");
 var constants = require("./Backend/Api/getConstants");
 
+/**
+ * @description APIs to be used are listed here
+ */
 app.use(
   "/",
   register,

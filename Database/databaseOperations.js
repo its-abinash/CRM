@@ -8,6 +8,13 @@ const pool = new Pool({
   connectionString: `${ENV.connectionString}`,
 });
 
+/**
+ * @function insertAtCred
+ * @async
+ * @description Save the credentials of user in table of db
+ * @param {Array} data
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var insertAtCred = async function (data) {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -32,6 +39,13 @@ var insertAtCred = async function (data) {
   }
 };
 
+/**
+ * @function insertAtCustomer
+ * @async
+ * @description Save the data of user in table of db
+ * @param {Array} data
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var insertAtCustomer = async function (data) {
   try {
     logger.info("Connecting to 'customer' database");
@@ -56,6 +70,12 @@ var insertAtCustomer = async function (data) {
   }
 };
 
+/**
+ * @function fetchAllFromCred
+ * @async
+ * @description Get all credentials from table in db
+ * @returns Credentials
+ */
 var fetchAllFromCred = async function () {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -81,6 +101,12 @@ var fetchAllFromCred = async function () {
   }
 };
 
+/**
+ * @function fetchAllFromCustomer
+ * @async
+ * @description Gets all data of customers
+ * @returns Data of customers
+ */
 var fetchAllFromCustomer = async function () {
   try {
     logger.info("Connecting to 'customer' database");
@@ -106,6 +132,13 @@ var fetchAllFromCustomer = async function () {
   }
 };
 
+/**
+ * @function fetchSpecificFromCustomer
+ * @async
+ * @description Gets specific data of a customer according to the given filter
+ * @param {string} pk_name
+ * @param {string} pk_value
+ */
 var fetchSpecificFromCustomer = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'customer' database");
@@ -130,6 +163,14 @@ var fetchSpecificFromCustomer = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function fetchSpecificFromCred
+ * @async
+ * @description Gets specific credential of a user
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @returns Specific Creds
+ */
 var fetchSpecificFromCred = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -154,6 +195,16 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function updateAtCred
+ * @async
+ * @description Update credentials of user onclick 'forgot password/email'
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @param {Array} fields
+ * @param {Array} data
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var updateAtCred = async function (pk_name, pk_value, fields, data) {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -180,6 +231,16 @@ var updateAtCred = async function (pk_name, pk_value, fields, data) {
   }
 };
 
+/**
+ * @function updateAtCustomer
+ * @async
+ * @description Updates user's detail(s)
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @param {Array} fields
+ * @param {Array} data
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   try {
     logger.info("Connecting to 'customer' database");
@@ -206,6 +267,14 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   }
 };
 
+/**
+ * @function removeAtCred
+ * @async
+ * @description Delete credentials of user
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var removeAtCred = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -230,6 +299,14 @@ var removeAtCred = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function removeAtCustomer
+ * @async
+ * @description Removes user and data
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var removeAtCustomer = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'customer' database");
@@ -254,11 +331,19 @@ var removeAtCustomer = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function removeAtConversation
+ * @async
+ * @description Removes conversations of a user with any(or all) admin(s)
+ * @param {Array} pk_name
+ * @param {Array} pk_value
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var removeAtConversation = async function (pk_name, pk_value) {
   /*
-        :param pk_name is an array of keys [sender, receiver]
-        :param pk_value is an array of values [sender_email_id, receiver_email_id]
-    */
+    :param pk_name is an array of keys [sender, receiver]
+    :param pk_value is an array of values [sender_email_id, receiver_email_id]
+  */
   try {
     logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
@@ -283,6 +368,13 @@ var removeAtConversation = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function insertAtConversation
+ * @async
+ * @description Inserts chat of user with admin
+ * @param {Array} data
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 var insertAtConversation = async function (data) {
   try {
     logger.info("Connecting to 'conversation' database");
@@ -307,6 +399,14 @@ var insertAtConversation = async function (data) {
   }
 };
 
+/**
+ * @function fetchConversation
+ * @async
+ * @description Gets conversations of sender with receiver (Not Vice-Versa)
+ * @param {string} sender
+ * @param {string} receiver
+ * @returns Chats
+ */
 var fetchConversations = async function (sender, receiver) {
   try {
     logger.info("Connecting to 'conversation' database");
@@ -331,6 +431,14 @@ var fetchConversations = async function (sender, receiver) {
   }
 };
 
+/**
+ * @function fetchLimitedConversations
+ * @async
+ * @description Gets conversations between user and admin and Vice-Versa
+ * @param {string} sender
+ * @param {string} receiver
+ * @returns Chats
+ */
 var fetchLimitedConversations = async function (sender, receiver) {
   try {
     logger.info("Connecting to 'conversation' database");
@@ -358,6 +466,17 @@ var fetchLimitedConversations = async function (sender, receiver) {
   }
 };
 
+/**
+ * @function fetch
+ * @async
+ * @description Gets the data from database at database_id according to fetch_id
+ * @param {number} database_id
+ * @param {number} fetch_type
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @param {string} key
+ * @returns Queried Data
+ */
 exports.fetch = async function (
   database_id,
   fetch_type,
@@ -366,12 +485,12 @@ exports.fetch = async function (
   key = null
 ) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer) or 4(conversation).
-       param :: fetch_type are 1 or 2, where 1 is to fetch all data and 2 is to fetch specific data
-       param :: pk_name = primary key name (eg: email)
-       param :: pk_value = primary key value (eg: abc@domain.com)
-       param :: key required while fetching specific data from a row of the table.
-       -> NOTE : for `fetchConversation` (pk_name, pk_value) = (sender, receiver), as no primary key set for conversation table
-    */
+     param :: fetch_type are 1 or 2, where 1 is to fetch all data and 2 is to fetch specific data
+     param :: pk_name = primary key name (eg: email)
+     param :: pk_value = primary key value (eg: abc@domain.com)
+     param :: key required while fetching specific data from a row of the table.
+    -> NOTE : for `fetchConversation` (pk_name, pk_value) = (sender, receiver), as no primary key set for conversation table
+  */
   switch (database_id) {
     case DATABASE.CREDENTIALS:
       return fetch_type === DATABASE.FETCH_ALL
@@ -388,6 +507,14 @@ exports.fetch = async function (
   }
 };
 
+/**
+ * @function insert
+ * @async
+ * @description Inserts data into database at database_id
+ * @param {number} database_id
+ * @param {Array} data
+ * @returns Queried Data
+ */
 exports.insert = async function (database_id, data) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer). 4(conversation) */
   switch (database_id) {
@@ -400,6 +527,16 @@ exports.insert = async function (database_id, data) {
   }
 };
 
+/**
+ * @function update
+ * @async
+ * @description Updates the data in database at database_id
+ * @param {number} database_id
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @param {Array} fields
+ * @param {Array} data
+ */
 exports.update = async function (database_id, pk_name, pk_value, fields, data) {
   /* param :: database_ids are 1(Credentials), 2(Admin), or 3(Customer).
        param :: pk_name = primary key name (eg: email)
@@ -415,6 +552,15 @@ exports.update = async function (database_id, pk_name, pk_value, fields, data) {
   }
 };
 
+/**
+ * @function remove
+ * @async
+ * @description Removes data in database at database_id
+ * @param {number} database_id
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @returns Queried Data
+ */
 exports.remove = async function (database_id, pk_name, pk_value) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer), 4(Conversation).
        param :: pk_name = primary key name (eg: email)
@@ -430,6 +576,14 @@ exports.remove = async function (database_id, pk_name, pk_value) {
   }
 };
 
+/**
+ * @function isExistingUser
+ * @async
+ * @description Checks if the user already exists in database
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 exports.isExistingUser = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
@@ -454,6 +608,15 @@ exports.isExistingUser = async function (pk_name, pk_value) {
   }
 };
 
+/**
+ * @function isValidUser
+ * @async
+ * @description Authenticating user with given credentials
+ * @param {string} pk_name
+ * @param {string} pk_value
+ * @param {string} password
+ * @returns Acknowledgement of the operation(Boolean)
+ */
 exports.isValidUser = async function (pk_name, pk_value, password) {
   try {
     logger.info("Execution begins for 'isValidUser' method");

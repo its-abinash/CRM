@@ -17,6 +17,13 @@ var {
   CYPHER,
 } = require("../../Configs/constants.config");
 
+/**
+ * @function getPassCode
+ * @async
+ * @description Gets the Google App Password of the sender
+ * @param {string} email
+ * @returns Sends Google App Password as an acknowledgement
+ */
 var getPassCode = async function (email) {
   logger.info(
     `Calling \'getPassCode\' method for ${email} to get Google app password`
@@ -31,6 +38,14 @@ var getPassCode = async function (email) {
   return userCred[0].passcode;
 };
 
+/**
+ * @httpMethod POST
+ * @function email
+ * @async
+ * @description Sends email to user
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.email = async function (req, res) {
   try {
     logger.info("POST /email begins");

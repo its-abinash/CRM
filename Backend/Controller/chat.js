@@ -19,10 +19,16 @@ router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
+/**
+ * @httpMethod GET
+ * @async
+ * @function getConversation
+ * @description Fetch previous conversations between 2 persons
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.getConversation = async function (req, res) {
-  /*
-    When fetching Chat Conversations, we have to decrypt the encoded message
-    */
+  /* When fetching Chat Conversations, we have to decrypt the encoded message */
   try {
     logger.info("GET /Chat begins");
     var sender = req.session.user;
@@ -58,11 +64,26 @@ exports.getConversation = async function (req, res) {
   }
 };
 
+/**
+ * @function saveConversation
+ * @async
+ * @description Save the conversation between 2 persons in db
+ * @param {Array} data
+ * @returns Acknowledgement of saving conversations(Boolean)
+ */
 var saveConversation = async function (data) {
   logger.info("Execution of 'saveConversation' method begins");
   return await db.insert(DATABASE.CONVERSATION, data);
 };
 
+/**
+ * @httpMethod POST
+ * @function chat
+ * @async
+ * @description Save the conversation of 2 persons
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.chat = async function (req, res) {
   /*
     The Chat Conversation is end-end protected with encryption. Hence, the messages will be

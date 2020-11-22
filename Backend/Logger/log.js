@@ -1,6 +1,10 @@
 const { createLogger, transports, format } = require("winston");
 const { LOGGER } = require("../../Configs/constants.config");
 
+/**
+ * @constant
+ * @description Logger Formats
+ */
 var loggerFormat = format.combine(
   format.label({
     label: LOGGER.LABEL,
@@ -14,6 +18,10 @@ var loggerFormat = format.combine(
   )
 );
 
+/**
+ * @template
+ * @description Logger Template
+ */
 module.exports = createLogger({
   transports: [
     new transports.File({

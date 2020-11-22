@@ -8,8 +8,16 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var {DATABASE, STATUSCODE} = require('../../Configs/constants.config')
+var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
 
+/**
+ * @httpMethod POST
+ * @function delete
+ * @async
+ * @description Delete user's all data
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.delete = async function (req, res) {
   try {
     logger.info("POST /delete begins");
@@ -26,7 +34,11 @@ exports.delete = async function (req, res) {
     );
     logger.info(`Removing Conversation of '${email}' ends`);
     logger.info(`Removing Credentials of '${email}' begins`);
-    var removedCredentials = await db.remove(DATABASE.CREDENTIALS, "email", email);
+    var removedCredentials = await db.remove(
+      DATABASE.CREDENTIALS,
+      "email",
+      email
+    );
     logger.info(`Removing Credentials of '${email}' ends`);
     if (removedCustomer && removedConversation && removedCredentials) {
       logger.info(
