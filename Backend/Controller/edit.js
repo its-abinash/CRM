@@ -8,8 +8,16 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var {DATABASE, STATUSCODE} = require('../../Configs/constants.config')
+var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
 
+/**
+ * @httpMethod POST
+ * @function edit
+ * @async
+ * @description Update details of user
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.edit = async function (req, res) {
   try {
     logger.info("POST /edit begins");
@@ -34,7 +42,13 @@ exports.edit = async function (req, res) {
     }
     logger.info(`fields: ${fields}, data: ${data}`);
     logger.info("Execution of 'update' method begins");
-    var jobDone = await db.update(DATABASE.CUSTOMER, "email", email, fields, data);
+    var jobDone = await db.update(
+      DATABASE.CUSTOMER,
+      "email",
+      email,
+      fields,
+      data
+    );
     logger.info("Execution of 'update' method ends");
     if (jobDone) {
       logger.info("Edit successful, so redirecting back to dashboard");

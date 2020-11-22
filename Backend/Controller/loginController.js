@@ -12,6 +12,14 @@ router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
+/**
+ * @function isValidUser
+ * @async
+ * @description Validate user by checking the input credentials with the correct one
+ * @param {string} email
+ * @param {string} password
+ * @returns Acknowledgement of the validation of the user(Boolean)
+ */
 var isValidUser = async function (email, password) {
   logger.info("Execution of 'isValidUser' method begins");
   var isExistingUser = await db.isExistingUser("email", email);
@@ -20,6 +28,14 @@ var isValidUser = async function (email, password) {
   }
 };
 
+/**
+ * @httpMethod GET
+ * @function getLoginPage
+ * @async
+ * @description Renders the login-registration html file
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.getLoginPage = async function (req, res) {
   logger.info("GET /login begins");
   res.render("register", {
@@ -28,6 +44,14 @@ exports.getLoginPage = async function (req, res) {
   });
 };
 
+/**
+ * @httpMethod POST
+ * @function login
+ * @async
+ * @description log in to the dashboard
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.login = async function (req, res) {
   try {
     logger.info("POST /login begins");

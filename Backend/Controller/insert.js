@@ -8,12 +8,16 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var {
-  DATABASE,
-  STATUSCODE,
-  CYPHER,
-} = require("../../Configs/constants.config");
+var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
 
+/**
+ * @httpMethod POST
+ * @function insert
+ * @async
+ * @description Inserts user data
+ * @param {Object} req
+ * @param {Object} res
+ */
 exports.insert = async function (req, res) {
   try {
     logger.info("POST /insert begins");

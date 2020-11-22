@@ -10,8 +10,9 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
 /**
+ * @constant
  * *NOTE:* Make sure the CONSTANTS are unique
- * E.G: constId = CYPHER
+ * E.G: constId = CYPHER and fieldId = ENCRYPTIONKEY
  */
 const CONSTANTS = {
   CYPHER: {
@@ -33,9 +34,10 @@ const CONSTANTS = {
 
 /**
  * @httpMethod GET
- * @description getAllConstants will return all CONSTANTS to the client
- * @param {*} req
- * @param {*} res
+ * @function getAllConstants
+ * @description Gets all CONSTANTS
+ * @param {Object} req
+ * @param {Object} res
  */
 exports.getAllConstants = function (req, res) {
   logger.info("GET /constants begins");
@@ -55,9 +57,10 @@ exports.getAllConstants = function (req, res) {
 
 /**
  * @httpMethod GET
- * @description getSpecificFromConstants will return a field of specific CONSTANT from CONSTANTS to the client
- * @param {*} req
- * @param {*} res
+ * @function getSpecificFromConstants
+ * @description Gets a field of specific CONSTANT from CONSTANTS
+ * @param {Object} req
+ * @param {Object} res
  */
 exports.getSpecificFromConstants = function (req, res) {
   logger.info(`GET /constants/:constId/:fieldId begins`);
@@ -94,9 +97,10 @@ exports.getSpecificFromConstants = function (req, res) {
 
 /**
  * @httpMethod GET
- * @description getConstant will return the specific CONSTANT to the client
- * @param {*} req
- * @param {*} res
+ * @function getConstant
+ * @description Gets specific CONSTANT
+ * @param {Object} req
+ * @param {Object} res
  */
 exports.getConstant = function (req, res) {
   logger.info("GET /constants/:constId begins");
