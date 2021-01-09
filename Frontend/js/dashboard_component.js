@@ -47,6 +47,33 @@ function chat(email) {
   $("#customerEmail").attr("value", email);
 }
 
+async function processPendingRemainers() {
+  const fixedRemainderTime = 9; // AM
+  const Noon = 12;
+  const dateObject = new Date();
+  var currentHour = dateObject.getHours();
+  if (currentHour < Noon && currentHour == fixedRemainderTime) {
+    var remainderInfoList = [];
+    $.ajax({
+      url: `${SERVER}` + "getLatestRemainderInformation",
+      method: "GET",
+      async: false,
+      success: function (response) {
+        remainderInfoList = response.values;
+      },
+    });
+    for (const remainderInfo of remainderInfoList) {
+      await sendEmail(
+        remainderInfo.email,
+        remainderInfo.subject,
+        remainderInfo.body
+      );
+    }
+    return true; //Task Done
+  }
+  return false;
+}
+
 function getChatEndpoint() {
   var CHAT = "";
   $.ajax({
@@ -235,14 +262,12 @@ async function getEncryptedValue(key) {
   return encrypted;
 }
 
-$(document).on("click", "#email-btn", async function () {
+async function sendEmail(email, subject, body, show_html = false) {
   var EMAIL_ENDPOINT = getEmailEndpoint();
   var payload = {
-    email: document.getElementById("sendmail").value,
-    subject: await getEncryptedValue(
-      document.getElementById("email-subject").value
-    ),
-    body: await getEncryptedValue(document.getElementById("email-body").value),
+    email: email,
+    subject: await getEncryptedValue(subject),
+    body: await getEncryptedValue(body),
   };
   if (
     $.trim(payload.subject) != "" &&
@@ -255,23 +280,35 @@ $(document).on("click", "#email-btn", async function () {
       data: payload,
       dataType: "text",
       success: function () {
-        document.getElementById("email-subject").value = "";
-        document.getElementById("email-body").value = "";
-        var html_file = `<div class="alert success">
+        if (show_html) {
+          document.getElementById("email-subject").value = "";
+          document.getElementById("email-body").value = "";
+          var html_file = `<div class="alert success">
                 <span class="closebtn">&times;</span>
                 <strong>Success!</strong> Your email has been sent to <i>${payload.email}</i>.
                 </div>`;
-        $("#email-status").html(html_file).fadeIn("slow");
+          $("#email-status").html(html_file).fadeIn("slow");
+        }
       },
-      error: function () {
-        var html_file = `<div class="alert">
+      error: function (response) {
+        console.log(`EMAIL RESPONSE = ${response}`);
+        if (show_html) {
+          var html_file = `<div class="alert">
                 <span class="closebtn">&times;</span>
                 <strong>Dang!</strong> Failed to send email to ${payload.email}.
                 </div>`;
-        $("#email-status").html(html_file).fadeIn("slow");
+          $("#email-status").html(html_file).fadeIn("slow");
+        }
       },
     });
   }
+}
+
+$(document).on("click", "#email-btn", async function () {
+  email = document.getElementById("sendmail").value;
+  subject = document.getElementById("email-subject").value;
+  body = document.getElementById("email-body").value;
+  await sendEmail(email, subject, body, (show_html = true));
 });
 $(document).on("click", "#chat-btn", async function () {
   var CHAT_ENDPOINT = getChatEndpoint();
@@ -374,7 +411,13 @@ $(document).on("click", "#insert-btn", async function () {
 $(document).ready(function () {
   getdashBoard(); // Loading Dashboard
   var CHAT = getChatEndpoint();
-  setInterval(function () {
+  var remainderSent = false;
+  setInterval(async function () {
+    /* Check if any remainder is pending */
+    if (!remainderSent) {
+      remainderSent = await processPendingRemainers();
+    }
+
     if ($("#id04").css("display") === "block") {
       var receiver = $("#customerEmail").attr("value");
       $.ajax({
