@@ -43,7 +43,10 @@ exports.register = async function (req, res) {
       res.redirect("/login");
     } else {
       var credData = [email, password, passcode];
-      var userData = [username, email, phoneNum, gstNum, remFreq];
+      var date = new Date()
+      date.setDate(date.getDate() + remFreq)
+      var next_remainder = date.toLocaleDateString()
+      var userData = [username, email, phoneNum, gstNum, remFreq, next_remainder];
       logger.info(
         `credData to be saved ===> ${credData} and userData to be saved ===> ${userData}`
       );

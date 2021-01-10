@@ -125,6 +125,20 @@ function getAddEndpoint() {
   return ADD;
 }
 
+function checkUserType() {
+  var is_admin = false;
+  $.ajax({
+    url: `${SERVER}` + "getUserType",
+    method: "GET",
+    dataType: "json",
+    async: false,
+    success: function (response) {
+      is_admin = response.values;
+    },
+  });
+  return is_admin
+}
+
 function getdashBoard() {
   var ROUTES = {};
   $.ajax({
@@ -136,8 +150,9 @@ function getdashBoard() {
       ROUTES = response.values;
     },
   });
+  var is_admin = checkUserType();
   $.ajax({
-    url: SERVER + ROUTES.DASHBOARD,
+    url: SERVER + (is_admin === true ? ROUTES.DASHBOARD.CUSTOMER : ROUTES.DASHBOARD.ADMIN),
     method: "GET",
     dataType: "json",
     success: function (response) {
@@ -148,7 +163,11 @@ function getdashBoard() {
                     <div class="card">
                         <p> ${responseValue[i].name} </p>
                         <button onclick=remove('${responseValue[i].email}') style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
-                        <button onclick=edit('${responseValue[i].email}') style="width:auto;"><i class="fa fa-edit"></i></button>
+                    `
+        if(is_admin) {
+          html_file += `<button onclick=edit('${responseValue[i].email}') style="width:auto;"><i class="fa fa-edit"></i></button>`
+        }
+        html_file +=  `
                         <button onclick=message('${responseValue[i].email}') style="width:auto;background-color:blueviolet"><i class="fa fa-envelope"></i></button>
                         <button onclick=chat('${responseValue[i].email}') style="width:auto;background-color:darkcyan"><i class="fa fa-arrow-right"></i></button>
                         <div id="id01" class="modal">
