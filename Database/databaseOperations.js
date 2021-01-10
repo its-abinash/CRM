@@ -508,6 +508,36 @@ var fetchLimitedConversations = async function (sender, receiver) {
 };
 
 /**
+ * @function fetchLatestRemainder
+ * @async
+ * @description Gets emailId of customers according to their remainder_date
+ * @returns List of emailIds
+ */
+exports.fetchLatestRemainder = async function() {
+  try {
+    logger.info("Connecting to 'customer' database");
+    const db = await pool.connect();
+    logger.info("***************************************");
+    logger.info("Connection established to 'customer' database");
+    const query = `select email, remfreq from customer where next_remainder = CURRENT_DATE;`;
+    logger.info("Executing query in 'customer' database");
+    var data = await db.query(query);
+    logger.info("Execution successful, so disconnecting database");
+    db.release();
+    return data.rows;
+  } catch (ex) {
+    logger.info("***************************************");
+    logger.error(
+      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
+    );
+    return [];
+  } finally {
+    console.log("Task in 'customer' database has been done. Now it Quits");
+    logger.info("***************************************");
+  }
+}
+
+/**
  * @function fetch
  * @async
  * @description Gets the data from database at database_id according to fetch_id
