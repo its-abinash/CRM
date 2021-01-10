@@ -52,7 +52,7 @@ var insertAtCustomer = async function (data) {
     const db = await pool.connect();
     logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
-    const query = `INSERT INTO customer (name, email, phone, gst, remfreq) VALUES ($1, $2, $3, $4, $5)`;
+    const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder) VALUES ($1, $2, $3, $4, $5, $6)`;
     logger.info("Executing query in 'customer' database");
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");
@@ -194,6 +194,47 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
     logger.info("***************************************");
   }
 };
+
+/**
+ * @function fetchAllUserOfGivenType
+ * @async
+ * @description Fetches all users of one of the types: [admin or customer]
+ * @param {Array} is_admin
+ * @returns List of users of given type
+ */
+exports.fetchAllUserOfGivenType = async function (is_admin=[false]) {
+  try {
+    logger.info("Connecting to 'credentials' database");
+    const db = await pool.connect();
+    logger.info("***************************************");
+    logger.info("Connection established to 'credentials' database");
+    const query = `select customer.email, customer.name
+                   from customer
+                   inner join credentials
+                   on credentials.email = customer.email
+                   where credentials.is_admin = $1;`;
+    logger.info("Executing query in 'credentials' database");
+    var res = await db.query(query, is_admin);
+    logger.info("Execution successful, so disconnecting database");
+    db.release();
+    return res.rows;
+  } catch (ex) {
+    logger.info("***************************************");
+    logger.error(
+      `Tracked error in \'credentials\' database ===> ${JSON.stringify(
+        ex,
+        null,
+        3
+      )}`
+    );
+    return [];
+  } finally {
+    console.log("Task in 'credentials' database has been done. Now it Quits");
+    logger.info("***************************************");
+  }
+};
+
+
 
 /**
  * @function updateAtCred

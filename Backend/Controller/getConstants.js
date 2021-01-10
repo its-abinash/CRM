@@ -28,7 +28,10 @@ const CONSTANTS = {
     DELETE: "delete",
     EMAIL: "email",
     CHAT: "chat",
-    DASHBOARD: "dashboard/getCustomer",
+    DASHBOARD: {
+      CUSTOMER: "dashboard/getCustomer",
+      ADMIN: "dashboard/getAdmins",
+    },
   },
 };
 

@@ -5,6 +5,8 @@ var router = express.Router();
 
 router.get("/dashboard/getCustomer", controller.getCustomers);
 
+router.get("/dashboard/getAdmins", controller.getAdmins)
+
 router.get("/dashboard", controller.getDashboardPage);
 
 module.exports = router;
