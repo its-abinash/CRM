@@ -8,7 +8,13 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
+var {
+  DATABASE,
+  ResponseIds,
+} = require("../../Configs/constants.config");
+var { buildResponse, getEndMessage } = require("./response_utils");
+const { format } = require("./main_utils");
+const httpStatus = require("http-status");
 
 /**
  * @httpMethod POST
@@ -20,6 +26,14 @@ var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
  */
 exports.delete = async function (req, res) {
   try {
+    /**
+     * -todo Handle delete customer/Admin for the logged in user "only".
+     * - try to save the admin and customer or vise-versa mapping in db.
+     * - when the logged-in user deletes another user from dashboard,
+     * - it shouldn't reflected to others.
+     * - Then try sending/validating appropriate request payload with schema
+     * - Ticket available in github with issueId: 31
+     */
     logger.info("POST /delete begins");
     logger.info(`POST /delete body ===> ${JSON.stringify(req.body)}`);
     var email = req.body.email;
@@ -44,13 +58,35 @@ exports.delete = async function (req, res) {
       logger.info(
         "Removed user successfully, so redirecting back to dashboard"
       );
-      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
+      var response = await buildResponse(
+        null,
+        format(ResponseIds.RI_007, [
+          "Customer, Conversations, Credentials",
+          email,
+        ]),
+        httpStatus.OK,
+        "RI_007"
+      );
+      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      res.status(httpStatus.OK).send(response);
     } else {
       logger.error("User removal failed, so redirecting back to dashboard");
-      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
+      var response = await buildResponse(
+        null,
+        format(ResponseIds.RI_008, ["Customer", email]),
+        httpStatus.BAD_REQUEST,
+        "RI_008"
+      );
+      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      res.status(httpStatus.BAD_REQUEST).send(response);
     }
   } catch (ex) {
-    logger.exceptions(`POST /delete Captured Error ===> ${ex}`);
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
+    logger.error(`Error in POST /delete: ${JSON.stringify(ex, null, 3)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      httpStatus.BAD_GATEWAY
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

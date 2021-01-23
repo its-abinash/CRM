@@ -3,11 +3,17 @@ var router = express.Router();
 var bodyParser = require("body-parser");
 var cors = require("cors");
 var logger = require("../Logger/log");
-var { STATUSCODE } = require("../../Configs/constants.config");
+var HttpStatus = require("http-status");
+var { format } = require("./main_utils");
+var { buildResponse, getEndMessage } = require("./response_utils");
+const { ResponseIds } = require("../../Configs/constants.config");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
+
+var FIELD_EXCEPTION = "Requested field is not found";
+var CONSTID_EXCEPTION = "Requested constantId not found";
 
 /**
  * @constant
@@ -39,22 +45,30 @@ const CONSTANTS = {
  * @httpMethod GET
  * @function getAllConstants
  * @description Gets all CONSTANTS
+ * @async
  * @param {Object} req
  * @param {Object} res
  */
-exports.getAllConstants = function (req, res) {
+exports.getAllConstants = async function (req, res) {
   logger.info("GET /constants begins");
   try {
     logger.info(`Data sent : ${JSON.stringify(CONSTANTS)}`);
-    res.status(STATUSCODE.SUCCESS).send({
-      reason: "success",
-      values: CONSTANTS,
-    });
+    var response = await buildResponse(
+      CONSTANTS,
+      format(ResponseIds.RI_006, ["Constants", JSON.stringify(CONSTANTS)]),
+      HttpStatus.OK,
+      "RI_006"
+    );
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Tracked error in GET /constants ${JSON.stringify(ex)}`);
-    res
-      .status(STATUSCODE.INTERNAL_SERVER_ERROR)
-      .send({ reason: "exception", values: [] });
+    logger.error(`Error in GET /constants ${JSON.stringify(ex)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -62,39 +76,49 @@ exports.getAllConstants = function (req, res) {
  * @httpMethod GET
  * @function getSpecificFromConstants
  * @description Gets a field of specific CONSTANT from CONSTANTS
+ * @async
  * @param {Object} req
  * @param {Object} res
  */
-exports.getSpecificFromConstants = function (req, res) {
-  logger.info(`GET /constants/:constId/:fieldId begins`);
+exports.getSpecificFromConstants = async function (req, res) {
+  logger.info(`GET /constants/constId/fieldId begins`);
   try {
     var constantId = req.params.constId.toString().toUpperCase();
     var fieldId = req.params.fieldId.toString().toUpperCase();
-    logger.info(`CONST_ID : ${constantId} and FIELD_ID : ${fieldId}`);
     if (CONSTANTS.hasOwnProperty(constantId)) {
       if (CONSTANTS[constantId].hasOwnProperty(fieldId)) {
         logger.info(
           `Data sent : ${JSON.stringify(CONSTANTS[constantId][fieldId])}`
         );
-        res.status(STATUSCODE.SUCCESS).send({
-          reason: "success",
-          values: CONSTANTS[constantId][fieldId],
-        });
+        var response = await buildResponse(
+          CONSTANTS[constantId][fieldId],
+          format(ResponseIds.RI_006, [
+            "Constant",
+            JSON.stringify(CONSTANTS[constantId][fieldId]),
+          ]),
+          HttpStatus.OK,
+          "RI_006"
+        );
+        logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+        res.status(HttpStatus.OK).send(response);
       } else {
         // If fieldId not found then throwing keyError
-        throw "fieldId_Not_Found";
+        throw FIELD_EXCEPTION;
       }
     } else {
       // If not present then throwing keyError
-      throw "constId_Not_Found";
+      throw CONSTID_EXCEPTION;
     }
   } catch (ex) {
     logger.error(
-      `Tracked error in GET /constants/:constId/:fieldId ${JSON.stringify(ex)}`
+      `Error in GET /constants/constId/fieldId ${JSON.stringify(ex)}`
     );
-    res
-      .status(STATUSCODE.INTERNAL_SERVER_ERROR)
-      .send({ reason: "exception", values: [] });
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -105,27 +129,35 @@ exports.getSpecificFromConstants = function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getConstant = function (req, res) {
-  logger.info("GET /constants/:constId begins");
+exports.getConstant = async function (req, res) {
+  logger.info("GET /constants/constId begins");
   try {
     var constantId = req.params.constId.toString().toUpperCase();
-    logger.info(`CONST_ID : ${constantId}`);
+    logger.info(`constantId = ${constantId}`);
     if (CONSTANTS.hasOwnProperty(constantId)) {
       logger.info(`Data sent : ${JSON.stringify(CONSTANTS[constantId])}`);
-      res.status(STATUSCODE.SUCCESS).send({
-        reason: "success",
-        values: CONSTANTS[constantId],
-      });
+      var response = await buildResponse(
+        CONSTANTS[constantId],
+        format(ResponseIds.RI_006, [
+          "Constant",
+          JSON.stringify(CONSTANTS[constantId]),
+        ]),
+        HttpStatus.OK,
+        "RI_006"
+      );
+      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      res.status(HttpStatus.OK).send(response);
     } else {
       // If not present then throwing keyError
-      throw "constId_Not_Found";
+      throw CONSTID_EXCEPTION;
     }
   } catch (ex) {
-    logger.error(
-      `Tracked error in GET /constants/:constId ${JSON.stringify(ex)}`
+    logger.error(`Error in GET /constants/constId ${JSON.stringify(ex)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
     );
-    res
-      .status(STATUSCODE.INTERNAL_SERVER_ERROR)
-      .send({ reason: "exception", values: [] });
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };

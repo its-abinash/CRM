@@ -6,16 +6,19 @@ var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
 var {
   DATABASE,
-  STATUSCODE,
+  ResponseIds,
 } = require("../../Configs/constants.config");
+const { buildResponse, getEndMessage } = require("./response_utils");
+const { format } = require("./main_utils");
+const httpStatus = require("http-status");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
-var REMINDER_SUBJECT = 'Check Latest Business Deals!'
+var REMINDER_SUBJECT = "Check Latest Business Deals!";
 var REMINDER_BODY = `Hello,\n\nA gentle remainder to check our latest business deals.\n
-Please let us know about your thoughts.\n\nThanks,\nAbinash Biswal`
+Please let us know about your thoughts.\n\nThanks,\nAbinash Biswal`;
 
 /**
  * @function getCustomerForRemainderFromDB
@@ -23,8 +26,8 @@ Please let us know about your thoughts.\n\nThanks,\nAbinash Biswal`
  * @returns List of emailIds
  */
 async function getCustomerForRemainderFromDB() {
-  var remInfo = await db.fetchLatestRemainder()
-  return remInfo
+  var remInfo = await db.fetchLatestRemainder();
+  return remInfo;
 }
 
 /**
@@ -34,15 +37,15 @@ async function getCustomerForRemainderFromDB() {
  * @returns List of emailIds
  */
 function getCustomerIds(remainderInfos) {
-  var response = []
-  for(const remainderInfo of remainderInfos) {
+  var response = [];
+  for (const remainderInfo of remainderInfos) {
     response.push({
-      "email": remainderInfo.email,
-      "subject": REMINDER_SUBJECT,
-      "body": REMINDER_BODY
-    })
+      email: remainderInfo.email,
+      subject: REMINDER_SUBJECT,
+      body: REMINDER_BODY,
+    });
   }
-  return response
+  return response;
 }
 
 /**
@@ -51,11 +54,18 @@ function getCustomerIds(remainderInfos) {
  * @param {Array} customers
  */
 async function updateRemainderDateInDB(customers) {
-  for(const customer of customers) {
-    var date = new Date()
-    date.setDate(date.getDate() + customer.remfreq)
-    var next_remainder = date.toLocaleDateString()
-    await db.update(DATABASE.CUSTOMER, 'email', customer.email, ['next_remainder'], [next_remainder])
+  logger.info("In updateRemainderDateInDB");
+  for (const customer of customers) {
+    var date = new Date();
+    date.setDate(date.getDate() + parseInt(customer.remfreq));
+    var next_remainder = date.toLocaleDateString();
+    await db.update(
+      DATABASE.CUSTOMER,
+      "email",
+      customer.email,
+      ["next_remainder"],
+      [next_remainder]
+    );
   }
 }
 
@@ -71,27 +81,34 @@ exports.latestRemainderInformation = async function (req, res) {
   try {
     logger.info("GET /getLatestRemainderInformation begins");
     var customerIds = await getCustomerForRemainderFromDB();
-    logger.info(`Latest remainder information = ${JSON.stringify(customerIds, null, 3)}`);
-    var remInfo = getCustomerIds(customerIds)
+    var remInfo = getCustomerIds(customerIds);
+    logger.info(`Remainder Info = ${JSON.stringify(remInfo, null, 3)}`);
     // Updating next remainder date of the customers
-    await updateRemainderDateInDB(customerIds)
-    res.status(STATUSCODE.SUCCESS).send({
-      reason: "success",
-      statusCode: STATUSCODE.SUCCESS,
-      values: remInfo
-    })
+    await updateRemainderDateInDB(customerIds);
+    var response = await buildResponse(
+      null,
+      format(ResponseIds.RI_006, [
+        "remainder information",
+        JSON.stringify(remInfo),
+      ]),
+      httpStatus.OK,
+      "RI_006"
+    );
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    res.status(httpStatus.OK).send(response);
   } catch (ex) {
     logger.error(
-      `Tracked error in GET /getLatestRemainderInformation ${JSON.stringify(
+      `Error in GET /getLatestRemainderInformation: ${JSON.stringify(
         ex,
         null,
         3
       )}`
     );
-    res.status(STATUSCODE.BAD_REQUEST).send({
-      reason: "exception",
-      statusCode: STATUSCODE.INTERNAL_SERVER_ERROR,
-      values: [],
-    });
+    var response = await buildResponse(
+      null,
+      "exception",
+      httpStatus.BAD_GATEWAY
+    )
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

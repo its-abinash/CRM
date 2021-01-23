@@ -4,7 +4,6 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var session = require("express-session");
-var fs = require("fs");
 var logger = require("../Logger/log");
 var AES = require("crypto-js/aes"); // Advanced Encryption Standard
 var CryptoJs = require("crypto-js");
@@ -12,8 +11,16 @@ var {
   DATABASE,
   CSS,
   CYPHER,
-  STATUSCODE,
+  ResponseIds,
 } = require("../../Configs/constants.config");
+var HttpStatus = require("http-status");
+var {
+  buildResponse,
+  getEndMessage,
+  buildErrorReasons,
+} = require("./response_utils");
+var { format, validatePayload } = require("./main_utils");
+var { chatPostPayloadSchema } = require("./schema");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -33,15 +40,13 @@ exports.getConversation = async function (req, res) {
     logger.info("GET /Chat begins");
     var sender = req.session.user;
     var receiver = req.params.receiverId;
-    logger.info(`Sender = \'${sender}\', Receiver = \'${receiver}\'`);
     var chat = await db.fetch(
       DATABASE.CONVERSATION,
       DATABASE.FETCH_SPECIFIC,
       sender,
       receiver
     );
-    logger.info(`GET /Chat Data Fetched ===> ${JSON.stringify(chat)}`);
-    /* Fetching previous conversation */
+
     for (var i = 0; i < chat.length; i++) {
       chat[i].msg = AES.decrypt(chat[i].msg, CYPHER.DECRYPTION_KEY).toString(
         CryptoJs.enc.Utf8
@@ -54,13 +59,26 @@ exports.getConversation = async function (req, res) {
       chat[i][CSS.CHAT_COL] =
         chat[i].sender === sender ? CSS.CHAT_SENDER_COL : CSS.CHAT_RECEIVER_COL;
     }
-    logger.info("GET /Chat ends");
-    res.status(STATUSCODE.SUCCESS).send({ reason: "success", values: chat });
+    logger.info(`Chat between ${sender} and ${receiver} received`);
+    var response = await buildResponse(
+      chat,
+      format(ResponseIds.RI_001, [sender, receiver]),
+      HttpStatus.OK,
+      "RI_001"
+    );
+    var finalMsg = getEndMessage(ResponseIds.RI_005, req.method, req.path);
+    logger.info(finalMsg);
+    res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Tracked error in GET /Chat ${JSON.stringify(ex)}`);
-    res
-      .status(STATUSCODE.BAD_REQUEST)
-      .send({ reason: "exception", values: [] });
+    logger.error(
+      `Exceptions in GET /Chat with msg: ${JSON.stringify(ex, null, 3)}`
+    );
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -91,32 +109,61 @@ exports.chat = async function (req, res) {
     */
   try {
     logger.info("POST /chat begins");
-    logger.info(`POST /chat ===> body = ${JSON.stringify(req.body)}`);
-    var sender = req.session.user;
-    var receiver = req.body.email;
-    var message = req.body.chatmsg;
+    req.body["sender"] = req.session.user;
+    var payload = req.body;
 
-    /* Saving current conversation in db */
-
-    var data = [sender, receiver, message];
-    logger.info("Calling 'saveConversation' method");
-    var jobDone = await saveConversation(data);
-    logger.info("Execution of 'saveConversation' method ends");
-    if (jobDone === false) {
-      logger.error(
-        "Failure status from database, so redirecting back to dashboard"
+    var [isValidPayload, errorList] = await validatePayload(
+      payload,
+      chatPostPayloadSchema
+    );
+    if (!isValidPayload) {
+      var errorReason = await buildErrorReasons(errorList);
+      var response = await buildResponse(
+        null,
+        errorReason,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        "RI_004"
       );
-      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
+      logger.error("Invalid Request Payload");
+      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
-      logger.info(
-        "Success status from database, so redirecting back to dashboard"
+      var sender = payload.sender;
+      var receiver = payload.receiver;
+      var message = payload.chatmsg;
+
+      var reason = format(ResponseIds.RI_002, [sender, receiver]);
+      var statusCode = HttpStatus.BAD_REQUEST;
+      var responseId = "RI_002";
+
+      var data = [sender, receiver, message];
+      var jobDone = await saveConversation(data);
+      if (jobDone) {
+        logger.info("Success status from database");
+        reason = format(ResponseIds.RI_003, [sender, receiver]);
+        statusCode = HttpStatus.OK;
+        responseId = "RI_003";
+      } else {
+        logger.error("Failure status from database");
+      }
+      var response = await buildResponse(
+        null,
+        reason,
+        statusCode,
+        responseId
       );
-      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
+      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      res.status(statusCode).send(response);
     }
   } catch (ex) {
     logger.error(
-      "Exception status from database, so redirecting back to dashboard"
+      `Exception in POST /chat with msg: ${JSON.stringify(ex, null, 3)}`
     );
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
