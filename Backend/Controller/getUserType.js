@@ -6,43 +6,56 @@ var db = require("../../Database/databaseOperations");
 var session = require("express-session");
 var fs = require("fs");
 var logger = require("../Logger/log");
-var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
-var jp = require('jsonpath')
+var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
+var jp = require("jsonpath");
+var { buildResponse, getEndMessage } = require("./response_utils");
+var HttpStatus = require("http-status");
+var { format } = require("./main_utils");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
-var getUserTypeFromDB = async function(userId) {
+var getUserTypeFromDB = async function (userId) {
   var userType = await db.fetch(
     DATABASE.CREDENTIALS,
     DATABASE.FETCH_SPECIFIC,
     "email",
     userId || "demo@domain.com"
   );
-  var expr = "$..is_admin"
-  var result = jp.query(userType, expr)
-  return result[0]
-}
+  var expr = "$..is_admin";
+  var result = jp.query(userType, expr);
+  return result;
+};
 
+/**
+ * @function getUserType
+ * @description Gets the type of user. EG: admin/customer
+ * @async
+ * @param {Object} req
+ * @param {Object} res
+ * @returns Boolean :- is_admin
+ */
 exports.getUserType = async function (req, res) {
   try {
     logger.info("GET /getUserType begins");
     var isAdmin = await getUserTypeFromDB(req.session.user);
     logger.info(`Response from database = ${JSON.stringify(isAdmin, null, 3)}`);
-    res.status(STATUSCODE.SUCCESS).send({
-      reason: "success",
-      statusCode: STATUSCODE.SUCCESS,
-      values: isAdmin,
-    });
-  } catch (ex) {
-    logger.error(
-      `Error Captured from GET /getUserType = ${JSON.stringify(ex, null, 3)}`
+    var response = await buildResponse(
+      isAdmin,
+      format(ResponseIds.RI_006, ["is_admin flag", isAdmin]),
+      HttpStatus.OK,
+      "RI_006"
     );
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({
-        reason: "exception",
-        statusCode: STATUSCODE.INTERNAL_SERVER_ERROR,
-        values: null
-    })
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    res.status(HttpStatus.OK).send(response);
+  } catch (ex) {
+    logger.error(`Error from GET /getUserType = ${JSON.stringify(ex)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };

@@ -21,7 +21,9 @@ var insertAtCred = async function (data) {
     const db = await pool.connect();
     logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
-    const query = `INSERT INTO credentials (email, password, passcode) VALUES ($1, $2, $3)`;
+    const query = `INSERT INTO
+                   credentials (email, password, passcode, is_admin)
+                   VALUES ($1, $2, $3, $4)`;
     logger.info("Executing query in 'credentials' database");
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");

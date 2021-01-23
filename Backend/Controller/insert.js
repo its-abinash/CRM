@@ -3,12 +3,26 @@ var router = express.Router();
 var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
-var session = require("express-session");
 var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
+var {
+  DATABASE,
+  ResponseIds,
+} = require("../../Configs/constants.config");
+const { validatePayload, processPayload, format } = require("./main_utils");
+const { insertPayloadSchema } = require("./schema");
+const {
+  buildErrorReasons,
+  buildResponse,
+  getEndMessage,
+} = require("./response_utils");
+const httpStatus = require("http-status");
+
+var FAKE_PASSCODE = "fake_code";
+var FAKE_PASSWORD = "fake_password";
+var DEFAULT_ADMIN = false;
 
 /**
  * @httpMethod POST
@@ -21,31 +35,71 @@ var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
 exports.insert = async function (req, res) {
   try {
     logger.info("POST /insert begins");
-    logger.info(`POST /insert body ===> ${JSON.stringify(req.body)}`);
-    var data = [
-      req.body.name,
-      req.body.email,
-      req.body.phone,
-      req.body.gst,
-      req.body.remfreq,
-    ];
-    logger.info(`data to be inserted ===> ${data}`);
-    logger.info("Execution of 'insert' method begins");
-    var jobDone = await db.insert(DATABASE.CUSTOMER, data);
-    logger.info("Execution of 'insert' method ends");
-    if (jobDone) {
-      logger.info(
-        "User data insertion successful, so redirecting back to dashboard"
+    var payload = await processPayload(req.body);
+    payload["phone"] = payload["phone"].toString();
+    var [isValidPayload, errorList] = await validatePayload(
+      payload,
+      insertPayloadSchema
+    );
+    if (!isValidPayload) {
+      logger.info("Invalid Payload");
+      var reasons = await buildErrorReasons(errorList);
+      var response = await buildResponse(
+        null,
+        reasons,
+        httpStatus.UNPROCESSABLE_ENTITY,
+        "RI_004"
       );
-      res.status(STATUSCODE.SUCCESS).send({ reason: "success" });
+      res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
-      logger.error(
-        "User data insertion failed, so redirecting back to dashboard"
-      );
-      res.status(STATUSCODE.BAD_REQUEST).send({ reason: "failure" });
+      var date = new Date();
+      date.setDate(date.getDate() + parseInt(payload.remfreq));
+      var next_remainder = date.toLocaleDateString();
+      var data = [
+        payload.name,
+        payload.email,
+        payload.phone,
+        payload.gst,
+        payload.remfreq,
+        next_remainder,
+      ];
+      logger.info("Inserting data in customer table");
+      var jobDone1 = await db.insert(DATABASE.CUSTOMER, data);
+      logger.info("Inserting data in credentials table");
+      var jobDone2 = await db.insert(DATABASE.CREDENTIALS, [
+        payload.email,
+        FAKE_PASSWORD,
+        FAKE_PASSCODE,
+        DEFAULT_ADMIN,
+      ]);
+      if (jobDone1 && jobDone2) {
+        logger.info("Successfully inserted data");
+        var response = await buildResponse(
+          null,
+          format(ResponseIds.RI_011, ["data", payload.email]),
+          httpStatus.CREATED,
+          "RI_011"
+        );
+        logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+        res.status(httpStatus.CREATED).send(response);
+      } else {
+        logger.error("Failed to insert data");
+        var response = await buildResponse(
+          null,
+          format(ResponseIds.RI_012, ["data", payload.email]),
+          httpStatus.BAD_REQUEST,
+          "RI_012"
+        );
+        res.status(httpStatus.BAD_REQUEST).send(response);
+      }
     }
   } catch (ex) {
-    logger.exceptions(`POST /insert Captured Error ===> ${ex}`);
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({ reason: "exception" });
+    logger.error(`Error in POST /insert ===> ${JSON.stringify(ex, null, 3)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      httpStatus.BAD_GATEWAY
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

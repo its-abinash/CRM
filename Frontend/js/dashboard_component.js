@@ -21,19 +21,16 @@ $(document).mouseup(function (event) {
 
 function edit(email) {
   $("#id01").css("display", "block");
-  console.log(email);
   $("#updatemail").attr("value", email);
 }
 
 function remove(email) {
   $("#id02").css("display", "block");
-  console.log(email);
   $("#deletemail").attr("value", email);
 }
 
 function message(email) {
   $("#id03").css("display", "block");
-  console.log(email);
   $("#sendmail").attr("value", email);
 }
 
@@ -43,7 +40,6 @@ function add() {
 
 function chat(email) {
   $("#id04").css("display", "block");
-  console.log(email);
   $("#customerEmail").attr("value", email);
 }
 
@@ -81,20 +77,20 @@ function getChatEndpoint() {
     method: "GET",
     async: false,
     success: function (response) {
-      CHAT = response.values;
+      CHAT = response.values[0];
     },
   });
   return CHAT;
 }
 
 function getCypherEndpoint() {
-  var CYPHER = {};
+  var CYPHER = "";
   $.ajax({
     url: `${SERVER}` + "constants/cypher",
     method: "GET",
     async: false,
     success: function (response) {
-      CYPHER = response.values;
+      CYPHER = response.values[0];
     },
   });
   return CYPHER;
@@ -107,7 +103,7 @@ function getEmailEndpoint() {
     method: "GET",
     async: false,
     success: function (response) {
-      EMAIL = response.values;
+      EMAIL = response.values[0];
     },
   });
   return EMAIL;
@@ -120,7 +116,7 @@ function getEditEndpoint() {
     method: "GET",
     async: false,
     success: function (response) {
-      EDIT = response.values;
+      EDIT = response.values[0];
     },
   });
   return EDIT;
@@ -133,7 +129,7 @@ function getDeleteEndpoint() {
     method: "GET",
     async: false,
     success: function (response) {
-      DELETE = response.values;
+      DELETE = response.values[0];
     },
   });
   return DELETE;
@@ -146,7 +142,7 @@ function getAddEndpoint() {
     method: "GET",
     async: false,
     success: function (response) {
-      ADD = response.values;
+      ADD = response.values[0];
     },
   });
   return ADD;
@@ -160,26 +156,31 @@ function checkUserType() {
     dataType: "json",
     async: false,
     success: function (response) {
-      is_admin = response.values;
+      is_admin = response.values[0];
     },
   });
-  return is_admin
+  return is_admin;
 }
 
-function getdashBoard() {
+async function getdashBoard() {
   var ROUTES = {};
+  await $.getScript(
+    "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+  );
   $.ajax({
     url: `${SERVER}` + "constants/routes",
     method: "GET",
     dataType: "json",
     async: false,
     success: function (response) {
-      ROUTES = response.values;
+      ROUTES = response.values[0];
     },
   });
   var is_admin = checkUserType();
   $.ajax({
-    url: SERVER + (is_admin === true ? ROUTES.DASHBOARD.CUSTOMER : ROUTES.DASHBOARD.ADMIN),
+    url:
+      SERVER +
+      (is_admin === true ? ROUTES.DASHBOARD.CUSTOMER : ROUTES.DASHBOARD.ADMIN),
     method: "GET",
     dataType: "json",
     success: function (response) {
@@ -204,7 +205,7 @@ function getdashBoard() {
                                 <p></p><br>
                                 <input type="text" placeholder="phone" id="id01-phone" name="phone">
                                 <p></p><br>
-                                <input type="text" placeholder="reminder frequency" id="id01-rem" name="remfreq">
+                                <input type="number" placeholder="reminder frequency" id="id01-rem" name="remfreq">
                                 <p></p><br>
                                 <button type="submit" id="update-btn">Update</button>
                             </div>
@@ -258,7 +259,7 @@ function getdashBoard() {
                             <input type="text" placeholder="email" name="email" id="id05_email"  required/>
                             <input type="text" placeholder="phone" name="phone" id="id05_phone" required/>
                             <input type="text" placeholder="GST Number" name="gst" id="id05_gst" required/>
-                            <input type="text" placeholder="reminder frequency" id="id05_remfreq" name="remfreq">
+                            <input type="number" placeholder="reminder frequency" id="id05_remfreq" name="remfreq">
                             <button type="submit" id="insert-btn">Add</button>
                         </div>
                     </div>
@@ -269,24 +270,18 @@ function getdashBoard() {
   });
 }
 
-async function getEncryptedValue(key) {
-  var CYPHER_ENDPOINT = getCypherEndpoint();
-  await $.getScript(
-    "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
-  );
-  var encrypted = CryptoJS.AES.encrypt(
-    key,
-    CYPHER_ENDPOINT.ENCRYPTIONKEY
-  ).toString();
-  return encrypted;
+async function getEncryptedValue(key, ENCRYPTION_KEY) {
+  var encrypted = CryptoJS.AES.encrypt(key, ENCRYPTION_KEY);
+  return encrypted.toString();
 }
 
 async function sendEmail(email, subject, body, show_html = false) {
   var EMAIL_ENDPOINT = getEmailEndpoint();
+  var CYPHER_ENDPOINT = getCypherEndpoint();
   var payload = {
     email: email,
-    subject: await getEncryptedValue(subject),
-    body: await getEncryptedValue(body),
+    subject: await getEncryptedValue(subject, CYPHER_ENDPOINT.ENCRYPTIONKEY),
+    body: await getEncryptedValue(body, CYPHER_ENDPOINT.ENCRYPTIONKEY),
   };
   if (
     $.trim(payload.subject) != "" &&
@@ -310,7 +305,6 @@ async function sendEmail(email, subject, body, show_html = false) {
         }
       },
       error: function (response) {
-        console.log(`EMAIL RESPONSE = ${response}`);
         if (show_html) {
           var html_file = `<div class="alert">
                 <span class="closebtn">&times;</span>
@@ -331,9 +325,15 @@ $(document).on("click", "#email-btn", async function () {
 });
 $(document).on("click", "#chat-btn", async function () {
   var CHAT_ENDPOINT = getChatEndpoint();
+  var CYPHER_ENDPOINT = getCypherEndpoint();
+  var timeStamp = new Date();
   var payload = {
-    email: document.getElementById("customerEmail").value,
-    chatmsg: await getEncryptedValue(document.getElementById("chat-msg").value),
+    receiver: document.getElementById("customerEmail").value,
+    chatmsg: await getEncryptedValue(
+      document.getElementById("chat-msg").value,
+      CYPHER_ENDPOINT.ENCRYPTIONKEY
+    ),
+    timestamp: timeStamp.toISOString(),
   };
   if ($.trim(payload.chatmsg) != "") {
     $.ajax({
@@ -346,7 +346,7 @@ $(document).on("click", "#chat-btn", async function () {
       },
       error: function (err) {
         // Handle this with more interactive way -- todo --
-        alert("exception");
+        // alert("exception");
       },
     });
   }
@@ -371,10 +371,6 @@ $(document).on("click", "#update-btn", async function () {
         payload.remfreq = "";
         getdashBoard(); // Loading Dashboard
       },
-      error: function () {
-        // Handle this with more interactive way -- todo --
-        alert("exception");
-      },
     });
   }
 });
@@ -392,10 +388,6 @@ $(document).on("click", "#delete-btn", async function () {
       dataType: "text",
       success: function (data) {
         getdashBoard(); // Loading Dashboard
-      },
-      error: function () {
-        // Handle this with more interactive way -- todo --
-        alert("exception");
       },
     });
   }
@@ -419,17 +411,12 @@ $(document).on("click", "#insert-btn", async function () {
       success: function (data) {
         getdashBoard(); // Loading Dashboard
       },
-      error: function () {
-        // Handle this with more interactive way -- todo --
-        alert("exception");
-      },
     });
   }
 });
 
 $(document).ready(function () {
   getdashBoard(); // Loading Dashboard
-  var CHAT = getChatEndpoint();
   var remainderSent = false;
   setInterval(async function () {
     /* Check if any remainder is pending */
@@ -438,6 +425,7 @@ $(document).ready(function () {
     }
 
     if ($("#id04").css("display") === "block") {
+      var CHAT = getChatEndpoint();
       var receiver = $("#customerEmail").attr("value");
       $.ajax({
         url: `${SERVER + CHAT}/${receiver}`,

@@ -1,21 +1,28 @@
 const { createLogger, transports, format } = require("winston");
 const { LOGGER } = require("../../Configs/constants.config");
 
+var timeZoned = function () {
+  return new Date().toLocaleDateString({
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+};
+
+var currentTime = function () {
+  return new Date().toLocaleTimeString("En");
+};
+
 /**
  * @constant
  * @description Logger Formats
  */
 var loggerFormat = format.combine(
-  format.label({
-    label: LOGGER.LABEL,
-  }),
   format.timestamp({
-    format: LOGGER.TIMESTAMP,
+    format: timeZoned,
   }),
   format.printf(
     (info) =>
-      `${info.label}  [${info.timestamp}]  [${info.level}] : ${info.message}`
-  )
+      `[${info.timestamp} • ${currentTime()}] [${info.level}] | ${info.message}`
+    )
 );
 
 /**

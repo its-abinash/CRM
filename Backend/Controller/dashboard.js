@@ -3,12 +3,11 @@ var router = express.Router();
 var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
-var session = require("express-session");
-var fs = require("fs");
 var logger = require("../Logger/log");
-let ENV = JSON.parse(fs.readFileSync("./Configs/routes.config.json", "utf-8"));
-var { DATABASE, STATUSCODE } = require("../../Configs/constants.config");
-
+var { ResponseIds } = require("../../Configs/constants.config");
+var { buildResponse, getEndMessage } = require("./response_utils");
+const { format } = require("./main_utils");
+const HttpStatus = require("http-status");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
@@ -38,29 +37,23 @@ exports.getCustomers = async function (req, res) {
   try {
     logger.info("GET /dashboard/getCustomer begins");
     var customers = await getContacts();
-    logger.info(
-      `Customers data received from db ===> ${JSON.stringify(
-        customers,
-        null,
-        3
-      )}`
+    logger.info(`Customers: ${JSON.stringify(customers, null, 3)}`);
+    var response = await buildResponse(
+      customers,
+      format(ResponseIds.RI_006, ["Customers", JSON.stringify(customers)]),
+      HttpStatus.OK,
+      "RI_006"
     );
-    res.status(STATUSCODE.SUCCESS).send({
-      reason: "success",
-      statusCode: STATUSCODE.SUCCESS,
-      values: customers,
-      total: customers.length,
-    });
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path))
+    res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(
-      "Exception status from database, so redirecting back to dashboard"
+    logger.error(`Exception: ${JSON.stringify(ex, null, 3)}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
     );
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({
-      reason: "exception",
-      statusCode: STATUSCODE.INTERNAL_SERVER_ERROR,
-      values: [],
-      total: 0,
-    });
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -101,25 +94,27 @@ exports.getAdmins = async function (req, res) {
     logger.info(
       `adminList received from db: ${JSON.stringify(admins, null, 3)}`
     );
-    res.status(STATUSCODE.SUCCESS).send({
-      reason: "success",
-      statusCode: STATUSCODE.SUCCESS,
-      values: admins,
-      total: admins.length,
-    });
+    var response = await buildResponse(
+      admins,
+      format(ResponseIds.RI_006, ["getAdmins", JSON.stringify(admins)]),
+      HttpStatus.OK,
+      "RI_006"
+    );
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path))
+    res.status(HttpStatus.OK).send(response);
   } catch (ex) {
     logger.error(
-      `Error Captured from GET /dashboard/getAdmin ===> ${JSON.stringify(
+      `Error from GET /dashboard/getAdmin ===> ${JSON.stringify(
         ex,
         null,
         3
       )}`
     );
-    res.status(STATUSCODE.INTERNAL_SERVER_ERROR).send({
-      reason: "Exception",
-      statusCode: STATUSCODE.INTERNAL_SERVER_ERROR,
-      values: [],
-      total: 0,
-    });
+    var response = await buildResponse(
+      null,
+      "exception",
+      HttpStatus.BAD_GATEWAY
+    );
+    res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
