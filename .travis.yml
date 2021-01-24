@@ -4,7 +4,7 @@ node_js:
 env:
   - REDIS_PORT=${REDIS_PORT} REDIS_PASSWORD=${REDIS_PASSWORD}
 before_script:
-  - sudo redis-server /etc/redis/redis.conf --port "${REDIS_PORT}" --requirepass "${REDIS_PASSWORD}"
+  - sudo redis-server /etc/redis/redis.conf --port ${REDIS_PORT} --requirepass "${REDIS_PASSWORD}"
 script:
   - npm install
   - npm run test
