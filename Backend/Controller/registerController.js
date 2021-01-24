@@ -25,7 +25,7 @@ var existingUser = async function (email) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.register = async function (req, res) {
+module.exports.register = async function (req, res) {
   try {
     logger.info("POST /register begins");
     var payload = await processPayload(req.body);

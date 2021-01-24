@@ -24,7 +24,7 @@ const httpStatus = require("http-status");
  * @param {Object} req
  * @param {Object} res
  */
-exports.delete = async function (req, res) {
+module.exports.delete = async function (req, res) {
   try {
     /**
      * -todo Handle delete customer/Admin for the logged in user "only".

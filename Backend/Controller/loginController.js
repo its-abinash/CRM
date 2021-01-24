@@ -38,7 +38,7 @@ var isValidUser = async function (email, password) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getLoginPage = async function (req, res) {
+module.exports.getLoginPage = async function (req, res) {
   logger.info("GET /login begins");
   res.render("register", {
     regEndpoint: ENV.endpoints.server + ENV.routes.reg,
@@ -54,7 +54,7 @@ exports.getLoginPage = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.login = async function (req, res) {
+module.exports.login = async function (req, res) {
   try {
     logger.info("POST /login begins");
     var payload = await processPayload(req.body);

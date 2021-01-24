@@ -10,7 +10,7 @@ let ENV = JSON.parse(fs.readFileSync("./Configs/routes.config.json", "utf-8"));
  * @param {Object} req
  * @param {Object} res
  */
-exports.landingPage = async function (req, res) {
+module.exports.landingPage = async function (req, res) {
   logger.info("GET /landingPage begins");
   res.render("register", {
     regEndpoint: ENV.endpoints.server + ENV.routes.reg,

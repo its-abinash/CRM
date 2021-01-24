@@ -34,7 +34,7 @@ router.use(cors());
  * @param {Object} req
  * @param {Object} res
  */
-exports.getConversation = async function (req, res) {
+module.exports.getConversation = async function (req, res) {
   /* When fetching Chat Conversations, we have to decrypt the encoded message */
   try {
     logger.info("GET /Chat begins");
@@ -102,7 +102,7 @@ var saveConversation = async function (data) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.chat = async function (req, res) {
+module.exports.chat = async function (req, res) {
   /*
     The Chat Conversation is end-end protected with encryption. Hence, the messages will be
     stored in the database are totally encrypted.

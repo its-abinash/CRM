@@ -33,7 +33,7 @@ var getContacts = async function () {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getCustomers = async function (req, res) {
+module.exports.getCustomers = async function (req, res) {
   try {
     logger.info("GET /dashboard/getCustomer begins");
     var customers = await getContacts();
@@ -65,7 +65,7 @@ exports.getCustomers = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getDashboardPage = async function (req, res) {
+module.exports.getDashboardPage = async function (req, res) {
   logger.info("GET /dashboard begins");
   res.render("dashboard");
 };
@@ -87,7 +87,7 @@ var getAdmins = async function () {
  * @param {Object} res
  * @returns List of Admins
  */
-exports.getAdmins = async function (req, res) {
+module.exports.getAdmins = async function (req, res) {
   try {
     logger.info(`GET /dashboard/getAdmins begins`);
     var admins = await getAdmins();
