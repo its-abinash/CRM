@@ -4,17 +4,17 @@ const redisStore = require("connect-redis")(session);
 
 module.exports = {
   CORE: {
-    PORT: '<YOUR_PORT>',
+    PORT: process.env.APP_PORT,
     SESSION_PARAMETERS: {
-      secret: "Shh, its a secret!",
+      secret: process.env.REDIS_SECRET,
       resave: true,
       saveUninitialized: true,
       cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
       store: new redisStore({
         client: redis.createClient({
-          host: '<YOUR_SERVER>',
-          port: '<YOUR_PORT>',
-          password: '<YOUR_PASSWORD>'
+          host: process.env.REDIS_HOST,
+          port: process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD
         }),
       }),
     },
