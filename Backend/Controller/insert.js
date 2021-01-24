@@ -32,7 +32,7 @@ var DEFAULT_ADMIN = false;
  * @param {Object} req
  * @param {Object} res
  */
-exports.insert = async function (req, res) {
+module.exports.insert = async function (req, res) {
   try {
     logger.info("POST /insert begins");
     var payload = await processPayload(req.body);

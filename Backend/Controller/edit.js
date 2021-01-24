@@ -25,7 +25,7 @@ const { validatePayload, format, processPayload } = require("./main_utils");
  * @param {Object} req
  * @param {Object} res
  */
-exports.edit = async function (req, res) {
+module.exports.edit = async function (req, res) {
   try {
     logger.info("POST /edit begins");
     var payload = await processPayload(req.body);

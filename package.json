@@ -1,10 +1,12 @@
 {
   "name": "crm-app",
   "version": "1.0.0",
-  "description": "Customer Contact CRM application",
+  "description": "CRM Web Application",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "nyc --reporter=html --check-coverage --lines 90 --per-file mocha --recursive ./Backend/test/*.js --timeout=3000 --exit",
+    "coverage": "nyc report --reporter=text"
   },
   "author": "Abinash Biswal",
   "license": "MIT",
@@ -21,10 +23,13 @@
     "http-status": "^1.5.0",
     "jsonpath": "^1.0.2",
     "jsonschema": "^1.4.0",
+    "mocha": "^8.2.1",
     "nodemailer": "^6.4.13",
     "nodemon": "^2.0.6",
+    "nyc": "^15.1.0",
     "pg": "^8.3.3",
     "redis": "^3.0.2",
+    "sinon": "^9.2.4",
     "winston": "^3.3.3"
   }
 }

@@ -36,7 +36,7 @@ var getUserTypeFromDB = async function (userId) {
  * @param {Object} res
  * @returns Boolean :- is_admin
  */
-exports.getUserType = async function (req, res) {
+module.exports.getUserType = async function (req, res) {
   try {
     logger.info("GET /getUserType begins");
     var isAdmin = await getUserTypeFromDB(req.session.user);

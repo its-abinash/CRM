@@ -49,7 +49,7 @@ const CONSTANTS = {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getAllConstants = async function (req, res) {
+module.exports.getAllConstants = async function (req, res) {
   logger.info("GET /constants begins");
   try {
     logger.info(`Data sent : ${JSON.stringify(CONSTANTS)}`);
@@ -80,7 +80,7 @@ exports.getAllConstants = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getSpecificFromConstants = async function (req, res) {
+module.exports.getSpecificFromConstants = async function (req, res) {
   logger.info(`GET /constants/constId/fieldId begins`);
   try {
     var constantId = req.params.constId.toString().toUpperCase();
@@ -129,7 +129,7 @@ exports.getSpecificFromConstants = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.getConstant = async function (req, res) {
+module.exports.getConstant = async function (req, res) {
   logger.info("GET /constants/constId begins");
   try {
     var constantId = req.params.constId.toString().toUpperCase();

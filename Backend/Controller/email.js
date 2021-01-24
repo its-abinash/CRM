@@ -53,7 +53,7 @@ var getPassCode = async function (email) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.email = async function (req, res) {
+module.exports.email = async function (req, res) {
   try {
     logger.info("POST /email begins");
     var payload = await processPayload(req.body);

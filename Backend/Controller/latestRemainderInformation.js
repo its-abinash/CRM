@@ -77,7 +77,7 @@ async function updateRemainderDateInDB(customers) {
  * @param {Object} req
  * @param {Object} res
  */
-exports.latestRemainderInformation = async function (req, res) {
+module.exports.latestRemainderInformation = async function (req, res) {
   try {
     logger.info("GET /getLatestRemainderInformation begins");
     var customerIds = await getCustomerForRemainderFromDB();

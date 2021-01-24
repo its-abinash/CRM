@@ -294,11 +294,11 @@ validator.addSchema(phoneNumberSchema, "/phoneNumberSchema")
 validator.addSchema(remainderSchema, "/remainderSchema")
 validator.addSchema(passwordSchema, "/passwordSchema")
 
-exports.responseSchema = responseSchema
-exports.chatPostPayloadSchema = chatPostPayloadSchema
-exports.updatePayloadSchema = updatePayloadSchema
-exports.insertPayloadSchema = insertPayloadSchema
-exports.emailPayloadSchema = emailPayloadSchema
-exports.validator = validator
-exports.registrationSchema = registrationSchema
-exports.loginPayloadSchema = loginPayloadSchema
+module.exports.responseSchema = responseSchema
+module.exports.chatPostPayloadSchema = chatPostPayloadSchema
+module.exports.updatePayloadSchema = updatePayloadSchema
+module.exports.insertPayloadSchema = insertPayloadSchema
+module.exports.emailPayloadSchema = emailPayloadSchema
+module.exports.validator = validator
+module.exports.registrationSchema = registrationSchema
+module.exports.loginPayloadSchema = loginPayloadSchema

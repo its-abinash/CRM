@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "12"
+install:
+  - npm install npm@latest -g
+script:
+  - echo '********************* Build Starts *********************'
+  - echo 'Installing Dependencies'
+  - npm install
+  - echo 'success'
+  - echo '********************* Running Tests *********************'
+  - npm run test
+after_success:
+  - npm run coverage
