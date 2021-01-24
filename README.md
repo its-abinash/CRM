@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.com/AbinashB1997/CRM.svg?branch=master)](https://travis-ci.com/AbinashB1997/CRM)
