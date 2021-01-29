@@ -56,7 +56,7 @@ var chatControllerTestPositive = function () {
       sinon.stub(dbUtils, "fetch").returns(fakeChatData);
       sinon.stub(loggerUtils, "info");
       await chatUtils.getConversation(testCase.req, testCase.res);
-      assert.match(testCase.res.response, testCase.exp);
+      assert.match(testCase.res.statusCode, testCase.exp.statusCode);
     });
   }
   it("POST /chat - DB Insertion Successful Test", async function () {
