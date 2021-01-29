@@ -3,72 +3,56 @@ var assert = sinon.assert;
 
 var { validator } = require("../Controller/schema");
 var main_utils = require("../Controller/main_utils");
+var loggerUtils = require("../Logger/log");
+var responseUtils = require("../Controller/response_utils");
+const {
+  fakeBuildResponse1,
+  fakeBuildResponse2,
+  fakeBuildResponse3,
+  fakeBuildResponse4,
+  fakeBuildErrorReasonsPayload,
+  fakeBuildErrorReasons,
+} = require("./mockData");
 
-var test_format = function () {
-  it("is valid format returned", function () {
+var mainUtilsControllerTest = function () {
+  it("String format check test", function () {
     var msg = "hello {0}";
     var formatList = ["world"];
     var res = main_utils.format(msg, formatList);
     assert.match(res, "hello world");
   });
-  afterEach(function () {
-    sinon.verifyAndRestore();
+  it("Non-empty payload validation test", async function () {
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(loggerUtils, "info");
+    var res = await main_utils.validatePayload({}, {});
+    assert.match(JSON.stringify(res), JSON.stringify([true, null]));
   });
-};
-
-var test_validatePayloadNegative = function () {
-  it("is payload validated", async function () {
+  it("Empty payload validation test", async function () {
+    sinon.stub(loggerUtils, "info");
+    var res = await main_utils.validatePayload(null, {});
+    assert.match(res, [false, []]);
+  });
+  it("Payload validation test", async function () {
     sinon.stub(validator, "validate").throws({ type: "error" });
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(loggerUtils, "info");
     try {
       var res = await main_utils.validatePayload({}, {});
     } catch (ex) {
       assert.match(ex.type, "error");
     }
   });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var test_validatePayloadPositiveCase = function () {
-  it("is non-empty payload validated", async function () {
-    sinon.stub(validator, "validate").returns({ valid: true });
-    var res = await main_utils.validatePayload({}, {});
-    assert.match(JSON.stringify(res), JSON.stringify([true, null]));
-  });
-  it("is empty payload validated", async function () {
-    var res = await main_utils.validatePayload(null, {});
-    assert.match(res, [false, []]);
-  });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var test_processPayload = function () {
-  it("is payload processed", async function () {
+  it("Payload processing test", async function () {
     var res = await main_utils.processPayload({ fake_key: "fake_value" });
     assert.match(res, { fake_key: "fake_value" });
   });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var test_getMemoryUsage = function () {
-  it("is having memory usage", function () {
-    var exp = 10;
+  it("MemoryUsage test", function () {
     var spy = sinon.spy(main_utils, "getMemoryUsage");
+    sinon.stub(loggerUtils, "info");
     main_utils.getMemoryUsage();
     assert.calledOnce(spy);
   });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var test_cloneObject = function () {
-  it("is cloned", function () {
+  it("Clone Object Test", function () {
     var data = { key: "value" };
     var res = main_utils.cloneObject(data);
     assert.match(res, data);
@@ -78,9 +62,60 @@ var test_cloneObject = function () {
   });
 };
 
-describe("test_format", test_format);
-describe("test_validatePayloadPositiveCase", test_validatePayloadPositiveCase);
-describe("test_validatePayloadNegative", test_validatePayloadNegative);
-describe("test_processPayload", test_processPayload);
-describe("test_getMemoryUsage", test_getMemoryUsage);
-describe("test_cloneObject", test_cloneObject);
+var responseUtilsControllerTest = function () {
+  var testCases = [
+    {
+      data: "fake_data",
+      reasons: "fake_reasons",
+      statusCode: 200,
+      responseId: "fake_responseId",
+      exp: fakeBuildResponse1,
+    },
+    {
+      data: null,
+      reasons: null,
+      statusCode: 200,
+      responseId: "fake_responseId",
+      exp: fakeBuildResponse2,
+    },
+    {
+      data: ["fake_data"],
+      reasons: null,
+      statusCode: 200,
+      responseId: "fake_responseId",
+      exp: fakeBuildResponse3,
+    },
+    {
+      data: { key: "fake_data" },
+      reasons: null,
+      statusCode: 200,
+      responseId: "fake_responseId",
+      exp: fakeBuildResponse4,
+    },
+  ];
+  for (const testCase of testCases) {
+    it("buildResponse test", async function () {
+      sinon.stub(loggerUtils, "info");
+      var result = await responseUtils.buildResponse(
+        testCase.data,
+        testCase.reasons,
+        testCase.statusCode,
+        testCase.responseId
+      );
+      assert.match(result, testCase.exp);
+    });
+  }
+  it("buildErrorReasons test", async function () {
+    sinon.stub(loggerUtils, "info");
+    var result = await responseUtils.buildErrorReasons(
+      fakeBuildErrorReasonsPayload
+    );
+    assert.match(result, fakeBuildErrorReasons);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+};
+
+describe("test_main_utils", mainUtilsControllerTest);
+describe("test_response_utils", responseUtilsControllerTest);

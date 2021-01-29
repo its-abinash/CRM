@@ -22,7 +22,7 @@ var loggerFormat = format.combine(
   format.printf(
     (info) =>
       `[${info.timestamp} • ${currentTime()}] [${info.level}] | ${info.message}`
-    )
+  )
 );
 
 /**
@@ -40,3 +40,6 @@ module.exports = createLogger({
     }),
   ],
 });
+
+module.exports.currentTime = currentTime;
+module.exports.timeZoned = timeZoned;

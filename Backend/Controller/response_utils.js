@@ -10,7 +10,7 @@ var getRandomId = function () {
   );
 };
 
-exports.buildResponse = async function (
+module.exports.buildResponse = async function (
   data = null,
   reason = null,
   statusCode = httpStatus.BAD_REQUEST,
@@ -49,16 +49,19 @@ exports.buildResponse = async function (
   return response;
 };
 
-exports.buildErrorReasons = async function (result) {
+/*
+  Returning Wrong Response for Wrong payload
+  Work on it for different wrong payloads
+  Change UTs accordingly
+*/
+module.exports.buildErrorReasons = async function (result) {
   logger.info("In buildErrorReasons")
   var propertiesExpr = "$..property";
   var errorTypeExpr = "$..name";
   var messageExpr = "$..message";
-  logger.info(`result = ${JSON.stringify(result)}`)
   var properties = jp.query(result, propertiesExpr);
   var errorTypes = jp.query(result, errorTypeExpr);
   var messages = jp.query(result, messageExpr);
-  logger.info(`properties = ${JSON.stringify(properties)}`)
   var reasons = [];
   for (var i = 0; i < properties.length; i++) {
     var fieldName = properties[i].slice(properties[i].indexOf(".") + 1);
@@ -76,7 +79,7 @@ exports.buildErrorReasons = async function (result) {
   return reasons;
 };
 
-exports.getEndMessage = function (message, apiType, apiName) {
+module.exports.getEndMessage = function (message, apiType, apiName) {
   var memoryUsed = main_utils.getMemoryUsage();
   message = main_utils.format(message, [apiType, apiName, memoryUsed]);
   return message;

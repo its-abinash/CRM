@@ -1,4 +1,4 @@
-const { Pool, Client } = require("pg");
+const { Pool } = require("pg");
 var fs = require("fs");
 var logger = require("../Backend/Logger/log");
 var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
@@ -19,25 +19,17 @@ var insertAtCred = async function (data) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
     const query = `INSERT INTO
                    credentials (email, password, passcode, is_admin)
                    VALUES ($1, $2, $3, $4)`;
-    logger.info("Executing query in 'credentials' database");
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -52,23 +44,15 @@ var insertAtCustomer = async function (data) {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
     const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder) VALUES ($1, $2, $3, $4, $5, $6)`;
-    logger.info("Executing query in 'customer' database");
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -82,24 +66,15 @@ var fetchAllFromCred = async function () {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
     const query = `SELECT * FROM credentials`;
-    logger.info("Executing query in 'credentials' database");
     var res = await db.query(query);
     logger.info("Execution successful, so disconnecting database");
     db.release();
-    console.log(res.rows);
     return res.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -113,24 +88,15 @@ var fetchAllFromCustomer = async function () {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
     const query = `SELECT * FROM customer`;
-    logger.info("Executing query in 'customer' database");
     var res = await db.query(query);
     logger.info("Execution successful, so disconnecting database");
     db.release();
-    console.log(res.rows);
     return res.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -145,23 +111,15 @@ var fetchSpecificFromCustomer = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
     const query = `SELECT * FROM customer WHERE ${pk_name} = $1`;
-    logger.info("Executing query in 'customer' database");
     var res = await db.query(query, [pk_value]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -177,23 +135,17 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
-    const query = `SELECT * FROM credentials WHERE ${pk_name} = $1`;
-    logger.info("Executing query in 'credentials' database");
+    const query = `SELECT *
+                   FROM credentials
+                   WHERE ${pk_name} = $1`;
     var res = await db.query(query, [pk_value]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -204,39 +156,25 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
  * @param {Array} is_admin
  * @returns List of users of given type
  */
-exports.fetchAllUserOfGivenType = async function (is_admin=[false]) {
+module.exports.fetchAllUserOfGivenType = async function (is_admin = [false]) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
     const query = `select customer.email, customer.name
                    from customer
                    inner join credentials
                    on credentials.email = customer.email
                    where credentials.is_admin = $1;`;
-    logger.info("Executing query in 'credentials' database");
     var res = await db.query(query, is_admin);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(
-        ex,
-        null,
-        3
-      )}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
-
-
 
 /**
  * @function updateAtCred
@@ -252,25 +190,19 @@ var updateAtCred = async function (pk_name, pk_value, fields, data) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
-    logger.info("Executing query in 'credentials' database");
     for (var i = 0; i < fields.length; i++) {
-      const query = `UPDATE credentials SET ${fields[i]} = $1 WHERE ${pk_name} = $2`;
+      const query = `UPDATE credentials
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
       await db.query(query, [data[i], pk_value]);
     }
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -288,25 +220,19 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
-    logger.info("Executing query in 'customer' database");
     for (var i = 0; i < fields.length; i++) {
-      const query = `UPDATE customer SET ${fields[i]} = $1 WHERE ${pk_name} = $2`;
+      const query = `UPDATE customer
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
       await db.query(query, [data[i], pk_value]);
     }
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -322,23 +248,16 @@ var removeAtCred = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
-    const query = `DELETE FROM credentials WHERE ${pk_name} = $1`;
-    logger.info("Executing query in 'credentials' database");
+    const query = `DELETE FROM credentials
+                   WHERE ${pk_name} = $1`;
     await db.query(query, [pk_value]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -354,23 +273,16 @@ var removeAtCustomer = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
-    const query = `DELETE FROM customer WHERE ${pk_name} = $1`;
-    logger.info("Executing query in 'customer' database");
+    const query = `DELETE FROM customer
+                   WHERE ${pk_name} = $1`;
     await db.query(query, [pk_value]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -390,24 +302,17 @@ var removeAtConversation = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'conversation' database");
-    const query = `DELETE FROM conversation WHERE 
-                       ${pk_name[0]} = $1 and ${pk_name[1]} = $2 or ${pk_name[0]} = $2 and ${pk_name[1]} = $1`;
-    logger.info("Executing query in 'conversation' database");
+    const query = `DELETE FROM conversation
+                   WHERE ${pk_name[0]} = $1 and ${pk_name[1]} = $2
+                   or ${pk_name[0]} = $2 and ${pk_name[1]} = $1`;
     await db.query(query, [pk_value[0], pk_value[1]]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'conversation' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -422,23 +327,16 @@ var insertAtConversation = async function (data) {
   try {
     logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'conversation' database");
-    const query = `INSERT INTO conversation (sender, receiver, msg, timestamp) values ($1, $2, $3, current_timestamp)`;
-    logger.info("Executing query in 'conversation' database");
+    const query = `INSERT INTO conversation (sender, receiver, msg, timestamp)
+                   values ($1, $2, $3, current_timestamp)`;
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'conversation' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -454,23 +352,18 @@ var fetchConversations = async function (sender, receiver) {
   try {
     logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'conversation' database");
-    const query = `select sender, receiver, msg, timestamp from conversation where sender = $1 and receiver = $2 order by timestamp`;
-    logger.info("Executing query in 'conversation' database");
+    const query = `select sender, receiver, msg, timestamp
+                   from conversation
+                   where sender = $1 and receiver = $2
+                   order by timestamp`;
     var data = await db.query(query, [sender, receiver]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'conversation' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -486,26 +379,19 @@ var fetchLimitedConversations = async function (sender, receiver) {
   try {
     logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'conversation' database");
     const query = `select sender, receiver, msg, timestamp from (
-            select * from conversation 
-            where sender = $1 and receiver = $2 or sender = $2 and receiver = $1) sub
-            order by timestamp;`;
-    logger.info("Executing query in 'conversation' database");
+                    select * from conversation
+                    where sender = $1 and receiver = $2
+                    or sender = $2 and receiver = $1) sub
+                  order by timestamp;`;
     var data = await db.query(query, [sender, receiver]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'conversation\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'conversation' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -515,29 +401,23 @@ var fetchLimitedConversations = async function (sender, receiver) {
  * @description Gets emailId of customers according to their remainder_date
  * @returns List of emailIds
  */
-exports.fetchLatestRemainder = async function() {
+module.exports.fetchLatestRemainder = async function () {
   try {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'customer' database");
-    const query = `select email, remfreq from customer where next_remainder = CURRENT_DATE;`;
-    logger.info("Executing query in 'customer' database");
+    const query = `select email, remfreq
+                   from customer
+                   where next_remainder = CURRENT_DATE;`;
     var data = await db.query(query);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'customer\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
-  } finally {
-    console.log("Task in 'customer' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
-}
+};
 
 /**
  * @function fetch
@@ -550,7 +430,7 @@ exports.fetchLatestRemainder = async function() {
  * @param {string} key
  * @returns Queried Data
  */
-exports.fetch = async function (
+module.exports.fetch = async function (
   database_id,
   fetch_type,
   pk_name = null,
@@ -588,7 +468,7 @@ exports.fetch = async function (
  * @param {Array} data
  * @returns Queried Data
  */
-exports.insert = async function (database_id, data) {
+module.exports.insert = async function (database_id, data) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer). 4(conversation) */
   switch (database_id) {
     case DATABASE.CREDENTIALS:
@@ -604,19 +484,19 @@ exports.insert = async function (database_id, data) {
  * @function update
  * @async
  * @description Updates the data in database at database_id
- * @param {number} database_id
- * @param {string} pk_name
- * @param {string} pk_value
- * @param {Array} fields
- * @param {Array} data
+ * @param {number} database_id database_ids are 1(Credentials), 2(Admin), or 3(Customer).
+ * @param {string} pk_name primary key name (eg: email)
+ * @param {string} pk_value primary key value (eg: abc@domain.com)
+ * @param {Array} fields list of columns
+ * @param {Array} data list of json to be updated for above fields
  */
-exports.update = async function (database_id, pk_name, pk_value, fields, data) {
-  /* param :: database_ids are 1(Credentials), 2(Admin), or 3(Customer).
-       param :: pk_name = primary key name (eg: email)
-       param :: pk_value = primary key value (eg: abc@domain.com)
-       param :: fields = list of columns
-       param :: list of json to be updated in corresponding field
-    */
+module.exports.update = async function (
+  database_id,
+  pk_name,
+  pk_value,
+  fields,
+  data
+) {
   switch (database_id) {
     case DATABASE.CREDENTIALS:
       return await updateAtCred(pk_name, pk_value, fields, data);
@@ -634,7 +514,7 @@ exports.update = async function (database_id, pk_name, pk_value, fields, data) {
  * @param {string} pk_value
  * @returns Queried Data
  */
-exports.remove = async function (database_id, pk_name, pk_value) {
+module.exports.remove = async function (database_id, pk_name, pk_value) {
   /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer), 4(Conversation).
        param :: pk_name = primary key name (eg: email)
        param :: pk_value = primary key value (eg: abc@domain.com)
@@ -657,27 +537,19 @@ exports.remove = async function (database_id, pk_name, pk_value) {
  * @param {string} pk_value
  * @returns Acknowledgement of the operation(Boolean)
  */
-exports.isExistingUser = async function (pk_name, pk_value) {
+module.exports.isExistingUser = async function (pk_name, pk_value) {
   try {
     logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("***************************************");
     logger.info("Connection established to 'credentials' database");
     const query = `select exists (select * from credentials where ${pk_name} = $1)`;
-    logger.info("Executing query in 'credentials' database");
     var res = await db.query(query, [pk_value]);
     logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows[0].exists;
   } catch (ex) {
-    logger.info("***************************************");
-    logger.error(
-      `Tracked error in \'credentials\' database ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    console.log("Task in 'credentials' database has been done. Now it Quits");
-    logger.info("***************************************");
   }
 };
 
@@ -690,24 +562,13 @@ exports.isExistingUser = async function (pk_name, pk_value) {
  * @param {string} password
  * @returns Acknowledgement of the operation(Boolean)
  */
-exports.isValidUser = async function (pk_name, pk_value, password) {
+module.exports.isValidUser = async function (pk_name, pk_value, password) {
   try {
-    logger.info("Execution begins for 'isValidUser' method");
-    var userData = await fetchSpecificFromCred(
-      pk_name,
-      pk_value,
-      "email",
-      "password"
-    );
-    logger.info("Execution ends for 'isValidUser' method");
-    logger.info(`Fetched data = ${JSON.stringify(userData)}`);
+    logger.info("In isValidUser method");
+    var userData = await fetchSpecificFromCred(pk_name, pk_value);
     return userData[0].email === pk_value && userData[0].password === password;
   } catch (ex) {
-    logger.error(
-      `Error in verifying user. Captured Error ===> ${JSON.stringify(ex)}`
-    );
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return false;
-  } finally {
-    logger.info("finally finished validating user");
   }
 };
