@@ -65,6 +65,7 @@ var mainUtilsControllerTest = function () {
 var responseUtilsControllerTest = function () {
   var testCases = [
     {
+      tc_name: "buildResponse test-1",
       data: "fake_data",
       reasons: "fake_reasons",
       statusCode: 200,
@@ -72,6 +73,7 @@ var responseUtilsControllerTest = function () {
       exp: fakeBuildResponse1,
     },
     {
+      tc_name: "buildResponse test-2",
       data: null,
       reasons: null,
       statusCode: 200,
@@ -79,6 +81,7 @@ var responseUtilsControllerTest = function () {
       exp: fakeBuildResponse2,
     },
     {
+      tc_name: "buildResponse test-3",
       data: ["fake_data"],
       reasons: null,
       statusCode: 200,
@@ -86,6 +89,7 @@ var responseUtilsControllerTest = function () {
       exp: fakeBuildResponse3,
     },
     {
+      tc_name: "buildResponse test-4",
       data: { key: "fake_data" },
       reasons: null,
       statusCode: 200,
@@ -94,7 +98,7 @@ var responseUtilsControllerTest = function () {
     },
   ];
   for (const testCase of testCases) {
-    it("buildResponse test", async function () {
+    it(testCase.tc_name, async function () {
       sinon.stub(loggerUtils, "info");
       var result = await responseUtils.buildResponse(
         testCase.data,

@@ -94,7 +94,7 @@ module.exports.insert = async function (req, res) {
       }
     }
   } catch (ex) {
-    logger.error(`Error in POST /insert ===> ${JSON.stringify(ex, null, 3)}`);
+    logger.error(`Error in POST /insert: ${ex}`);
     var response = await buildResponse(
       null,
       "exception",

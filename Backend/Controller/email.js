@@ -16,10 +16,14 @@ var {
   CYPHER,
   ResponseIds,
 } = require("../../Configs/constants.config");
-const { validatePayload, processPayload } = require("./main_utils");
+const { validatePayload, processPayload, format } = require("./main_utils");
 const { emailPayloadSchema } = require("./schema");
 const httpStatus = require("http-status");
-const { buildErrorReasons, buildResponse } = require("./response_utils");
+const {
+  buildErrorReasons,
+  buildResponse,
+  getEndMessage,
+} = require("./response_utils");
 
 var SERVICE_NAME = "gmail";
 var FROM = "from";
@@ -76,13 +80,14 @@ module.exports.email = async function (req, res) {
       );
       res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
-      var transporter = mailer.createTransport({
+      var transPortFields = {
         service: SERVICE_NAME,
         auth: {
           user: payload.from,
           pass: await getPassCode(payload.from),
         },
-      });
+      };
+      var transporter = mailer.createTransport(transPortFields);
       payload[SUBJECT] = AES.decrypt(
         payload.subject,
         CYPHER.DECRYPTION_KEY
@@ -101,9 +106,9 @@ module.exports.email = async function (req, res) {
           "RI_013"
         );
         logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
-        res.status(httpStatus.OK).send(response)
+        res.status(httpStatus.OK).send(response);
       } catch (emailException) {
-        logger.error(`Error: ${JSON.stringify(emailException, null, 3)}`);
+        logger.error(`Error: ${emailException}`);
         var response = await buildResponse(
           null,
           format(ResponseIds.RI_014, [payload.to]),
@@ -114,12 +119,8 @@ module.exports.email = async function (req, res) {
       }
     }
   } catch (ex) {
-    logger.error(`Error in POST /email: ${JSON.stringify(ex)}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      httpStatus.BAD_GATEWAY
-    );
+    logger.error(`Error in POST /email: ${ex}`);
+    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

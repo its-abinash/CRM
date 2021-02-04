@@ -55,13 +55,13 @@ module.exports.buildResponse = async function (
   Change UTs accordingly
 */
 module.exports.buildErrorReasons = async function (result) {
-  logger.info("In buildErrorReasons")
+  logger.info("In buildErrorReasons");
   var propertiesExpr = "$..property";
   var errorTypeExpr = "$..name";
   var messageExpr = "$..message";
-  var properties = jp.query(result, propertiesExpr);
-  var errorTypes = jp.query(result, errorTypeExpr);
-  var messages = jp.query(result, messageExpr);
+  var properties = jp.query(result || {}, propertiesExpr);
+  var errorTypes = jp.query(result || {}, errorTypeExpr);
+  var messages = jp.query(result || {}, messageExpr);
   var reasons = [];
   for (var i = 0; i < properties.length; i++) {
     var fieldName = properties[i].slice(properties[i].indexOf(".") + 1);

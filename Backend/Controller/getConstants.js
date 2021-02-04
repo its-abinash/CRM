@@ -62,12 +62,8 @@ module.exports.getAllConstants = async function (req, res) {
     logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /constants ${JSON.stringify(ex)}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      HttpStatus.BAD_GATEWAY
-    );
+    logger.error(`Error in GET /constants ${ex}`);
+    var response = await buildResponse(null, ex, HttpStatus.BAD_GATEWAY);
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -87,14 +83,12 @@ module.exports.getSpecificFromConstants = async function (req, res) {
     var fieldId = req.params.fieldId.toString().toUpperCase();
     if (CONSTANTS.hasOwnProperty(constantId)) {
       if (CONSTANTS[constantId].hasOwnProperty(fieldId)) {
-        logger.info(
-          `Data sent : ${JSON.stringify(CONSTANTS[constantId][fieldId])}`
-        );
+        logger.info(`Data sent : ${CONSTANTS[constantId][fieldId]}`);
         var response = await buildResponse(
           CONSTANTS[constantId][fieldId],
           format(ResponseIds.RI_006, [
             "Constant",
-            JSON.stringify(CONSTANTS[constantId][fieldId]),
+            CONSTANTS[constantId][fieldId],
           ]),
           HttpStatus.OK,
           "RI_006"
@@ -110,14 +104,8 @@ module.exports.getSpecificFromConstants = async function (req, res) {
       throw CONSTID_EXCEPTION;
     }
   } catch (ex) {
-    logger.error(
-      `Error in GET /constants/constId/fieldId ${JSON.stringify(ex)}`
-    );
-    var response = await buildResponse(
-      null,
-      "exception",
-      HttpStatus.BAD_GATEWAY
-    );
+    logger.error(`Error in GET /constants/constId/fieldId ${ex}`);
+    var response = await buildResponse(null, ex, HttpStatus.BAD_GATEWAY);
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -152,12 +140,8 @@ module.exports.getConstant = async function (req, res) {
       throw CONSTID_EXCEPTION;
     }
   } catch (ex) {
-    logger.error(`Error in GET /constants/constId ${JSON.stringify(ex)}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      HttpStatus.BAD_GATEWAY
-    );
+    logger.error(`Error in GET /constants/constId ${ex}`);
+    var response = await buildResponse(null, ex, HttpStatus.BAD_GATEWAY);
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };

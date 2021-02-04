@@ -339,3 +339,210 @@ module.exports.fakeLatestRemainderData = [
     remfreq: 2,
   },
 ];
+
+module.exports.fakeEditRequest = {
+  path: "/fake_path",
+  method: "fake_method",
+  body: {
+    email: "receiver@gmail.com",
+    name: "receiver",
+    phone: "12345",
+    remfreq: "2",
+  },
+};
+
+module.exports.fakeEmailRequest = {
+  session: {
+    user: "sender@gmail.com",
+  },
+  body: {
+    email: "receiver@gmail.com",
+    subject: "sub",
+    body: "body",
+  },
+  path: "/fake_path",
+  method: "fake_method",
+};
+
+module.exports.fakeEmailResponse = {
+  responseId: "RI_013",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [],
+  totalCount: 0,
+  reasons: ["Successfully sent email to user with userId: receiver@gmail.com"],
+};
+
+module.exports.emailWrongPayloadResponse = {
+  responseId: "RI_004",
+  status: "UNPROCESSABLE_ENTITY",
+  statusCode: 422,
+  responseMessage:
+    "The request was well-formed but was unable to be followed due to semantic errors.",
+  values: [],
+  totalCount: 0,
+  reasons: [[]],
+};
+
+module.exports.emailExceptionResponse = {
+  responseId: "RI_014",
+  status: "BAD_REQUEST",
+  statusCode: 400,
+  responseMessage:
+    "The server cannot or will not process the request due to an apparent client error.",
+  values: [],
+  totalCount: 0,
+  reasons: ["Failed to send email to user with userId: receiver@gmail.com"],
+};
+
+module.exports.fakeConstants = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [
+    {
+      CYPHER: {
+        ENCRYPTIONKEY: "#",
+        DECRYPTIONKEY: "#",
+      },
+      ROUTES: {
+        REG: "register",
+        LOGIN: "login",
+        CONTACT: "contact",
+        EDIT: "edit",
+        ADD: "insert",
+        DELETE: "delete",
+        EMAIL: "email",
+        CHAT: "chat",
+        DASHBOARD: {
+          CUSTOMER: "dashboard/getCustomer",
+          ADMIN: "dashboard/getAdmins",
+        },
+      },
+    },
+  ],
+  totalCount: 1,
+  reasons: [
+    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
+  ],
+};
+
+module.exports.getSpecificFromConstantsRequest = {
+  params: {
+    constId: "ROUTES",
+    fieldId: "REG",
+  },
+  body: {
+    email: "receiver@gmail.com",
+    subject: "sub",
+    body: "body",
+  },
+  path: "/fake_path",
+  method: "fake_method",
+};
+
+module.exports.getSpecificFromConstantsResponse = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: ["register"],
+  totalCount: 1,
+  reasons: ["Successfully fetched the Constant with value = register"],
+};
+
+module.exports.fakeLatestRemainderData = [
+  {
+    email: "demo1@gmail.com",
+    remfreq: 1,
+  },
+  {
+    email: "demo2@gmail.com",
+    remfreq: 2,
+  },
+];
+
+module.exports.fakeRemainderResponse = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [],
+  totalCount: 0,
+  reasons: [
+    'Successfully fetched the remainder information with value = [{"email":"demo1@gmail.com","subject":"Check Latest Business Deals!","body":"Hello,\\n\\nA gentle remainder to check our latest business deals.\\n\\nPlease let us know about your thoughts.\\n\\nThanks,\\nAbinash Biswal"},{"email":"demo2@gmail.com","subject":"Check Latest Business Deals!","body":"Hello,\\n\\nA gentle remainder to check our latest business deals.\\n\\nPlease let us know about your thoughts.\\n\\nThanks,\\nAbinash Biswal"}]',
+  ],
+};
+
+module.exports.fakeUserTypeResponse = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [true],
+  totalCount: 1,
+  reasons: ["Successfully fetched the is_admin flag with value = true"],
+};
+
+module.exports.fakeInsertPayloadRequest = {
+  path: "/fake_path",
+  method: "fake_method",
+  body: {
+    name: "c1_name1",
+    email: "c1@gmail.com",
+    phone: "1234568484",
+    gst: "jdbdhbdhd",
+    remfreq: 2,
+  },
+};
+
+module.exports.insertSuccessfulResponse = {
+  responseId: "RI_011",
+  status: "CREATED",
+  statusCode: 201,
+  responseMessage:
+    "The request has been fulfilled, resulting in the creation of a new resource.",
+  values: [],
+  totalCount: 0,
+  reasons: ["Successfully inserted data of user having userId: c1@gmail.com"],
+};
+
+module.exports.insertFailureResponse = {
+  responseId: "RI_012",
+  status: "BAD_REQUEST",
+  statusCode: 400,
+  responseMessage:
+    "The server cannot or will not process the request due to an apparent client error.",
+  values: [],
+  totalCount: 0,
+  reasons: ["Failed to insert data of user having userId: c1@gmail.com"],
+};
+
+module.exports.loginPayloadRequest = {
+  path: "/fake_path",
+  method: "fake_method",
+  session: {
+    user: "sender@gmail.com",
+    password: "pass",
+  },
+  body: {
+    email: "c1@gmail.com",
+    password: "pass",
+  },
+};
+
+module.exports.registerPayloadRequest = {
+  path: "/fake_path",
+  method: "fake_method",
+  body: {
+    email: "c1@gmail.com",
+    password: "pass",
+    username: "usename",
+    phonenum: "111111",
+    gstnum: "suhdud",
+    remfreq: "2",
+    passcode: "jdudhdu",
+  },
+};
