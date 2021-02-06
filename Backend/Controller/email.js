@@ -63,14 +63,16 @@ module.exports.email = async function (req, res) {
     var payload = await processPayload(req.body);
     payload[FROM] = req.session.user;
     payload[TO] = payload.email || "";
+    delete payload.email;
     payload[SUBJECT] = payload.subject || "";
     payload[TEXT] = payload.body || "";
+    delete payload.body;
     var [isValidPayload, errorList] = await validatePayload(
       payload,
       emailPayloadSchema
     );
     if (!isValidPayload) {
-      logger.error("Invalid Payload");
+      logger.info(`Invalid Payload with errorList = ${errorList}`);
       var reasons = await buildErrorReasons(errorList);
       var response = await buildResponse(
         null,

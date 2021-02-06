@@ -21,7 +21,7 @@ const {
 const httpStatus = require("http-status");
 
 var FAKE_PASSCODE = "fake_code";
-var FAKE_PASSWORD = "fake_password";
+var FAKE_PASSWORD = "Default@123";
 var DEFAULT_ADMIN = false;
 
 /**
@@ -37,12 +37,13 @@ module.exports.insert = async function (req, res) {
     logger.info("POST /insert begins");
     var payload = await processPayload(req.body);
     payload["phone"] = payload["phone"].toString();
+    payload["email"] = payload["email"].toLowerCase();
     var [isValidPayload, errorList] = await validatePayload(
       payload,
       insertPayloadSchema
     );
     if (!isValidPayload) {
-      logger.info("Invalid Payload");
+      logger.info(`Invalid Payload with errorList = ${errorList}`);
       var reasons = await buildErrorReasons(errorList);
       var response = await buildResponse(
         null,

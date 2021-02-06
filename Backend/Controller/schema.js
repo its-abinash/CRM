@@ -99,7 +99,7 @@ var responseSchema = {
         "totalCount": {"$ref": "/totalItemSchema"},
         "reasons": {"$ref": "/reasonsSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 var chatPostSenderSchema = {
@@ -161,7 +161,7 @@ var chatPostPayloadSchema = {
         "chatmsg": {"$ref": "/chatPostMessageSchema"},
         "timestamp": {"$ref": "/chatPostTimestampSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 var nameSchema = {
@@ -209,7 +209,7 @@ var updatePayloadSchema = {
         "phone": {"$ref": "/phoneNumberSchema"},
         "remfreq": {"$ref": "/remainderSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 var emailPayloadSchema = {
@@ -228,7 +228,7 @@ var emailPayloadSchema = {
         "subject": {"$ref": "/chatPostMessageSchema"},
         "text": {"$ref": "chatPostMessageSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 var registrationSchema = {
@@ -253,7 +253,7 @@ var registrationSchema = {
         "password": {"$ref": "/passwordSchema"},
         "passcode": {"$ref": "/chatPostMessageSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 var loginPayloadSchema = {
@@ -268,7 +268,7 @@ var loginPayloadSchema = {
         "email": {"$ref": "/chatPostReceiverSchema"},
         "password": {"$ref": "/passwordSchema"}
     },
-    "additionalProperties": true
+    "additionalProperties": false
 }
 
 // below schema is a deep copy of the updatePayloadSchema

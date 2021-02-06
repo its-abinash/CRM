@@ -124,7 +124,7 @@ module.exports.chat = async function (req, res) {
         HttpStatus.UNPROCESSABLE_ENTITY,
         "RI_004"
       );
-      logger.error("Invalid Request Payload");
+      logger.info(`Invalid Payload with errorList = ${errorList}`);
       res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
       var sender = payload.sender;

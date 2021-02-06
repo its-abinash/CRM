@@ -16,17 +16,16 @@ module.exports.buildResponse = async function (
   statusCode = httpStatus.BAD_REQUEST,
   responseId = null
 ) {
-  logger.info("In buildResponse");
   var values = [];
-  if (data instanceof Array) {
+  if (Array.isArray(data)) {
     values = data;
   } else if (data instanceof Object) {
     values.push(data);
   } else {
     values = data || [];
   }
-  // Check if values is still array
-  if (!(values instanceof Array)) {
+  // Check if values is still not an array
+  if (!Array.isArray(values)) {
     values = [values];
   }
 
@@ -55,26 +54,39 @@ module.exports.buildResponse = async function (
   Change UTs accordingly
 */
 module.exports.buildErrorReasons = async function (result) {
-  logger.info("In buildErrorReasons");
-  var propertiesExpr = "$..property";
-  var errorTypeExpr = "$..name";
-  var messageExpr = "$..message";
-  var properties = jp.query(result || {}, propertiesExpr);
+  var errorTypeExpr = "$[*].name";
+  var pathExpr = "$[*].path";
+  var argsExpr = "$[*].argument";
   var errorTypes = jp.query(result || {}, errorTypeExpr);
-  var messages = jp.query(result || {}, messageExpr);
+  var path = jp.query(result || {}, pathExpr);
+  var arguments = jp.query(result || {}, argsExpr);
   var reasons = [];
-  for (var i = 0; i < properties.length; i++) {
-    var fieldName = properties[i].slice(properties[i].indexOf(".") + 1);
-    var errorMsg = "";
-    if (errorTypes[i] === "type") {
-      errorMsg = messages[i];
+  var reason = {};
+  for (var i = 0; i < errorTypes.length; i++) {
+    var fieldName = arguments[i];
+    var errorMsg = null;
+    if (errorTypes[i] == "required") {
+      errorMsg = `Field '${fieldName}' is required`;
+      reason = { field: fieldName, error: errorMsg };
+    } else if (errorTypes[i] == "additionalProperties") {
+      errorMsg = `Additional field '${fieldName}' is not allowed`;
+      reason = { field: fieldName, error: errorMsg };
+    } else if (errorTypes[i] == "type") {
+      // Iterate over the path & arguments fields for saving individual reason
+      reason = [];
+      for (var field = 0; field < path[i].length; field++) {
+        reason.push({
+          field: path[i][field],
+          error: `Field '${path[i][field]}' is not a type(s) of ${fieldName[field]}`,
+        });
+      }
+    } else if (errorTypes[i] == "pattern") {
+      errorMsg = `Value for field '${path[i]}' is invalid`;
+      reason = { field: path[i], error: errorMsg };
     } else {
-      errorMsg = `Invalid value passed to '${fieldName}' field`;
+      errorMsg = "";
     }
-    reasons.push({
-      field: fieldName,
-      error: errorMsg,
-    });
+    Array.isArray(reason) ? reasons.push(...reason) : reasons.push(reason);
   }
   return reasons;
 };

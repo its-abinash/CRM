@@ -218,40 +218,27 @@ module.exports.fakeBuildResponse4 = {
 module.exports.fakeBuildErrorReasonsPayload = [
   {
     path: [],
-    property: "instance",
-    message: 'requires property "remfreq"',
-    instance: {
-      name: "Somit",
-      email: "sumit@gmail.com",
-      phone: "1111111111111111",
-    },
     name: "required",
-    argument: "remfreq",
-    stack: 'instance requires property "remfreq"',
+    argument: "gst",
+  },
+  {
+    path: ["name"],
+    name: "type",
+    argument: ["string"],
   },
   {
     path: [],
-    property: "instance",
-    message: 'requires property "gst"',
-    instance: {
-      name: "Somit",
-      email: "sumit@gmail.com",
-      phone: "111111111111111111",
-    },
-    name: "required",
-    argument: "gst",
-    stack: 'instance requires property "gst"',
+    name: "additionalProperties",
+    argument: "fakeKey",
   },
 ];
 
 module.exports.fakeBuildErrorReasons = [
+  { field: "gst", error: "Field 'gst' is required" },
+  { field: "name", error: "Field 'name' is not a type(s) of string" },
   {
-    field: "instance",
-    error: "Invalid value passed to 'instance' field",
-  },
-  {
-    field: "instance",
-    error: "Invalid value passed to 'instance' field",
+    field: "fakeKey",
+    error: "Additional field 'fakeKey' is not allowed",
   },
 ];
 
