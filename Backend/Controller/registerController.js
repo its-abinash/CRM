@@ -13,8 +13,12 @@ const { registrationSchema } = require("./schema");
 
 var existingUser = async function (email) {
   logger.info("In isExistingUser");
-  var res = await db.isExistingUser("email", email);
-  return res;
+  try {
+    var res = await db.isExistingUser("email", email);
+    return res;
+  } catch (ex) {
+    throw ex;
+  }
 };
 
 /**
@@ -79,7 +83,7 @@ module.exports.register = async function (req, res) {
       }
     }
   } catch (ex) {
-    logger.error(`POST /register Captured Error ===> ${ex}`);
+    logger.error(`POST /register Error: ${ex}`);
     res.redirect("/login");
   }
 };

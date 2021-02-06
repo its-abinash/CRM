@@ -191,11 +191,11 @@ async function getdashBoard() {
                     <div class="card">
                         <p> ${responseValue[i].name} </p>
                         <button onclick=remove('${responseValue[i].email}') style="width:auto;background-color:red"><i class="fa fa-trash"></i></button>
-                    `
-        if(is_admin) {
-          html_file += `<button onclick=edit('${responseValue[i].email}') style="width:auto;"><i class="fa fa-edit"></i></button>`
+                    `;
+        if (is_admin) {
+          html_file += `<button onclick=edit('${responseValue[i].email}') style="width:auto;"><i class="fa fa-edit"></i></button>`;
         }
-        html_file +=  `
+        html_file += `
                         <button onclick=message('${responseValue[i].email}') style="width:auto;background-color:blueviolet"><i class="fa fa-envelope"></i></button>
                         <button onclick=chat('${responseValue[i].email}') style="width:auto;background-color:darkcyan"><i class="fa fa-arrow-right"></i></button>
                         <div id="id01" class="modal">
@@ -418,6 +418,7 @@ $(document).on("click", "#insert-btn", async function () {
 $(document).ready(function () {
   getdashBoard(); // Loading Dashboard
   var remainderSent = false;
+  var CHAT = null;
   setInterval(async function () {
     /* Check if any remainder is pending */
     if (!remainderSent) {
@@ -425,7 +426,9 @@ $(document).ready(function () {
     }
 
     if ($("#id04").css("display") === "block") {
-      var CHAT = getChatEndpoint();
+      if (!CHAT) {
+        CHAT = getChatEndpoint();
+      }
       var receiver = $("#customerEmail").attr("value");
       $.ajax({
         url: `${SERVER + CHAT}/${receiver}`,

@@ -50,10 +50,10 @@ module.exports.getUserType = async function (req, res) {
     logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error from GET /getUserType = ${JSON.stringify(ex)}`);
+    logger.error(`Error from GET /getUserType = ${ex}`);
     var response = await buildResponse(
       null,
-      "exception",
+      ex,
       HttpStatus.BAD_GATEWAY
     );
     res.status(HttpStatus.BAD_GATEWAY).send(response);

@@ -24,9 +24,15 @@ router.use(cors());
  */
 var isValidUser = async function (email, password) {
   logger.info("In isValidUser");
-  var isExistingUser = await db.isExistingUser("email", email);
-  if (isExistingUser) {
-    return await db.isValidUser("email", email, password);
+  try {
+    var isExistingUser = await db.isExistingUser("email", email);
+    logger.info(`isExistingUser = ${isExistingUser}`);
+    if (isExistingUser) {
+      return await db.isValidUser("email", email, password);
+    }
+    return false;
+  } catch (ex) {
+    throw ex;
   }
 };
 
@@ -69,21 +75,18 @@ module.exports.login = async function (req, res) {
       var email = payload.email;
       var password = payload.password;
       var validUser = await isValidUser(email, password);
-      logger.info("Execution of 'isValidUser' method ends");
       if (validUser) {
-        logger.info(
-          "User validation successful, so redirecting back to dashboard"
-        );
+        logger.info(`User Validated: ${validUser}`);
         req.session.user = email;
         req.session.password = password;
         res.redirect("/dashboard");
       } else {
-        logger.error("User validation failed, so redirecting back to login");
+        logger.error(`User Validated: ${validUser}`);
         res.redirect("/login");
       }
     }
   } catch (ex) {
-    logger.error(`POST /login Captured Error ===> ${ex}`);
+    logger.error(`POST /login Captured Error: ${ex}`);
     res.redirect("/login");
   }
 };

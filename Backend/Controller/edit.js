@@ -34,7 +34,7 @@ module.exports.edit = async function (req, res) {
       updatePayloadSchema
     );
     if (!isValidPayload) {
-      logger.error("Invalid Payload");
+      logger.info(`Invalid Payload with errorList = ${errorList}`);
       var reasons = await buildErrorReasons(errorList);
       var response = await buildResponse(
         null,

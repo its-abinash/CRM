@@ -19,7 +19,6 @@ module.exports.format = function (message, formatList) {
 };
 
 module.exports.validatePayload = async function (payload, schema) {
-  logger.info("In validatePayload");
   try {
     if (payload) {
       var result = validator.validate(payload, schema);
@@ -43,7 +42,6 @@ module.exports.processPayload = async function(payload) {
 }
 
 module.exports.getMemoryUsage = function() {
-  logger.info("In getMemoryUsage")
   var memoryUsed = (process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100;
   return memoryUsed
 }
