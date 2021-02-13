@@ -4,13 +4,11 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
+var session = require("express-session");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var {
-  DATABASE,
-  ResponseIds,
-} = require("../../Configs/constants.config");
+var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
 const { validatePayload, processPayload, format } = require("./main_utils");
 const { insertPayloadSchema } = require("./schema");
 const {
@@ -23,6 +21,30 @@ const httpStatus = require("http-status");
 var FAKE_PASSCODE = "fake_code";
 var FAKE_PASSWORD = "Default@123";
 var DEFAULT_ADMIN = false;
+
+var removeDataOnFailure = async function (
+  isCustomerCreated = false,
+  isCredentialSaved = false,
+  isUserMapCreated = false,
+  userMap = [],
+  email = null
+) {
+  try {
+    if (isCustomerCreated) {
+      await db.remove(DATABASE.CUSTOMER, "email", email);
+    }
+    if (isCredentialSaved) {
+      await db.remove(DATABASE.CREDENTIALS, "email", email);
+    }
+    if (isUserMapCreated) {
+      for (const each_map of userMap) {
+        await db.remove(DATABASE.USERS_MAP, null, each_map);
+      }
+    }
+  } catch (ex) {
+    logger.error(`Failed to remove user data with err: ${ex}`);
+  }
+};
 
 /**
  * @httpMethod POST
@@ -65,15 +87,21 @@ module.exports.insert = async function (req, res) {
         next_remainder,
       ];
       logger.info("Inserting data in customer table");
-      var jobDone1 = await db.insert(DATABASE.CUSTOMER, data);
+      var customerCreated = await db.insert(DATABASE.CUSTOMER, data);
       logger.info("Inserting data in credentials table");
-      var jobDone2 = await db.insert(DATABASE.CREDENTIALS, [
+      var credentialSaved = await db.insert(DATABASE.CREDENTIALS, [
         payload.email,
         FAKE_PASSWORD,
         FAKE_PASSCODE,
         DEFAULT_ADMIN,
       ]);
-      if (jobDone1 && jobDone2) {
+      var userMap = [
+        [req.session.user, payload.email],
+        [payload.email, req.session.user],
+      ];
+      logger.info("Inserting data in users_map table");
+      var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
+      if (customerCreated && credentialSaved && usermapCreated) {
         logger.info("Successfully inserted data");
         var response = await buildResponse(
           null,
@@ -85,6 +113,13 @@ module.exports.insert = async function (req, res) {
         res.status(httpStatus.CREATED).send(response);
       } else {
         logger.error("Failed to insert data");
+        await removeDataOnFailure(
+          customerCreated,
+          credentialSaved,
+          usermapCreated,
+          userMap,
+          payload.email
+        );
         var response = await buildResponse(
           null,
           format(ResponseIds.RI_012, ["data", payload.email]),
@@ -96,11 +131,14 @@ module.exports.insert = async function (req, res) {
     }
   } catch (ex) {
     logger.error(`Error in POST /insert: ${ex}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      httpStatus.BAD_GATEWAY
+    await removeDataOnFailure(
+      customerCreated,
+      credentialSaved,
+      usermapCreated,
+      userMap,
+      payload.email
     );
+    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

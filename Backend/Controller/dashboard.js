@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var bodyParser = require("body-parser");
 var cors = require("cors");
+var session = require("express-session");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
 var { ResponseIds } = require("../../Configs/constants.config");
@@ -13,15 +14,15 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
 
 /**
- * @function getContacts
+ * @function getAllCustomer
  * @async
  * @description Fetch all the customers and their details
  * @returns All Customers
  */
-var getContacts = async function () {
-  logger.info("Execution of 'getContacts' method begins");
-  var is_admin = [false];
-  var contacts = await db.fetchAllUserOfGivenType(is_admin);
+var getAllCustomer = async function (logged_in_user_id) {
+  logger.info("In getAllCustomer");
+  var data = [logged_in_user_id, false];
+  var contacts = await db.fetchAllUsersForGivenUserId(data);
   return contacts;
 };
 
@@ -36,7 +37,7 @@ var getContacts = async function () {
 module.exports.getCustomers = async function (req, res) {
   try {
     logger.info("GET /dashboard/getCustomer begins");
-    var customers = await getContacts();
+    var customers = await getAllCustomer(req.session.user);
     logger.info(`Customers: ${JSON.stringify(customers, null, 3)}`);
     var response = await buildResponse(
       customers,
@@ -44,7 +45,7 @@ module.exports.getCustomers = async function (req, res) {
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path))
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
     logger.error(`Exception: ${JSON.stringify(ex, null, 3)}`);
@@ -71,15 +72,18 @@ module.exports.getDashboardPage = async function (req, res) {
 };
 
 /**
+ * @function getAllAdmins
+ * @async
  * @description Gets admin List from db
  */
-var getAdmins = async function () {
-  var is_admin = [true];
-  var adminList = await db.fetchAllUserOfGivenType(is_admin);
+var getAllAdmins = async function (logged_in_user_id) {
+  var data = [logged_in_user_id, true];
+  var adminList = await db.fetchAllUsersForGivenUserId(data);
   return adminList;
 };
 
 /**
+ * @httpMethod GET
  * @function getAdmins
  * @async
  * @description Fetches all admins from the db
@@ -90,26 +94,18 @@ var getAdmins = async function () {
 module.exports.getAdmins = async function (req, res) {
   try {
     logger.info(`GET /dashboard/getAdmins begins`);
-    var admins = await getAdmins();
-    logger.info(
-      `adminList received from db: ${JSON.stringify(admins, null, 3)}`
-    );
+    var admins = await getAllAdmins(req.session.user);
+    logger.info(`adminList: ${JSON.stringify(admins, null, 3)}`);
     var response = await buildResponse(
       admins,
       format(ResponseIds.RI_006, ["getAdmins", JSON.stringify(admins)]),
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path))
+    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(
-      `Error from GET /dashboard/getAdmin ===> ${JSON.stringify(
-        ex,
-        null,
-        3
-      )}`
-    );
+    logger.error(`Error from GET /dashboard/getAdmin: ${ex}`);
     var response = await buildResponse(
       null,
       "exception",

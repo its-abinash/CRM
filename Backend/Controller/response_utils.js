@@ -48,11 +48,6 @@ module.exports.buildResponse = async function (
   return response;
 };
 
-/*
-  Returning Wrong Response for Wrong payload
-  Work on it for different wrong payloads
-  Change UTs accordingly
-*/
 module.exports.buildErrorReasons = async function (result) {
   var errorTypeExpr = "$[*].name";
   var pathExpr = "$[*].path";
