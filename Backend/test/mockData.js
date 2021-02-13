@@ -476,6 +476,9 @@ module.exports.fakeUserTypeResponse = {
 module.exports.fakeInsertPayloadRequest = {
   path: "/fake_path",
   method: "fake_method",
+  session: {
+    user: "sender@gmail.com",
+  },
   body: {
     name: "c1_name1",
     email: "c1@gmail.com",

@@ -29,7 +29,7 @@ var insertAtCred = async function (data) {
     return true;
   } catch (ex) {
     logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -52,7 +52,33 @@ var insertAtCustomer = async function (data) {
     return true;
   } catch (ex) {
     logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
+  }
+};
+
+/**
+ * @function insertAtUsersMap
+ * @description map customer with admin and vice-versa
+ * @async
+ * @param {Array} data list of userIds of both admin and customers
+ * @returns Boolean (True/False)
+ */
+var insertAtUsersMap = async function (data) {
+  try {
+    logger.info("Connecting to 'users_map' database");
+    const db = await pool.connect();
+    logger.info("Connection established to 'users_map' database");
+    const query = `INSERT INTO users_map (user_id1, user_id2)
+                   VALUES ($1, $2)`;
+    for (const each_data of data) {
+      await db.query(query, each_data);
+    }
+    logger.info("Execution successful, so disconnecting database");
+    db.release();
+    return true;
+  } catch (ex) {
+    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
+    throw ex;
   }
 };
 
@@ -146,6 +172,34 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
   } catch (ex) {
     logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     return [];
+  }
+};
+
+/**
+ * @async
+ * @description Fetches the customers for an admin and vice-versa
+ * @param {Array} data
+ */
+module.exports.fetchAllUsersForGivenUserId = async function (data) {
+  try {
+    logger.info("Connecting to 'credentials' database");
+    const db = await pool.connect();
+    logger.info("Connection established to 'credentials' database");
+    const query = `select customer.email, customer.name
+                   from customer
+                   inner join users_map on
+                   users_map.user_id2 = customer.email
+                   inner join credentials on
+                   credentials.email = users_map.user_id2
+                   where
+                   users_map.user_id1 = $1 and credentials.is_admin=$2;`;
+    var res = await db.query(query, data);
+    logger.info("Execution successful, so disconnecting database");
+    db.release();
+    return res.rows;
+  } catch (ex) {
+    logger.error(`Execution Failed with Error: ${ex}`);
+    throw ex;
   }
 };
 
@@ -317,6 +371,27 @@ var removeAtConversation = async function (pk_name, pk_value) {
 };
 
 /**
+ * @description Removes the given user from users_map table
+ * @param {Array} data array having email_id of person1 and person2
+ */
+var removeUserFromUserMap = async function (data) {
+  try {
+    logger.info("Connecting to 'users_map' database");
+    const db = await pool.connect();
+    logger.info("Connection established to 'conversation' database");
+    const query = `delete from users_map
+                   WHERE user_id1 = $1 and user_id2 = $2`;
+    await db.query(query, data);
+    logger.info("Execution successful, so disconnecting database");
+    db.release();
+    return true;
+  } catch (ex) {
+    logger.error(`Execution Failed with Error: ${ex}`);
+    throw ex;
+  }
+};
+
+/**
  * @function insertAtConversation
  * @async
  * @description Inserts chat of user with admin
@@ -336,7 +411,7 @@ var insertAtConversation = async function (data) {
     return true;
   } catch (ex) {
     logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -469,7 +544,7 @@ module.exports.fetch = async function (
  * @returns Queried Data
  */
 module.exports.insert = async function (database_id, data) {
-  /* param :: database_ids are 1(Credentials), 2(Admin), 3(Customer). 4(conversation) */
+  /* param :: database_ids are 1(Credentials), 2(users_map), 3(Customer). 4(conversation) */
   switch (database_id) {
     case DATABASE.CREDENTIALS:
       return await insertAtCred(data);
@@ -477,6 +552,8 @@ module.exports.insert = async function (database_id, data) {
       return await insertAtCustomer(data);
     case DATABASE.CONVERSATION:
       return await insertAtConversation(data);
+    case DATABASE.USERS_MAP:
+      return await insertAtUsersMap(data);
   }
 };
 
@@ -526,6 +603,8 @@ module.exports.remove = async function (database_id, pk_name, pk_value) {
       return await removeAtCustomer(pk_name, pk_value);
     case DATABASE.CONVERSATION:
       return await removeAtConversation(pk_name, pk_value);
+    case DATABASE.USERS_MAP:
+      return await removeUserFromUserMap(pk_value);
   }
 };
 

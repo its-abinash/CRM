@@ -158,14 +158,14 @@ var dashboardControllerTestPositive = function () {
   });
   it("GET /dashboard/getAdmins - get all admins test", async function () {
     sinon.stub(loggerUtils, "info");
-    sinon.stub(dbUtils, "fetchAllUserOfGivenType").returns([]);
-    await dashboardUtils.getAdmins(fakeRequest, fakeResponse);
+    sinon.stub(dbUtils, "fetchAllUsersForGivenUserId").returns([]);
+    await dashboardUtils.getAdmins(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
   });
   it("GET /dashboard/getCustomer - Get all customers test", async function () {
     sinon.stub(loggerUtils, "info");
-    sinon.stub(dbUtils, "fetchAllUserOfGivenType").returns([]);
-    await dashboardUtils.getCustomers(fakeRequest, fakeResponse);
+    sinon.stub(dbUtils, "fetchAllUsersForGivenUserId").returns([]);
+    await dashboardUtils.getCustomers(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
   });
   afterEach(function () {
@@ -182,7 +182,7 @@ var dashboardControllerTestNegative = function () {
     assert.match(fakeResponse.statusCode, 502);
   });
   it("GET /dashboard/getCustomer - Get all customers test", async function () {
-    sinon.stub(dbUtils, "fetchAllUserOfGivenType").throwsException();
+    sinon.stub(dbUtils, "fetchAllUsersForGivenUserId").throwsException();
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     await dashboardUtils.getCustomers(fakeRequest, fakeResponse);

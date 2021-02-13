@@ -105,6 +105,28 @@ var databaseControllerTest = function () {
       assert.match(result, testCase.exp);
     }
   });
+  it("remove user from user map - success test", async function () {
+    sinon.stub(logUtils, "info");
+    var pgStub = fakePgPool(true);
+    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    var result = await dbUtils.remove(DATABASE.USERS_MAP, null, null);
+    assert.match(result, true);
+  });
+  it("remove user from user map - exception test", async function () {
+    sinon.stub(logUtils, "info");
+    sinon.stub(logUtils, "error");
+    var pgStub = fakePgPoolException();
+    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    try {
+      await dbUtils.remove(DATABASE.USERS_MAP, null, null);
+    }catch(ex) {
+      assert.match(ex, "CONNERR");
+    }
+  });
   it("update user test", async function () {
     var testCases = [
       {
@@ -142,6 +164,11 @@ var databaseControllerTest = function () {
         exp: true,
         pgStub: fakePgPool(true),
       },
+      {
+        databaseId: DATABASE.USERS_MAP,
+        exp: true,
+        pgStub: fakePgPool(true),
+      },
     ];
     sinon.stub(logUtils, "info");
     for (const testCase of testCases) {
@@ -150,6 +177,28 @@ var databaseControllerTest = function () {
       });
       var result = await dbUtils.insert(testCase.databaseId, ["fake_data"]);
       assert.match(result, testCase.exp);
+    }
+  });
+  it("fetch all users for given userId - success test", async function () {
+    sinon.stub(logUtils, "info");
+    var pgStub = fakePgPool({ rows: fakeCustomerData });
+    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    var result = await dbUtils.fetchAllUsersForGivenUserId(null);
+    assert.match(result, fakeCustomerData);
+  });
+  it("fetch all users for given userId - exception test", async function () {
+    sinon.stub(logUtils, "info");
+    sinon.stub(logUtils, "error");
+    var pgStub = fakePgPoolException();
+    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    try {
+      await dbUtils.fetchAllUsersForGivenUserId(null);
+    } catch (ex) {
+      assert.match(ex, "CONNERR");
     }
   });
   it("fetch user data test", async function () {
@@ -222,17 +271,22 @@ var databaseControllerTest = function () {
     var testCases = [
       {
         databaseId: DATABASE.CREDENTIALS,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CUSTOMER,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CONVERSATION,
-        exp: false,
+        exp: "CONNERR",
+        pgStub: fakePgPoolException(),
+      },
+      {
+        databaseId: DATABASE.USERS_MAP,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
     ];
@@ -242,8 +296,11 @@ var databaseControllerTest = function () {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
-      var result = await dbUtils.insert(testCase.databaseId, ["fake_data"]);
-      assert.match(result, testCase.exp);
+      try {
+        await dbUtils.insert(testCase.databaseId, ["fake_data"]);
+      } catch (ex) {
+        assert.match(ex, testCase.exp);
+      }
     }
   });
   it("fetch exception test", async function () {
@@ -388,7 +445,7 @@ var databaseControllerTest = function () {
   });
   it("valid user check exception test", async function () {
     sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, 'error')
+    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,

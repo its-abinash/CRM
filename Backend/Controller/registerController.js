@@ -21,6 +21,32 @@ var existingUser = async function (email) {
   }
 };
 
+var removeDataOnFailure = async function (
+  isCredSaved,
+  isDataSaved,
+  isUserMapCreated
+) {
+  try {
+    if (isCredSaved) {
+      await db.remove(DATABASE.CREDENTIALS, "email", email);
+    }
+    if (isDataSaved) {
+      await db.remove(DATABASE.CUSTOMER, "email", email);
+    }
+    if (isUserMapCreated) {
+      await db.remove(DATABASE.USERS_MAP, "user_id1", email);
+    }
+  } catch (ex) {
+    logger.error(`Failed to remove user data with err: ${ex}`);
+  }
+};
+
+var getAdmins = async function () {
+  var is_admin = [true]
+  var adminList = await db.fetchAllUserOfGivenType(is_admin);
+  return adminList;
+};
+
 /**
  * @httpMethod POST
  * @function register
@@ -73,17 +99,29 @@ module.exports.register = async function (req, res) {
         // Save user data in db
         logger.info(`Saving 'customer' with userId: ${email}`);
         var dataSaved = await db.insert(DATABASE.CUSTOMER, userData);
-        if (credSaved && dataSaved) {
+        logger.info(`Mapping present admins with userId: ${email}`);
+        var adminList = await getAdmins();
+        var userMap = [];
+        // Saving user-admin and admin-user in user_map table
+        for (const admin of adminList) {
+          userMap.push([email, admin.email]);
+          userMap.push([admin.email, email]);
+        }
+        logger.info(`userMap: ${JSON.stringify(userMap)}`);
+        var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
+        if (credSaved && dataSaved && usermapCreated) {
           logger.info("User has been successfully registered");
           res.redirect("/login");
         } else {
           logger.error("Registration Failed");
+          await removeDataOnFailure(credSaved, dataSaved, usermapCreated);
           res.redirect("/login");
         }
       }
     }
   } catch (ex) {
     logger.error(`POST /register Error: ${ex}`);
+    await removeDataOnFailure(credSaved, dataSaved, usermapCreated);
     res.redirect("/login");
   }
 };

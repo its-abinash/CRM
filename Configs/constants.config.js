@@ -37,6 +37,7 @@ module.exports = {
     CREDENTIALS: 1,
     CUSTOMER: 3,
     CONVERSATION: 4,
+    USERS_MAP: 2
   },
   CSS: {
     CHAT_TIME_LOC: "time_loc",
