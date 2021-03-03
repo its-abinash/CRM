@@ -45,7 +45,8 @@ var insertAtCustomer = async function (data) {
     logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
     logger.info("Connection established to 'customer' database");
-    const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder) VALUES ($1, $2, $3, $4, $5, $6)`;
+    const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder, img_data)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
     await db.query(query, data);
     logger.info("Execution successful, so disconnecting database");
     db.release();

@@ -79,7 +79,7 @@ module.exports.login = async function (req, res) {
         logger.info(`User Validated: ${validUser}`);
         req.session.user = email;
         req.session.password = password;
-        res.redirect("/dashboard");
+        res.redirect("/home");
       } else {
         logger.error(`User Validated: ${validUser}`);
         res.redirect("/login");

@@ -11,10 +11,12 @@ var landingPageUtils = require("../Controller/landingPage");
 var loginUtils = require("../Controller/loginController");
 var registerUtils = require("../Controller/registerController");
 var dbUtils = require("../../Database/databaseOperations");
+var getQuotesUtils = require("../Controller/getQuotes");
 var loggerUtils = require("../Logger/log");
 var { validator } = require("../Controller/schema");
 var jp = require("jsonpath");
 var mailer = require("nodemailer");
+const axios = require("axios").default;
 
 var sinon = require("sinon");
 var assert = sinon.assert;
@@ -51,6 +53,17 @@ const {
   insertFailureResponse,
   loginPayloadRequest,
   registerPayloadRequest,
+  fakeInsertPayloadRequest2,
+  insertSuccessfulResponse1,
+  fakeAxiosGetData,
+  fakeGetQuotesResponse,
+  fakeAxiosGetDefaultData,
+  fakeGetQuotesResponseForDefaultCategory,
+  fakeAxiosGetEmptyData,
+  fakeGetQuoteRequest1,
+  fakeGetQuoteRequest2,
+  fakeGetProfilePicResponse,
+  fakeGetProfilePicResponse2,
 } = require("./mockData");
 
 var chatControllerTestPositive = function () {
@@ -462,6 +475,27 @@ var insertControllerTest = function () {
     await insertUtils.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });
+  it("POST /insertProfilePicture begins - success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(dbUtils, "update").returns(true);
+    await insertUtils.insertProfilePicture(
+      fakeInsertPayloadRequest2,
+      fakeResponse
+    );
+    assert.match(fakeResponse.response, insertSuccessfulResponse1);
+  });
+  it("POST /insertProfilePicture begins - exception test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(dbUtils, "update").throwsException();
+    await insertUtils.insertProfilePicture(
+      fakeInsertPayloadRequest2,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 502);
+  });
   afterEach(function () {
     sinon.verifyAndRestore();
   });
@@ -594,6 +628,97 @@ var registerControllerTest = function () {
   });
 };
 
+var getQuotesTest = function () {
+  it("GET /getQuotes - fetch category from url success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(Math, "random").returns(0);
+    sinon.stub(axios, "get").returns(fakeAxiosGetData);
+    await getQuotesUtils.getQuotes(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.response, fakeGetQuotesResponse);
+  });
+  it("GET /getQuotes - get default category success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
+    await getQuotesUtils.getQuotes(fakeRequest, fakeResponse);
+    assert.match(
+      fakeResponse.response,
+      fakeGetQuotesResponseForDefaultCategory
+    );
+  });
+  it("GET /getQuotes - get default category success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
+    await getQuotesUtils.getQuotes(fakeRequest, fakeResponse);
+    assert.match(
+      fakeResponse.response,
+      fakeGetQuotesResponseForDefaultCategory
+    );
+  });
+  it("GET /getQuotes - exception test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    var stubFunc = sinon.stub(axios, "get");
+    stubFunc.onCall(0).returns(fakeAxiosGetData);
+    stubFunc.onCall(1).returns(fakeAxiosGetEmptyData);
+    await getQuotesUtils.getQuotes(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 502);
+  });
+  it("GET /loadHomePage - with session values - success test", async function () {
+    // This test is for coverage only.
+    sinon.stub(loggerUtils, "info");
+    await getQuotesUtils.loadHomePage(fakeGetQuoteRequest1, fakeResponse);
+  });
+  it("GET /loadHomePage - without session values - success test", async function () {
+    // This test is for coverage only.
+    sinon.stub(loggerUtils, "info");
+    await getQuotesUtils.loadHomePage(fakeGetQuoteRequest2, fakeResponse);
+  });
+  it("GET /getProfilePicture - all tests", async function () {});
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+};
+
+var getProfilePicture = async function () {
+  var testCases = [
+    {
+      name: "GET /getProfilePicture - valid values from db - success tests",
+      fetchValue: [
+        {
+          img_data: "fake_url",
+          name: "fake_name",
+        },
+      ],
+      exp: fakeGetProfilePicResponse,
+      req: fakeGetQuoteRequest1,
+    },
+    {
+      name: "GET /getProfilePicture - no values found from db - success tests",
+      fetchValue: [
+        {
+          img_data: null,
+          name: null,
+        },
+      ],
+      exp: fakeGetProfilePicResponse2,
+      req: fakeGetQuoteRequest1,
+    },
+  ];
+  for (const testCase of testCases) {
+    it(testCase.name, async function () {
+      sinon.stub(loggerUtils, "info");
+      sinon.stub(axios, "get").returns({});
+      sinon.stub(Buffer, "from").returns("fakeImgUrl");
+      sinon.stub(dbUtils, "fetch").returns(testCase.fetchValue);
+      await getQuotesUtils.getProfilePicture(testCase.req, fakeResponse);
+      assert.match(fakeResponse.response, testCase.exp);
+    });
+    afterEach(function () {
+      sinon.verifyAndRestore();
+    });
+  }
+};
+
 describe("test_chat_positive", chatControllerTestPositive);
 describe("test_chat_negative", chatControllerTestNegative);
 describe("test_dashboard_positive", dashboardControllerTestPositive);
@@ -609,3 +734,5 @@ describe("test_insert", insertControllerTest);
 describe("test_landingPage", landingPageControllerTest);
 describe("test_login", loginControllerTest);
 describe("test_register", registerControllerTest);
+describe("test_getQuotes", getQuotesTest);
+describe("test_getProfilePicture", getProfilePicture);

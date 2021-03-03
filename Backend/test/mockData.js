@@ -29,6 +29,7 @@ module.exports.fakeResponse = {
   statusCode: 200,
   response: {},
   render: function () {},
+  redirect: function () {},
 };
 
 // status(200).send
@@ -400,6 +401,7 @@ module.exports.fakeConstants = {
         CONTACT: "contact",
         EDIT: "edit",
         ADD: "insert",
+        UPLOAD: "insertProfilePicture",
         DELETE: "delete",
         EMAIL: "email",
         CHAT: "chat",
@@ -412,7 +414,7 @@ module.exports.fakeConstants = {
   ],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
+    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insertProfilePicture","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
   ],
 };
 
@@ -485,6 +487,30 @@ module.exports.fakeInsertPayloadRequest = {
   },
 };
 
+module.exports.fakeInsertPayloadRequest2 = {
+  path: "/fake_path",
+  method: "fake_method",
+  session: {
+    user: "sender@gmail.com",
+  },
+  file: {
+    mimetype: "image/png",
+    buffer: [1, 2, 3],
+  },
+};
+
+module.exports.insertSuccessfulResponse1 = {
+  responseId: "RI_011",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [],
+  totalCount: 0,
+  reasons: [
+    "Successfully inserted Profile Picture of user having userId: sender@gmail.com",
+  ],
+};
+
 module.exports.insertSuccessfulResponse = {
   responseId: "RI_011",
   status: "CREATED",
@@ -532,4 +558,139 @@ module.exports.registerPayloadRequest = {
     remfreq: "2",
     passcode: "jdudhdu",
   },
+};
+
+module.exports.fakeAxiosGetData = {
+  data: {
+    contents: {
+      categories: {
+        inspire: "Inspiring Quote of the day",
+        management: "Management Quote of the day",
+        sports: "Sports Quote of the day",
+        life: "Quote of the day about life",
+        funny: "Funny Quote of the day",
+        love: "Quote of the day about Love",
+        art: "Art quote of the day ",
+        students: "Quote of the day for students",
+      },
+      quotes: [
+        {
+          quote: "fake quote",
+          author: "fake author",
+          title: "fake title",
+          background: "fake background",
+          permalink: "fake permalink",
+        },
+      ],
+    },
+    userId: 1,
+    id: 1,
+    title: "fake_title",
+    body: "fake_body",
+  },
+};
+
+module.exports.fakeAxiosGetDefaultData = {
+  data: {
+    contents: {
+      categories: {},
+      quotes: [
+        {
+          quote: "fake quote",
+          author: "fake author",
+          title: "fake title",
+          background: "fake background",
+          permalink: "fake permalink",
+        },
+      ],
+    },
+    userId: 1,
+    id: 1,
+    title: "fake_title",
+    body: "fake_body",
+  },
+};
+
+module.exports.fakeAxiosGetEmptyData = {
+  data: {},
+};
+
+module.exports.fakeGetQuotesResponse = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [
+    {
+      quote: "fake quote",
+      author: "fake author",
+      title: "fake title",
+      imgUrl: "fake background",
+      credit: "fake permalink",
+    },
+  ],
+  totalCount: 1,
+  reasons: [
+    'Successfully fetched the quote with value = {"quote":"fake quote","author":"fake author","title":"fake title","imgUrl":"fake background","credit":"fake permalink"}',
+  ],
+};
+
+module.exports.fakeGetQuotesResponseForDefaultCategory = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [
+    {
+      quote:
+        "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
+      author: "Marva Collins",
+      title: "Quote of the day for students",
+      imgUrl: "https://theysaidso.com/img/qod/qod-students.jpg",
+      credit:
+        "https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher",
+    },
+  ],
+  totalCount: 1,
+  reasons: [
+    `Successfully fetched the quote with value = {"quote":"Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.","author":"Marva Collins","title":"Quote of the day for students","imgUrl":"https://theysaidso.com/img/qod/qod-students.jpg","credit":"https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher"}`,
+  ],
+};
+
+module.exports.fakeGetQuoteRequest1 = {
+  path: "/fake_path",
+  method: "fake_method",
+  session: {
+    // <- Valid session values
+    user: "user@gmail.com",
+    password: "password",
+  },
+};
+
+module.exports.fakeGetQuoteRequest2 = {
+  path: "/fake_path",
+  method: "fake_method",
+  session: {}, // <- Empty session values
+};
+
+module.exports.fakeGetProfilePicResponse = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [{ name: "fake_name", url: "fake_url" }],
+  totalCount: 1,
+  reasons: ["Successfully fetched the Img Data with value = fake_url"],
+};
+
+module.exports.fakeGetProfilePicResponse2 = {
+  responseId: "RI_006",
+  status: "OK",
+  statusCode: 200,
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: [{ name: null, url: "data:image/png;base64, fakeImgUrl" }],
+  totalCount: 1,
+  reasons: [
+    "Successfully fetched the Img Data with value = data:image/png;base64, fakeImgUrl",
+  ],
 };

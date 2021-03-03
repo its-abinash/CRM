@@ -7,9 +7,10 @@ module.exports = {
     PORT: process.env.APP_PORT,
     SESSION_PARAMETERS: {
       secret: process.env.REDIS_SECRET,
-      resave: true,
-      saveUninitialized: true,
-      cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
+      rolling: true,           //Reset the cookie Max-Age on every request
+      resave: true,            //Save the session to store if it has changed
+      saveUninitialized: true, //Don't create a session for anonymous users
+      cookie: { maxAge: 30 * 60 * 1000 }, // 30 min
       store: new redisStore({
         client: redis.createClient({
           host: process.env.REDIS_HOST,

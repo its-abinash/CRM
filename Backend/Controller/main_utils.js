@@ -1,6 +1,7 @@
 var { validator } = require("./schema");
 require("format-unicorn");
 var logger = require("../Logger/log");
+var session = require("express-session");
 
 /**
  * @function format
@@ -31,22 +32,26 @@ module.exports.validatePayload = async function (payload, schema) {
   }
 };
 
-module.exports.processPayload = async function(payload) {
-  var result = {}
-  for(var key in payload) {
-    if(payload.hasOwnProperty(key) && payload[key].length > 0) {
-      result[key] = isNaN(payload[key]) ? payload[key] : parseInt(payload[key])
+module.exports.processPayload = async function (payload) {
+  var result = {};
+  for (var key in payload) {
+    if (payload.hasOwnProperty(key) && payload[key].length > 0) {
+      result[key] = isNaN(payload[key]) ? payload[key] : parseInt(payload[key]);
     }
   }
-  return result
-}
+  return result;
+};
 
-module.exports.getMemoryUsage = function() {
-  var memoryUsed = (process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100;
-  return memoryUsed
-}
+module.exports.getMemoryUsage = function () {
+  var memoryUsed = ((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+  return memoryUsed;
+};
 
-module.exports.cloneObject = function(dataObject) {
-  var copy = JSON.parse(JSON.stringify(dataObject || {}))
-  return copy
-}
+module.exports.cloneObject = function (dataObject) {
+  var copy = JSON.parse(JSON.stringify(dataObject || {}));
+  return copy;
+};
+
+module.exports.isLoggedInUser = async function (request) {
+  return request.session && request.session.user && request.session.password;
+};

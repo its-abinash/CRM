@@ -31,6 +31,7 @@ const CONSTANTS = {
     CONTACT: "contact",
     EDIT: "edit",
     ADD: "insert",
+    UPLOAD: "insertProfilePicture",
     DELETE: "delete",
     EMAIL: "email",
     CHAT: "chat",
