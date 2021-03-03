@@ -142,3 +142,61 @@ module.exports.insert = async function (req, res) {
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
+
+var saveImageIntoDB = async function (userData, imgUri) {
+  try {
+    await db.update(
+      DATABASE.CUSTOMER,
+      "email",
+      userData.user,
+      ["img_data"],
+      [imgUri]
+    );
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @httpMethod POST
+ * @function insert
+ * @async
+ * @description Inserts profile picture of user into db
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.insertProfilePicture = async function (req, res) {
+  logger.info("POST /insertProfilePicture begins");
+  try {
+    if (req.session && req.session.user && req.file) {
+      var base64Uri = req.file.buffer.toString("base64");
+      var url = `data:${req.file.mimetype};base64, ${base64Uri}`;
+      await saveImageIntoDB(req.session, url);
+      var response = await buildResponse(
+        null,
+        format(ResponseIds.RI_011, ["Profile Picture", req.session.user]),
+        httpStatus.OK,
+        "RI_011"
+      );
+      logger.info("Profile Picture Successfully Updated")
+      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      res.status(httpStatus.OK).send(response);
+    } else {
+      var response = await buildResponse(
+        null,
+        format(ResponseIds.RI_012, ["Profile Picture", req.session.user]),
+        httpStatus.BAD_REQUEST,
+        "RI_012"
+      );
+      res.status(httpStatus.BAD_REQUEST).send(response);
+    }
+  } catch (ex) {
+    logger.error(`Error in POST /insertProfilePicture: ${ex}`);
+    var response = await buildResponse(
+      null,
+      "exception",
+      httpStatus.BAD_GATEWAY
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};

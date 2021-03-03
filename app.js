@@ -25,6 +25,8 @@ var chat = require("./Backend/Api/chat");
 var constants = require("./Backend/Api/getConstants");
 var remainder = require("./Backend/Api/getLatestRemainder");
 var userType = require("./Backend/Api/getUserType");
+var quotes = require("./Backend/Api/getQuotes");
+var logout = require("./Backend/Api/logout");
 
 /**
  * @description APIs to be used are listed here
@@ -41,7 +43,9 @@ app.use(
   chat,
   constants,
   remainder,
-  userType
+  userType,
+  quotes,
+  logout
 );
 
 app.get("/", controller.landingPage);
