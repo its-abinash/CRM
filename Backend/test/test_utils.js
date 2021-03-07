@@ -34,8 +34,6 @@ var mainUtilsControllerTest = function () {
   });
   it("Payload validation test", async function () {
     sinon.stub(validator, "validate").throws({ type: "error" });
-    sinon.stub(loggerUtils, "error");
-    sinon.stub(loggerUtils, "info");
     try {
       var res = await main_utils.validatePayload({}, {});
     } catch (ex) {

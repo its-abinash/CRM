@@ -57,7 +57,7 @@ module.exports = {
     RI_002: "Error from database while saving conversation between userId: {0} and userId: ${1}",
     RI_003: "Conversations between userId: {0} and userId: {1} are successfully inserted in Database",
     RI_004: "Invalid payload/request_body",
-    RI_005: "Execution of {0} {1} finished which has generated {2} MB of memory",
+    RI_005: "Execution of {0} {1} finished in {2} msecs, which has generated {3} MB of memory",
     RI_006: "Successfully fetched the {0} with value = {1}",
     RI_007: "Successfully removed {0} of user having userId: {1}",
     RI_008: "Failed to remove {0} of user having userId: {1}",
@@ -67,5 +67,16 @@ module.exports = {
     RI_012: "Failed to insert {0} of user having userId: {1}",
     RI_013: "Successfully sent email to user with userId: {0}",
     RI_014: "Failed to send email to user with userId: {0}"
+  },
+  URL: {
+    defaultProfilePictureUrl: "https://www.w3schools.com/howto/img_avatar.png",
+    defaultQuoteCreditUrl: "https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher",
+    defaultQuoteBGImg: "https://theysaidso.com/img/qod/qod-students.jpg",
+    defaultGETCategoryUrl: "https://quotes.rest/qod/categories?language=en"
+  },
+  StringConstant: {
+    defaultQuote: "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
+    defaultAuthor: "Marva Collins",
+    defaultTitle: "Quote of the day for students",
   }
 };

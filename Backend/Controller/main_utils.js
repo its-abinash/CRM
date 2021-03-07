@@ -2,6 +2,7 @@ var { validator } = require("./schema");
 require("format-unicorn");
 var logger = require("../Logger/log");
 var session = require("express-session");
+var requestTracer = require("cls-rtracer");
 
 /**
  * @function format
@@ -27,7 +28,6 @@ module.exports.validatePayload = async function (payload, schema) {
     }
     return [false, []];
   } catch (ex) {
-    logger.error("Exception ocurred while validating payload against schema");
     throw ex;
   }
 };
@@ -43,7 +43,7 @@ module.exports.processPayload = async function (payload) {
 };
 
 module.exports.getMemoryUsage = function () {
-  var memoryUsed = ((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+  var memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
   return memoryUsed;
 };
 
@@ -54,4 +54,8 @@ module.exports.cloneObject = function (dataObject) {
 
 module.exports.isLoggedInUser = async function (request) {
   return request.session && request.session.user && request.session.password;
+};
+
+module.exports.getRequestId = function () {
+  return requestTracer.id() || "main-thread";
 };

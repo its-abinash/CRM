@@ -35,6 +35,7 @@ var getAllCustomer = async function (logged_in_user_id) {
  * @param {Object} res
  */
 module.exports.getCustomers = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("GET /dashboard/getCustomer begins");
     var customers = await getAllCustomer(req.session.user);
@@ -45,7 +46,7 @@ module.exports.getCustomers = async function (req, res) {
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
     logger.error(`Exception: ${JSON.stringify(ex, null, 3)}`);
@@ -54,6 +55,7 @@ module.exports.getCustomers = async function (req, res) {
       "exception",
       HttpStatus.BAD_GATEWAY
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -92,6 +94,7 @@ var getAllAdmins = async function (logged_in_user_id) {
  * @returns List of Admins
  */
 module.exports.getAdmins = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info(`GET /dashboard/getAdmins begins`);
     var admins = await getAllAdmins(req.session.user);
@@ -102,15 +105,16 @@ module.exports.getAdmins = async function (req, res) {
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error from GET /dashboard/getAdmin: ${ex}`);
+    logger.error(`Error in ${req.method} ${req.path}: ${ex}`);
     var response = await buildResponse(
       null,
       "exception",
       HttpStatus.BAD_GATEWAY
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };

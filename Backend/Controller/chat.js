@@ -36,6 +36,7 @@ router.use(cors());
  */
 module.exports.getConversation = async function (req, res) {
   /* When fetching Chat Conversations, we have to decrypt the encoded message */
+  req._initialTime = Date.now();
   try {
     logger.info("GET /Chat begins");
     var sender = req.session.user;
@@ -66,13 +67,11 @@ module.exports.getConversation = async function (req, res) {
       HttpStatus.OK,
       "RI_001"
     );
-    var finalMsg = getEndMessage(ResponseIds.RI_005, req.method, req.path);
+    var finalMsg = getEndMessage(req, ResponseIds.RI_005, req.method, req.path);
     logger.info(finalMsg);
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(
-      `Exceptions in GET /Chat with msg: ${JSON.stringify(ex, null, 3)}`
-    );
+    logger.error(`Error in GET /Chat with msg: ${JSON.stringify(ex, null, 3)}`);
     var response = await buildResponse(
       null,
       "exception",
@@ -107,6 +106,7 @@ module.exports.chat = async function (req, res) {
     The Chat Conversation is end-end protected with encryption. Hence, the messages will be
     stored in the database are totally encrypted.
     */
+  req._initialTime = Date.now();
   try {
     logger.info("POST /chat begins");
     req.body["sender"] = req.session.user;
@@ -151,14 +151,12 @@ module.exports.chat = async function (req, res) {
         statusCode,
         responseId
       );
-      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.status(statusCode).send(response);
     }
   } catch (ex) {
-    logger.error(
-      `Exception in POST /chat with msg: ${JSON.stringify(ex, null, 3)}`
-    );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.error(`Error in POST /chat with msg: ${JSON.stringify(ex, null, 3)}`);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     var response = await buildResponse(
       null,
       "exception",
