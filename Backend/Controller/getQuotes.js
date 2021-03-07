@@ -1,31 +1,36 @@
 const httpStatus = require("http-status");
 const axios = require("axios").default;
-const { ResponseIds, DATABASE } = require("../../Configs/constants.config");
+const {
+  ResponseIds,
+  DATABASE,
+  URL,
+  StringConstant,
+} = require("../../Configs/constants.config");
 const logger = require("../Logger/log");
 const { format, isLoggedInUser } = require("./main_utils");
-const { buildResponse } = require("./response_utils");
+const { buildResponse, getEndMessage } = require("./response_utils");
 const jp = require("jsonpath");
 const session = require("express-session");
 var db = require("../../Database/databaseOperations");
 
 const DEFAULT_DATA = {
   defaultCategoryList: ["students"],
-  defaultImgUrl: "https://theysaidso.com/img/qod/qod-students.jpg",
-  defaultQuote:
-    "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
-  defaultAuthor: "Marva Collins",
-  defaultTitle: "Quote of the day for students",
-  defaultCredit:
-    "https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher",
-  defaultProfilePicture: "https://www.w3schools.com/howto/img_avatar.png",
+  defaultImgUrl: URL.defaultQuoteBGImg,
+  defaultQuote: StringConstant.defaultQuote,
+  defaultAuthor: StringConstant.defaultAuthor,
+  defaultTitle: StringConstant.defaultTitle,
+  defaultCredit: URL.defaultQuoteCreditUrl,
+  defaultProfilePicture: URL.defaultProfilePictureUrl,
 };
 
 var getRandomCategory = async function () {
-  var url = "https://quotes.rest/qod/categories?language=en";
+  var url = URL.defaultGETCategoryUrl;
   var categoryList = [];
   var defaultCategoryList = DEFAULT_DATA.defaultCategoryList;
   try {
+    logger.info(`making external call to url: ${url}`)
     var data = await axios.get(url);
+    logger.info(`response received from external service`)
     var result = data.data;
     var catListExpr = "$.contents.categories";
     var catList = jp.query(result, catListExpr);
@@ -71,6 +76,7 @@ var processQuoteResult = async function (result) {
  * @param {Object} res
  */
 module.exports.getQuotes = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info("GET /getQuotes begins");
   try {
     var category = await getRandomCategory();
@@ -78,7 +84,9 @@ module.exports.getQuotes = async function (req, res) {
     var result = {};
     if (category != DEFAULT_DATA.defaultCategoryList[0]) {
       var url = `https://quotes.rest/qod?category=${category}&language=en`;
+      logger.info(`making external call to url: ${url}`)
       var data = await axios.get(url);
+      logger.info(`response received from external service`)
       result = data.data;
       result = await processQuoteResult(result);
     } else {
@@ -90,17 +98,18 @@ module.exports.getQuotes = async function (req, res) {
         credit: DEFAULT_DATA.defaultCredit,
       };
     }
-    logger.info(`quote data: ${JSON.stringify(result, null, 3)}`);
     var response = await buildResponse(
       result,
       format(ResponseIds.RI_006, ["quote", JSON.stringify(result)]),
       httpStatus.OK,
       "RI_006"
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /getQuotes: ${ex}`)
+    logger.error(`Error in GET /getQuotes: ${ex}`);
     var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -153,6 +162,7 @@ var getImageOfLoggedInUser = async function (loggedInUser) {
  * @param {Object} res
  */
 module.exports.getProfilePicture = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info("GET /getProfilePicture begins");
   try {
     var [imgUrl, username] = await getImageOfLoggedInUser(req.session.user);
@@ -175,10 +185,12 @@ module.exports.getProfilePicture = async function (req, res) {
       httpStatus.OK,
       "RI_006"
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.OK).send(response);
   } catch (ex) {
     logger.error(`Error in GET /getProfilePicture: ${ex}`);
     var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

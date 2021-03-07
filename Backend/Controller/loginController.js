@@ -9,6 +9,8 @@ var session = require("express-session");
 var logger = require("../Logger/log");
 const { processPayload, validatePayload } = require("./main_utils");
 const { loginPayloadSchema } = require("./schema");
+const { getEndMessage } = require("./response_utils");
+const { ResponseIds } = require("../../Configs/constants.config");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -61,6 +63,7 @@ module.exports.getLoginPage = async function (req, res) {
  * @param {Object} res
  */
 module.exports.login = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("POST /login begins");
     var payload = await processPayload(req.body);
@@ -70,6 +73,7 @@ module.exports.login = async function (req, res) {
     );
     if (!isValidPayload) {
       logger.error(`Invalid Payload with errorList = ${errorList}`);
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path))
       res.redirect("/login");
     } else {
       var email = payload.email;
@@ -79,14 +83,17 @@ module.exports.login = async function (req, res) {
         logger.info(`User Validated: ${validUser}`);
         req.session.user = email;
         req.session.password = password;
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path))
         res.redirect("/home");
       } else {
         logger.error(`User Validated: ${validUser}`);
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path))
         res.redirect("/login");
       }
     }
   } catch (ex) {
     logger.error(`POST /login Captured Error: ${ex}`);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path))
     res.redirect("/login");
   }
 };

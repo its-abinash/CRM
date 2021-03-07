@@ -514,6 +514,19 @@ module.exports.insertSuccessfulResponse1 = {
   ],
 };
 
+module.exports.insertProfilePictureFailureRes = {
+  responseId: "RI_012",
+  status: "BAD_REQUEST",
+  statusCode: 400,
+  responseMessage:
+    "The server cannot or will not process the request due to an apparent client error.",
+  values: [],
+  totalCount: 0,
+  reasons: [
+    "Failed to insert Profile Picture of user having userId: undefined",
+  ],
+};
+
 module.exports.insertSuccessfulResponse = {
   responseId: "RI_011",
   status: "CREATED",

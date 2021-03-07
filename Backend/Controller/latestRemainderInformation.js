@@ -4,10 +4,7 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
-var {
-  DATABASE,
-  ResponseIds,
-} = require("../../Configs/constants.config");
+var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
 const { buildResponse, getEndMessage } = require("./response_utils");
 const { format } = require("./main_utils");
 const httpStatus = require("http-status");
@@ -78,6 +75,7 @@ async function updateRemainderDateInDB(customers) {
  * @param {Object} res
  */
 module.exports.latestRemainderInformation = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("GET /getLatestRemainderInformation begins");
     var customerIds = await getCustomerForRemainderFromDB();
@@ -94,21 +92,16 @@ module.exports.latestRemainderInformation = async function (req, res) {
       httpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(
-      `Error in GET /getLatestRemainderInformation: ${JSON.stringify(
-        ex,
-        null,
-        3
-      )}`
-    );
+    logger.error(`Error in ${req.method} ${req.path}: ${ex}`);
     var response = await buildResponse(
       null,
-      "exception",
+      ex,
       httpStatus.BAD_GATEWAY
-    )
+    );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

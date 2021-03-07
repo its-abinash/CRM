@@ -8,7 +8,7 @@ var session = require("express-session");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
+var { DATABASE, ResponseIds, URL } = require("../../Configs/constants.config");
 const { validatePayload, processPayload, format } = require("./main_utils");
 const { insertPayloadSchema } = require("./schema");
 const {
@@ -17,6 +17,7 @@ const {
   getEndMessage,
 } = require("./response_utils");
 const httpStatus = require("http-status");
+const axios = require("axios").default;
 
 var FAKE_PASSCODE = "fake_code";
 var FAKE_PASSWORD = "Default@123";
@@ -46,6 +47,15 @@ var removeDataOnFailure = async function (
   }
 };
 
+var getDefaultImgUrl = async function () {
+  var img_data = await axios.get(URL.defaultProfilePictureUrl, {
+    responseType: "arraybuffer",
+  });
+  var base64Uri = await Buffer.from(img_data.data, "binary").toString("base64");
+  base64Uri = `data:image/png;base64, ${base64Uri}`;
+  return base64Uri;
+};
+
 /**
  * @httpMethod POST
  * @function insert
@@ -55,6 +65,7 @@ var removeDataOnFailure = async function (
  * @param {Object} res
  */
 module.exports.insert = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("POST /insert begins");
     var payload = await processPayload(req.body);
@@ -73,11 +84,13 @@ module.exports.insert = async function (req, res) {
         httpStatus.UNPROCESSABLE_ENTITY,
         "RI_004"
       );
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
       var date = new Date();
       date.setDate(date.getDate() + parseInt(payload.remfreq));
       var next_remainder = date.toLocaleDateString();
+      var imgUrl = await getDefaultImgUrl();
       var data = [
         payload.name,
         payload.email,
@@ -85,6 +98,7 @@ module.exports.insert = async function (req, res) {
         payload.gst,
         payload.remfreq,
         next_remainder,
+        imgUrl,
       ];
       logger.info("Inserting data in customer table");
       var customerCreated = await db.insert(DATABASE.CUSTOMER, data);
@@ -109,7 +123,7 @@ module.exports.insert = async function (req, res) {
           httpStatus.CREATED,
           "RI_011"
         );
-        logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
         res.status(httpStatus.CREATED).send(response);
       } else {
         logger.error("Failed to insert data");
@@ -126,6 +140,7 @@ module.exports.insert = async function (req, res) {
           httpStatus.BAD_REQUEST,
           "RI_012"
         );
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
         res.status(httpStatus.BAD_REQUEST).send(response);
       }
     }
@@ -139,6 +154,7 @@ module.exports.insert = async function (req, res) {
       payload.email
     );
     var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -166,6 +182,7 @@ var saveImageIntoDB = async function (userData, imgUri) {
  * @param {Object} res
  */
 module.exports.insertProfilePicture = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info("POST /insertProfilePicture begins");
   try {
     if (req.session && req.session.user && req.file) {
@@ -178,8 +195,8 @@ module.exports.insertProfilePicture = async function (req, res) {
         httpStatus.OK,
         "RI_011"
       );
-      logger.info("Profile Picture Successfully Updated")
-      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      logger.info("Profile Picture Successfully Updated");
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.status(httpStatus.OK).send(response);
     } else {
       var response = await buildResponse(
@@ -188,6 +205,7 @@ module.exports.insertProfilePicture = async function (req, res) {
         httpStatus.BAD_REQUEST,
         "RI_012"
       );
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.status(httpStatus.BAD_REQUEST).send(response);
     }
   } catch (ex) {
@@ -197,6 +215,7 @@ module.exports.insertProfilePicture = async function (req, res) {
       "exception",
       httpStatus.BAD_GATEWAY
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

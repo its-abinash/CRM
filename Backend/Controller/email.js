@@ -58,6 +58,7 @@ var getPassCode = async function (email) {
  * @param {Object} res
  */
 module.exports.email = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("POST /email begins");
     var payload = await processPayload(req.body);
@@ -107,7 +108,7 @@ module.exports.email = async function (req, res) {
           httpStatus.OK,
           "RI_013"
         );
-        logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
         res.status(httpStatus.OK).send(response);
       } catch (emailException) {
         logger.error(`Error: ${emailException}`);

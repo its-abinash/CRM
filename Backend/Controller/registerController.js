@@ -7,9 +7,10 @@ var logger = require("../Logger/log");
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cors());
-var { DATABASE } = require("../../Configs/constants.config");
+var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
 const { processPayload, validatePayload } = require("./main_utils");
 const { registrationSchema } = require("./schema");
+const { getEndMessage } = require("./response_utils");
 
 var existingUser = async function (email) {
   logger.info("In isExistingUser");
@@ -42,7 +43,7 @@ var removeDataOnFailure = async function (
 };
 
 var getAdmins = async function () {
-  var is_admin = [true]
+  var is_admin = [true];
   var adminList = await db.fetchAllUserOfGivenType(is_admin);
   return adminList;
 };
@@ -56,6 +57,7 @@ var getAdmins = async function () {
  * @param {Object} res
  */
 module.exports.register = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("POST /register begins");
     var payload = await processPayload(req.body);
@@ -66,6 +68,7 @@ module.exports.register = async function (req, res) {
     );
     if (!isValidPayload) {
       logger.info(`Invalid Payload with errorList = ${errorList}`);
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.redirect("/login");
     } else {
       var email = payload.email;
@@ -78,6 +81,7 @@ module.exports.register = async function (req, res) {
       var isExisting = await existingUser(email);
       logger.info(`isExistingUser = ${isExisting}`);
       if (isExisting) {
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
         res.redirect("/login");
       } else {
         var credData = [email, password, passcode, false];
@@ -111,9 +115,11 @@ module.exports.register = async function (req, res) {
         var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
         if (credSaved && dataSaved && usermapCreated) {
           logger.info("User has been successfully registered");
+          logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
           res.redirect("/login");
         } else {
           logger.error("Registration Failed");
+          logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
           await removeDataOnFailure(credSaved, dataSaved, usermapCreated);
           res.redirect("/login");
         }
@@ -122,6 +128,7 @@ module.exports.register = async function (req, res) {
   } catch (ex) {
     logger.error(`POST /register Error: ${ex}`);
     await removeDataOnFailure(credSaved, dataSaved, usermapCreated);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.redirect("/login");
   }
 };

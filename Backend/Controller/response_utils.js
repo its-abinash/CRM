@@ -2,12 +2,11 @@ var httpStatus = require("http-status");
 var logger = require("../Logger/log");
 var main_utils = require("./main_utils");
 var jp = require("jsonpath");
+var uuid = require("uuid/v4");
 
 var getRandomId = function () {
-  return (
-    Math.random().toString(36).substring(2, 5) +
-    Math.random().toString(36).substring(2, 5)
-  );
+  var randomId = uuid();
+  return randomId;
 };
 
 module.exports.buildResponse = async function (
@@ -34,8 +33,7 @@ module.exports.buildResponse = async function (
   var status = httpStatus[`${statusCode}_NAME`];
   var responseLength = values.length;
 
-  var id =
-    responseId || getRandomId() + "-" + getRandomId() + "-" + getRandomId();
+  var id = responseId || getRandomId();
   var response = {
     responseId: id,
     status: status,
@@ -86,8 +84,14 @@ module.exports.buildErrorReasons = async function (result) {
   return reasons;
 };
 
-module.exports.getEndMessage = function (message, apiType, apiName) {
+module.exports.getEndMessage = function (request, message, apiType, apiName) {
   var memoryUsed = main_utils.getMemoryUsage();
-  message = main_utils.format(message, [apiType, apiName, memoryUsed]);
+  var totalTimeTaken = Date.now() - request._initialTime;
+  message = main_utils.format(message, [
+    apiType,
+    apiName,
+    totalTimeTaken,
+    memoryUsed,
+  ]);
   return message;
 };

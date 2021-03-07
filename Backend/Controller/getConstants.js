@@ -51,6 +51,7 @@ const CONSTANTS = {
  * @param {Object} res
  */
 module.exports.getAllConstants = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info("GET /constants begins");
   try {
     logger.info(`Data sent : ${JSON.stringify(CONSTANTS)}`);
@@ -60,7 +61,7 @@ module.exports.getAllConstants = async function (req, res) {
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
     logger.error(`Error in GET /constants ${ex}`);
@@ -78,6 +79,7 @@ module.exports.getAllConstants = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getSpecificFromConstants = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info(`GET /constants/constId/fieldId begins`);
   try {
     var constantId = req.params.constId.toString().toUpperCase();
@@ -94,7 +96,7 @@ module.exports.getSpecificFromConstants = async function (req, res) {
           HttpStatus.OK,
           "RI_006"
         );
-        logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+        logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
         res.status(HttpStatus.OK).send(response);
       } else {
         // If fieldId not found then throwing keyError
@@ -107,6 +109,7 @@ module.exports.getSpecificFromConstants = async function (req, res) {
   } catch (ex) {
     logger.error(`Error in GET /constants/constId/fieldId ${ex}`);
     var response = await buildResponse(null, ex, HttpStatus.BAD_GATEWAY);
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -119,6 +122,7 @@ module.exports.getSpecificFromConstants = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getConstant = async function (req, res) {
+  req._initialTime = Date.now();
   logger.info("GET /constants/constId begins");
   try {
     var constantId = req.params.constId.toString().toUpperCase();
@@ -134,7 +138,7 @@ module.exports.getConstant = async function (req, res) {
         HttpStatus.OK,
         "RI_006"
       );
-      logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       res.status(HttpStatus.OK).send(response);
     } else {
       // If not present then throwing keyError

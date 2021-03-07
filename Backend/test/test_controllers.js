@@ -64,6 +64,7 @@ const {
   fakeGetQuoteRequest2,
   fakeGetProfilePicResponse,
   fakeGetProfilePicResponse2,
+  insertProfilePictureFailureRes,
 } = require("./mockData");
 
 var chatControllerTestPositive = function () {
@@ -441,6 +442,8 @@ var insertControllerTest = function () {
     sinon.stub(dbUtils, "insert").returns(true);
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
+    sinon.stub(axios, 'get').returns({})
+    sinon.stub(Buffer, "from").returns("fakeImgUrl");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     await insertUtils.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, insertSuccessfulResponse);
@@ -460,6 +463,8 @@ var insertControllerTest = function () {
     sinon.stub(dbUtils, "insert").returns(false);
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
+    sinon.stub(axios, 'get').returns({})
+    sinon.stub(Buffer, "from").returns("fakeImgUrl");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     await insertUtils.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, insertFailureResponse);
@@ -471,6 +476,8 @@ var insertControllerTest = function () {
     sinon.stub(dbUtils, "insert").throwsException();
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
+    sinon.stub(axios, 'get').returns({})
+    sinon.stub(Buffer, "from").returns("fakeImgUrl");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     await insertUtils.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
@@ -484,6 +491,17 @@ var insertControllerTest = function () {
       fakeResponse
     );
     assert.match(fakeResponse.response, insertSuccessfulResponse1);
+  });
+  it("POST /insertProfilePicture begins - failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(dbUtils, "update").throwsException();
+    await insertUtils.insertProfilePicture(
+      fakeGetQuoteRequest2,
+      fakeResponse
+    );
+    assert.match(fakeResponse.response, insertProfilePictureFailureRes);
   });
   it("POST /insertProfilePicture begins - exception test", async function () {
     sinon.stub(loggerUtils, "info");

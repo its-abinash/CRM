@@ -1,5 +1,6 @@
 const { createLogger, transports, format } = require("winston");
 const { LOGGER } = require("../../Configs/constants.config");
+const { getRequestId } = require("../Controller/main_utils");
 
 var timeZoned = function () {
   return new Date().toLocaleDateString({
@@ -21,7 +22,7 @@ var loggerFormat = format.combine(
   }),
   format.printf(
     (info) =>
-      `[${info.timestamp} • ${currentTime()}] [${info.level}] | ${info.message}`
+      `[${info.timestamp} • ${currentTime()}] [${info.level}] | ${getRequestId()} | ${info.message}`
   )
 );
 

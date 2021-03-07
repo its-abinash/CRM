@@ -4,7 +4,6 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var session = require("express-session");
-var fs = require("fs");
 var logger = require("../Logger/log");
 var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
 var jp = require("jsonpath");
@@ -37,6 +36,7 @@ var getUserTypeFromDB = async function (userId) {
  * @returns Boolean :- is_admin
  */
 module.exports.getUserType = async function (req, res) {
+  req._initialTime = Date.now();
   try {
     logger.info("GET /getUserType begins");
     var isAdmin = await getUserTypeFromDB(req.session.user);
@@ -47,7 +47,7 @@ module.exports.getUserType = async function (req, res) {
       HttpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(ResponseIds.RI_005, req.method, req.path));
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.OK).send(response);
   } catch (ex) {
     logger.error(`Error from GET /getUserType = ${ex}`);
@@ -56,6 +56,7 @@ module.exports.getUserType = async function (req, res) {
       ex,
       HttpStatus.BAD_GATEWAY
     );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
