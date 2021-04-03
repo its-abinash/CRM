@@ -123,7 +123,7 @@ var databaseControllerTest = function () {
     });
     try {
       await dbUtils.remove(DATABASE.USERS_MAP, null, null);
-    }catch(ex) {
+    } catch (ex) {
       assert.match(ex, "CONNERR");
     }
   });
@@ -308,37 +308,37 @@ var databaseControllerTest = function () {
       {
         databaseId: DATABASE.CREDENTIALS,
         fetchType: DATABASE.FETCH_ALL,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CREDENTIALS,
         fetchType: DATABASE.FETCH_SPECIFIC,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CUSTOMER,
         fetchType: DATABASE.FETCH_ALL,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CUSTOMER,
         fetchType: DATABASE.FETCH_SPECIFIC,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CONVERSATION,
         fetchType: DATABASE.FETCH_ALL,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CONVERSATION,
         fetchType: DATABASE.FETCH_SPECIFIC,
-        exp: [],
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
     ];
@@ -348,20 +348,23 @@ var databaseControllerTest = function () {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
-      var result = await dbUtils.fetch(testCase.databaseId, testCase.fetchType);
-      assert.match(result, testCase.exp);
+      try {
+        await dbUtils.fetch(testCase.databaseId, testCase.fetchType);
+      } catch (exc) {
+        assert.match(exc, testCase.exp);
+      }
     }
   });
   it("update user exception test", async function () {
     var testCases = [
       {
         databaseId: DATABASE.CREDENTIALS,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CUSTOMER,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
     ];
@@ -371,31 +374,34 @@ var databaseControllerTest = function () {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
-      var result = await dbUtils.update(
-        testCase.databaseId,
-        "fake_email",
-        "demo@gmail.com",
-        ["fake_fields"],
-        ["fake_data"]
-      );
-      assert.match(result, testCase.exp);
+      try {
+        await dbUtils.update(
+          testCase.databaseId,
+          "fake_email",
+          "demo@gmail.com",
+          ["fake_fields"],
+          ["fake_data"]
+        );
+      } catch (exc) {
+        assert.match(exc, testCase.exp);
+      }
     }
   });
   it("remove user exception test", async function () {
     var testCases = [
       {
         databaseId: DATABASE.CONVERSATION,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CREDENTIALS,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
       {
         databaseId: DATABASE.CUSTOMER,
-        exp: false,
+        exp: "CONNERR",
         pgStub: fakePgPoolException(),
       },
     ];
@@ -405,12 +411,15 @@ var databaseControllerTest = function () {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
-      var result = await dbUtils.remove(
-        testCase.databaseId,
-        "fake_email",
-        "demo@gmail.com"
-      );
-      assert.match(result, testCase.exp);
+      try {
+        await dbUtils.remove(
+          testCase.databaseId,
+          "fake_email",
+          "demo@gmail.com"
+        );
+      } catch (exc) {
+        assert.match(exc, testCase.exp);
+      }
     }
   });
   it("fetch all user of given type exception test", async function () {
@@ -420,8 +429,11 @@ var databaseControllerTest = function () {
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
     });
-    var result = await dbUtils.fetchAllUserOfGivenType();
-    assert.match(result, []);
+    try {
+      await dbUtils.fetchAllUserOfGivenType();
+    } catch (exc) {
+      assert.match(exc, "CONNERR");
+    }
   });
   it("fetch latest remainder exception test", async function () {
     sinon.stub(logUtils, "info");
@@ -430,8 +442,11 @@ var databaseControllerTest = function () {
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
     });
-    var result = await dbUtils.fetchLatestRemainder();
-    assert.match(result, []);
+    try {
+      await dbUtils.fetchLatestRemainder();
+    } catch (exc) {
+      assert.match(exc, "CONNERR");
+    }
   });
   it("existing user check exception test", async function () {
     sinon.stub(logUtils, "info");
@@ -440,8 +455,11 @@ var databaseControllerTest = function () {
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
     });
-    var result = await dbUtils.isExistingUser("fake_email", "demo@gmail.com");
-    assert.match(result, false);
+    try {
+      await dbUtils.isExistingUser("fake_email", "demo@gmail.com");
+    } catch (exc) {
+      assert.match(exc, "CONNERR");
+    }
   });
   it("valid user check exception test", async function () {
     sinon.stub(logUtils, "info");
@@ -450,12 +468,15 @@ var databaseControllerTest = function () {
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
     });
-    var result = await dbUtils.isValidUser(
-      "fake_email",
-      "demo@gmail.com",
-      "pass"
-    );
-    assert.match(result, false);
+    try {
+      var result = await dbUtils.isValidUser(
+        "fake_email",
+        "demo@gmail.com",
+        "pass"
+      );
+    } catch (exc) {
+      assert.match(exc, "CONNERR");
+    }
   });
   afterEach(function () {
     sinon.verifyAndRestore();

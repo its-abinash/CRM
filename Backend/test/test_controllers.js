@@ -599,6 +599,16 @@ var registerControllerTest = function () {
     sinon.stub(dateObj, "setDate");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     sinon.stub(dbUtils, "insert").returns(true);
+    sinon.stub(dbUtils, 'fetchAllUserOfGivenType').returns([
+      {
+        email: 'user1@gmail.com',
+        name: 'user1'
+      },
+      {
+        email: 'user2@gmail.com',
+        name: 'user2'
+      }
+    ])
     var response = {
       redirect: sinon.spy(),
     };
@@ -621,6 +631,7 @@ var registerControllerTest = function () {
     sinon.stub(dbUtils, "isExistingUser").returns(false);
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(dbUtils, "insert").returns(false);
+    sinon.stub(dbUtils, 'fetchAllUserOfGivenType').returns([])
     var response = {
       redirect: sinon.spy(),
     };

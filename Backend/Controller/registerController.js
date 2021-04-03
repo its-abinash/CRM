@@ -43,9 +43,13 @@ var removeDataOnFailure = async function (
 };
 
 var getAdmins = async function () {
-  var is_admin = [true];
-  var adminList = await db.fetchAllUserOfGivenType(is_admin);
-  return adminList;
+  try {
+    var is_admin = [true];
+    var adminList = await db.fetchAllUserOfGivenType(is_admin);
+    return adminList;
+  } catch (exc) {
+    throw exc;
+  }
 };
 
 /**
