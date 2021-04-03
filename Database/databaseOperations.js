@@ -17,18 +17,15 @@ const pool = new Pool({
  */
 var insertAtCred = async function (data) {
   try {
-    logger.info("Connecting to 'credentials' database");
+    logger.info(`payload to insert at credential table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `INSERT INTO
                    credentials (email, password, passcode, is_admin)
                    VALUES ($1, $2, $3, $4)`;
     await db.query(query, data);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     throw ex;
   }
 };
@@ -42,17 +39,14 @@ var insertAtCred = async function (data) {
  */
 var insertAtCustomer = async function (data) {
   try {
-    logger.info("Connecting to 'customer' database");
+    logger.info(`payload to insert at customer table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder, img_data)
                    VALUES ($1, $2, $3, $4, $5, $6, $7)`;
     await db.query(query, data);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     throw ex;
   }
 };
@@ -66,19 +60,16 @@ var insertAtCustomer = async function (data) {
  */
 var insertAtUsersMap = async function (data) {
   try {
-    logger.info("Connecting to 'users_map' database");
+    logger.info(`payload to insert at user_map table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'users_map' database");
     const query = `INSERT INTO users_map (user_id1, user_id2)
                    VALUES ($1, $2)`;
     for (const each_data of data) {
       await db.query(query, each_data);
     }
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     throw ex;
   }
 };
@@ -91,17 +82,13 @@ var insertAtUsersMap = async function (data) {
  */
 var fetchAllFromCred = async function () {
   try {
-    logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `SELECT * FROM credentials`;
     var res = await db.query(query);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -113,17 +100,13 @@ var fetchAllFromCred = async function () {
  */
 var fetchAllFromCustomer = async function () {
   try {
-    logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     const query = `SELECT * FROM customer`;
     var res = await db.query(query);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -136,17 +119,13 @@ var fetchAllFromCustomer = async function () {
  */
 var fetchSpecificFromCustomer = async function (pk_name, pk_value) {
   try {
-    logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     const query = `SELECT * FROM customer WHERE ${pk_name} = $1`;
     var res = await db.query(query, [pk_value]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -160,19 +139,15 @@ var fetchSpecificFromCustomer = async function (pk_name, pk_value) {
  */
 var fetchSpecificFromCred = async function (pk_name, pk_value) {
   try {
-    logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `SELECT *
                    FROM credentials
                    WHERE ${pk_name} = $1`;
     var res = await db.query(query, [pk_value]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -183,9 +158,8 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
  */
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
-    logger.info("Connecting to 'credentials' database");
+    logger.info(`query payload to fetch all users for given userId: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `select customer.email, customer.name
                    from customer
                    inner join users_map on
@@ -195,11 +169,9 @@ module.exports.fetchAllUsersForGivenUserId = async function (data) {
                    where
                    users_map.user_id1 = $1 and credentials.is_admin=$2;`;
     var res = await db.query(query, data);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${ex}`);
     throw ex;
   }
 };
@@ -213,21 +185,18 @@ module.exports.fetchAllUsersForGivenUserId = async function (data) {
  */
 module.exports.fetchAllUserOfGivenType = async function (is_admin = [false]) {
   try {
-    logger.info("Connecting to 'credentials' database");
+    logger.info(`query payload to fetch all user of given type: is_admin = ${is_admin}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `select customer.email, customer.name
                    from customer
                    inner join credentials
                    on credentials.email = customer.email
                    where credentials.is_admin = $1;`;
     var res = await db.query(query, is_admin);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -243,21 +212,18 @@ module.exports.fetchAllUserOfGivenType = async function (is_admin = [false]) {
  */
 var updateAtCred = async function (pk_name, pk_value, fields, data) {
   try {
-    logger.info("Connecting to 'credentials' database");
+    logger.info(`payload to update at credentials table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     for (var i = 0; i < fields.length; i++) {
       const query = `UPDATE credentials
                      SET ${fields[i]} = $1
                      WHERE ${pk_name} = $2`;
       await db.query(query, [data[i], pk_value]);
     }
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -273,21 +239,19 @@ var updateAtCred = async function (pk_name, pk_value, fields, data) {
  */
 var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   try {
-    logger.info("Connecting to 'customer' database");
+    logger.info(`field to update at customer table: ${JSON.stringify(fields)}`);
+    logger.info(`payload to update at customer table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     for (var i = 0; i < fields.length; i++) {
       const query = `UPDATE customer
                      SET ${fields[i]} = $1
                      WHERE ${pk_name} = $2`;
       await db.query(query, [data[i], pk_value]);
     }
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -301,18 +265,14 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
  */
 var removeAtCred = async function (pk_name, pk_value) {
   try {
-    logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `DELETE FROM credentials
                    WHERE ${pk_name} = $1`;
     await db.query(query, [pk_value]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -326,18 +286,14 @@ var removeAtCred = async function (pk_name, pk_value) {
  */
 var removeAtCustomer = async function (pk_name, pk_value) {
   try {
-    logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     const query = `DELETE FROM customer
                    WHERE ${pk_name} = $1`;
     await db.query(query, [pk_value]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -350,24 +306,16 @@ var removeAtCustomer = async function (pk_name, pk_value) {
  * @returns Acknowledgement of the operation(Boolean)
  */
 var removeAtConversation = async function (pk_name, pk_value) {
-  /*
-    :param pk_name is an array of keys [sender, receiver]
-    :param pk_value is an array of values [sender_email_id, receiver_email_id]
-  */
   try {
-    logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'conversation' database");
     const query = `DELETE FROM conversation
                    WHERE ${pk_name[0]} = $1 and ${pk_name[1]} = $2
                    or ${pk_name[0]} = $2 and ${pk_name[1]} = $1`;
     await db.query(query, [pk_value[0], pk_value[1]]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -377,17 +325,14 @@ var removeAtConversation = async function (pk_name, pk_value) {
  */
 var removeUserFromUserMap = async function (data) {
   try {
-    logger.info("Connecting to 'users_map' database");
+    logger.info(`payload to delete user from user_map table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'conversation' database");
     const query = `delete from users_map
                    WHERE user_id1 = $1 and user_id2 = $2`;
     await db.query(query, data);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${ex}`);
     throw ex;
   }
 };
@@ -401,17 +346,14 @@ var removeUserFromUserMap = async function (data) {
  */
 var insertAtConversation = async function (data) {
   try {
-    logger.info("Connecting to 'conversation' database");
+    logger.info(`payload to insert at conversation table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
-    logger.info("Connection established to 'conversation' database");
     const query = `INSERT INTO conversation (sender, receiver, msg, timestamp)
                    values ($1, $2, $3, current_timestamp)`;
     await db.query(query, data);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return true;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
     throw ex;
   }
 };
@@ -426,20 +368,16 @@ var insertAtConversation = async function (data) {
  */
 var fetchConversations = async function (sender, receiver) {
   try {
-    logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'conversation' database");
     const query = `select sender, receiver, msg, timestamp
                    from conversation
                    where sender = $1 and receiver = $2
                    order by timestamp`;
     var data = await db.query(query, [sender, receiver]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -453,21 +391,17 @@ var fetchConversations = async function (sender, receiver) {
  */
 var fetchLimitedConversations = async function (sender, receiver) {
   try {
-    logger.info("Connecting to 'conversation' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'conversation' database");
     const query = `select sender, receiver, msg, timestamp from (
                     select * from conversation
                     where sender = $1 and receiver = $2
                     or sender = $2 and receiver = $1) sub
                   order by timestamp;`;
     var data = await db.query(query, [sender, receiver]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -479,19 +413,15 @@ var fetchLimitedConversations = async function (sender, receiver) {
  */
 module.exports.fetchLatestRemainder = async function () {
   try {
-    logger.info("Connecting to 'customer' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'customer' database");
     const query = `select email, remfreq
                    from customer
                    where next_remainder = CURRENT_DATE;`;
     var data = await db.query(query);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return data.rows;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return [];
+    throw ex;
   }
 };
 
@@ -520,19 +450,23 @@ module.exports.fetch = async function (
      param :: key required while fetching specific data from a row of the table.
     -> NOTE : for `fetchConversation` (pk_name, pk_value) = (sender, receiver), as no primary key set for conversation table
   */
-  switch (database_id) {
-    case DATABASE.CREDENTIALS:
-      return fetch_type === DATABASE.FETCH_ALL
-        ? await fetchAllFromCred()
-        : await fetchSpecificFromCred(pk_name, pk_value);
-    case DATABASE.CUSTOMER:
-      return fetch_type === DATABASE.FETCH_ALL
-        ? await fetchAllFromCustomer()
-        : await fetchSpecificFromCustomer(pk_name, pk_value);
-    case DATABASE.CONVERSATION:
-      return fetch_type === DATABASE.FETCH_ALL
-        ? await fetchConversations(pk_name, pk_value)
-        : await fetchLimitedConversations(pk_name, pk_value);
+  try {
+    switch (database_id) {
+      case DATABASE.CREDENTIALS:
+        return fetch_type === DATABASE.FETCH_ALL
+          ? await fetchAllFromCred()
+          : await fetchSpecificFromCred(pk_name, pk_value);
+      case DATABASE.CUSTOMER:
+        return fetch_type === DATABASE.FETCH_ALL
+          ? await fetchAllFromCustomer()
+          : await fetchSpecificFromCustomer(pk_name, pk_value);
+      case DATABASE.CONVERSATION:
+        return fetch_type === DATABASE.FETCH_ALL
+          ? await fetchConversations(pk_name, pk_value)
+          : await fetchLimitedConversations(pk_name, pk_value);
+    }
+  }catch(exc) {
+    throw exc;
   }
 };
 
@@ -546,15 +480,19 @@ module.exports.fetch = async function (
  */
 module.exports.insert = async function (database_id, data) {
   /* param :: database_ids are 1(Credentials), 2(users_map), 3(Customer). 4(conversation) */
-  switch (database_id) {
-    case DATABASE.CREDENTIALS:
-      return await insertAtCred(data);
-    case DATABASE.CUSTOMER:
-      return await insertAtCustomer(data);
-    case DATABASE.CONVERSATION:
-      return await insertAtConversation(data);
-    case DATABASE.USERS_MAP:
-      return await insertAtUsersMap(data);
+  try {
+    switch (database_id) {
+      case DATABASE.CREDENTIALS:
+        return await insertAtCred(data);
+      case DATABASE.CUSTOMER:
+        return await insertAtCustomer(data);
+      case DATABASE.CONVERSATION:
+        return await insertAtConversation(data);
+      case DATABASE.USERS_MAP:
+        return await insertAtUsersMap(data);
+    }
+  }catch(exc) {
+    throw exc;
   }
 };
 
@@ -575,11 +513,15 @@ module.exports.update = async function (
   fields,
   data
 ) {
-  switch (database_id) {
-    case DATABASE.CREDENTIALS:
-      return await updateAtCred(pk_name, pk_value, fields, data);
-    case DATABASE.CUSTOMER:
-      return await updateAtCustomer(pk_name, pk_value, fields, data);
+  try {
+    switch (database_id) {
+      case DATABASE.CREDENTIALS:
+        return await updateAtCred(pk_name, pk_value, fields, data);
+      case DATABASE.CUSTOMER:
+        return await updateAtCustomer(pk_name, pk_value, fields, data);
+    }
+  }catch(exc) {
+    throw exc;
   }
 };
 
@@ -597,15 +539,19 @@ module.exports.remove = async function (database_id, pk_name, pk_value) {
        param :: pk_name = primary key name (eg: email)
        param :: pk_value = primary key value (eg: abc@domain.com)
     */
-  switch (database_id) {
-    case DATABASE.CREDENTIALS:
-      return await removeAtCred(pk_name, pk_value);
-    case DATABASE.CUSTOMER:
-      return await removeAtCustomer(pk_name, pk_value);
-    case DATABASE.CONVERSATION:
-      return await removeAtConversation(pk_name, pk_value);
-    case DATABASE.USERS_MAP:
-      return await removeUserFromUserMap(pk_value);
+  try {
+    switch (database_id) {
+      case DATABASE.CREDENTIALS:
+        return await removeAtCred(pk_name, pk_value);
+      case DATABASE.CUSTOMER:
+        return await removeAtCustomer(pk_name, pk_value);
+      case DATABASE.CONVERSATION:
+        return await removeAtConversation(pk_name, pk_value);
+      case DATABASE.USERS_MAP:
+        return await removeUserFromUserMap(pk_value);
+    }
+  }catch (exc) {
+    throw exc;
   }
 };
 
@@ -619,17 +565,13 @@ module.exports.remove = async function (database_id, pk_name, pk_value) {
  */
 module.exports.isExistingUser = async function (pk_name, pk_value) {
   try {
-    logger.info("Connecting to 'credentials' database");
     const db = await pool.connect();
-    logger.info("Connection established to 'credentials' database");
     const query = `select exists (select * from credentials where ${pk_name} = $1)`;
     var res = await db.query(query, [pk_value]);
-    logger.info("Execution successful, so disconnecting database");
     db.release();
     return res.rows[0].exists;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
 
@@ -644,11 +586,9 @@ module.exports.isExistingUser = async function (pk_name, pk_value) {
  */
 module.exports.isValidUser = async function (pk_name, pk_value, password) {
   try {
-    logger.info("In isValidUser method");
     var userData = await fetchSpecificFromCred(pk_name, pk_value);
     return userData[0].email === pk_value && userData[0].password === password;
   } catch (ex) {
-    logger.error(`Execution Failed with Error: ${JSON.stringify(ex, null, 3)}`);
-    return false;
+    throw ex;
   }
 };
