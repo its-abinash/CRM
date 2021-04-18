@@ -60,3 +60,60 @@ module.exports.getUserType = async function (req, res) {
     res.status(HttpStatus.BAD_GATEWAY).send(response);
   }
 };
+
+var validateLoginUser = function (request) {
+  return (
+    "session" in request &&
+    request.session &&
+    "user" in request.session &&
+    !(request.session.user in ["undefined", "null", null])
+  );
+};
+
+/**
+ * @function getLoginUser
+ * @async
+ * @description This API gets the logged-in user-id
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.getLoginUser = async function (req, res) {
+  req._initialTime = Date.now();
+
+  var data = null,
+      reason = ResponseIds.RI_015,
+      statusCode = HttpStatus.BAD_REQUEST,
+      responseId = "RI_015";
+
+  try {
+    logger.info("GET /getLoginUser begins");
+    var validated = validateLoginUser(req);
+
+    if (validated) {
+      data = req.session.user;
+      reason = format(ResponseIds.RI_006, ["login user", data]);
+      statusCode = HttpStatus.OK;
+      responseId = "RI_006";
+    } else {
+      throw reason;
+    }
+    var response = await buildResponse(
+      data,
+      reason,
+      statusCode,
+      responseId
+    );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    res.status(HttpStatus.OK).send(response);
+  } catch (ex) {
+    logger.error(`Error from GET /getLoginUser = ${ex}`);
+    var response = await buildResponse(
+      data,
+      reason,
+      statusCode,
+      responseId
+    );
+    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    res.status(statusCode).send(response);
+  }
+};

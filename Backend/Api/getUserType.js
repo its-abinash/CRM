@@ -5,4 +5,6 @@ var router = express.Router();
 
 router.get("/getUserType", controller.getUserType);
 
+router.get("/getLoginUser", controller.getLoginUser);
+
 module.exports = router;

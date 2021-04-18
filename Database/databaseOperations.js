@@ -240,7 +240,6 @@ var updateAtCred = async function (pk_name, pk_value, fields, data) {
 var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   try {
     logger.info(`field to update at customer table: ${JSON.stringify(fields)}`);
-    logger.info(`payload to update at customer table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     for (var i = 0; i < fields.length; i++) {
       const query = `UPDATE customer

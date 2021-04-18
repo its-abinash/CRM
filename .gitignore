@@ -4,3 +4,4 @@ logs/app.log
 .nyc_output
 coverage
 secret
+DEBUG.txt

@@ -65,6 +65,8 @@ const {
   fakeGetProfilePicResponse,
   fakeGetProfilePicResponse2,
   insertProfilePictureFailureRes,
+  fakeLoginUserResponse,
+  fakeLoginUserExpResponse,
 } = require("./mockData");
 
 var chatControllerTestPositive = function () {
@@ -429,6 +431,18 @@ var getUserTypeUtilsControllerTest = function () {
     sinon.stub(dbUtils, "fetch").throwsException();
     await getUserTypeUtils.getUserType(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
+  });
+  it("GET /getLoginUser - success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(dbUtils, "fetch").returns(specificCredData);
+    await getUserTypeUtils.getLoginUser(fakeChatPOSTRequest, fakeResponse);
+    assert.match(fakeResponse.response, fakeLoginUserResponse);
+  });
+  it("GET /getLoginUser - exception test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(dbUtils, "fetch").returns(specificCredData);
+    await getUserTypeUtils.getLoginUser(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.response, fakeLoginUserExpResponse);
   });
   afterEach(function () {
     sinon.verifyAndRestore();

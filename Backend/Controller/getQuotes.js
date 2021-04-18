@@ -23,6 +23,8 @@ const DEFAULT_DATA = {
   defaultProfilePicture: URL.defaultProfilePictureUrl,
 };
 
+var UNKNOWN = "Unknown"
+
 var getRandomCategory = async function () {
   var url = URL.defaultGETCategoryUrl;
   var categoryList = [];
@@ -64,6 +66,7 @@ var processQuoteResult = async function (result) {
     var queryResult = jp.query(result, eachExpr.expr);
     res[eachExpr.name] = queryResult[0] || null;
   }
+  res["author"] = res["author"] || UNKNOWN;
   return res;
 };
 
