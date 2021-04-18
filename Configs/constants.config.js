@@ -66,7 +66,8 @@ module.exports = {
     RI_011: "Successfully inserted {0} of user having userId: {1}",
     RI_012: "Failed to insert {0} of user having userId: {1}",
     RI_013: "Successfully sent email to user with userId: {0}",
-    RI_014: "Failed to send email to user with userId: {0}"
+    RI_014: "Failed to send email to user with userId: {0}",
+    RI_015: "User has logged-out or session has expired for the user"
   },
   URL: {
     defaultProfilePictureUrl: "https://www.w3schools.com/howto/img_avatar.png",
