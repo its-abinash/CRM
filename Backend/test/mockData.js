@@ -475,6 +475,28 @@ module.exports.fakeUserTypeResponse = {
   reasons: ["Successfully fetched the is_admin flag with value = true"],
 };
 
+module.exports.fakeLoginUserResponse = {
+  responseId: 'RI_006',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [ 'sender@gmail.com' ],
+  totalCount: 1,
+  reasons: [
+    'Successfully fetched the login user with value = sender@gmail.com'
+  ]
+}
+
+module.exports.fakeLoginUserExpResponse = {
+  responseId: 'RI_015',
+  status: 'BAD_REQUEST',
+  statusCode: 400,
+  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  values: [],
+  totalCount: 0,
+  reasons: [ 'User has logged-out or session has expired for the user' ]
+}
+
 module.exports.fakeInsertPayloadRequest = {
   path: "/fake_path",
   method: "fake_method",
