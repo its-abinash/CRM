@@ -2,7 +2,7 @@ var httpStatus = require("http-status");
 var logger = require("../Logger/log");
 var main_utils = require("./main_utils");
 var jp = require("jsonpath");
-var uuid = require("uuid/v4");
+var { v4: uuid } = require("uuid")
 
 var getRandomId = function () {
   var randomId = uuid();
