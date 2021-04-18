@@ -201,10 +201,6 @@ async function getdashBoard() {
                         <div id="id01" class="modal">
                             <div class="container modal-content animate">
                                 <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
-                                <input type="text" placeholder="name" id="id01-name" name="name">
-                                <p></p><br>
-                                <input type="text" placeholder="phone" id="id01-phone" name="phone">
-                                <p></p><br>
                                 <input type="number" placeholder="reminder frequency" id="id01-rem" name="remfreq">
                                 <p></p><br>
                                 <button type="submit" id="update-btn">Update</button>
