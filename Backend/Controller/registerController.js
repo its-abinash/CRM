@@ -92,6 +92,7 @@ module.exports.register = async function (req, res) {
         var date = new Date();
         date.setDate(date.getDate() + parseInt(remFreq));
         var next_remainder = date.toLocaleDateString();
+        var default_profile_img_url = "";
         var userData = [
           username,
           email,
@@ -99,6 +100,7 @@ module.exports.register = async function (req, res) {
           gstNum,
           remFreq,
           next_remainder,
+          default_profile_img_url
         ];
         logger.info(`credData: ${credData} and userData: ${userData}`);
         // Save user cred in db
