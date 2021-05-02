@@ -7,9 +7,7 @@
 
 - Let's understand few scenarios. Suppose there is a company **X**, and it has 2 clients/customers which are companies **Y**, and **Z**. So the members from company **Y** and **Z** are referred as **CUSTOMERS/CLIENTS** of members from company **X** who are referred as **ADMINS**.
 
-- For 1 admin, there can be N customers and vice-versa. You can see the below picture to understand the relationship better.
-
-![](Editorial-Department-Organizational-Chart.jpg)
+- For 1 admin, there can be N customers and vice-versa.
 
 - With the above relation, there are few challenges to handle,
     - Deleting user/admin from dashboard should not be permanently removing them from db causing other users/admins to be unable to contact that person (Refer [GitHub issue](https://github.com/AbinashB1997/CRM/issues/31))
