@@ -33,5 +33,4 @@ router.post("/insert/profilePicture", uploadMiddleware, userController.insertPro
 // Email Endpoints
 router.post("/email", userController.email);
 
-
 module.exports = router;

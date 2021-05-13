@@ -40,14 +40,11 @@ var processAndGetFinalResponse = async function (
  */
 module.exports.processAndDeleteUserData = async function (req) {
   var email = req.body.email;
-  logger.info(`XXXXXXXXXXXXXXXXXX email = ${email}`)
   var removeFields = [req.session.user, email];
-  logger.info(`XXXXXXXXXXXXXXXXXX removeFields = ${removeFields}`)
   var [isUserRemoved, isChatRemoved] = await deleteServiceDao.removeUserData(
     removeFields,
     req.session.user
   );
-  logger.info(`XXXXXXXXXXXXXXXXXXXXXXX isUserRemoved, isChatRemoved = , ${isUserRemoved}, ${isChatRemoved}`)
   var response = await processAndGetFinalResponse(isUserRemoved, isChatRemoved, email);
   return [response.statusCode, response];
 };
