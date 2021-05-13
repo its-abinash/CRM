@@ -5,6 +5,7 @@ module.exports.fakeChatPOSTRequest = {
   method: "fake_method",
   session: {
     user: "sender@gmail.com",
+    password: "password"
   },
   body: {
     receiver: "receiver@gmail.com",
@@ -401,7 +402,7 @@ module.exports.fakeConstants = {
         CONTACT: "contact",
         EDIT: "edit",
         ADD: "insert",
-        UPLOAD: "insertProfilePicture",
+        UPLOAD: "insert/profilePicture",
         DELETE: "delete",
         EMAIL: "email",
         CHAT: "chat",
@@ -414,7 +415,7 @@ module.exports.fakeConstants = {
   ],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insertProfilePicture","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
+    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insert/profilePicture","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
   ],
 };
 
@@ -422,6 +423,10 @@ module.exports.getSpecificFromConstantsRequest = {
   params: {
     constId: "ROUTES",
     fieldId: "REG",
+  },
+  session: {
+    user: "sender@gmail.com",
+    password: "pass",
   },
   body: {
     email: "receiver@gmail.com",

@@ -350,9 +350,7 @@ $(document).on("click", "#chat-btn", async function () {
 $(document).on("click", "#update-btn", async function () {
   var EDIT_ENDPOINT = getEditEndpoint();
   var payload = {
-    name: document.getElementById("id01-name").value,
     email: document.getElementById("updatemail").value,
-    phone: document.getElementById("id01-phone").value,
     remfreq: document.getElementById("id01-rem").value,
   };
   if ($.trim(payload.email) != "") {

@@ -1,7 +1,6 @@
 var proxyrequire = require("proxyquire").noCallThru();
 var sinon = require("sinon");
 var assert = sinon.assert;
-var logUtils = require("../Logger/log");
 var { DATABASE } = require("../../Configs/constants.config");
 const {
   fakeCredData,
@@ -43,7 +42,6 @@ function fakePgPoolException() {
 
 var databaseControllerTest = function () {
   it("valid user check test", async function () {
-    sinon.stub(logUtils, "info");
     let pgData = { rows: [{ email: "demo@gmail.com", password: "pass" }] };
     var pgStub = fakePgPool(pgData);
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
@@ -57,8 +55,6 @@ var databaseControllerTest = function () {
     assert.match(result, true);
   });
   it("invalid user check test", async function () {
-    sinon.stub(logUtils, "error");
-    sinon.stub(logUtils, "info");
     var pgData = { rows: [{ email: "demo1@gmail.com", password: "pass1" }] };
     var pgStub = fakePgPool(pgData);
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
@@ -73,7 +69,6 @@ var databaseControllerTest = function () {
     assert.match(result, false);
   });
   it("existing user check test", async function () {
-    sinon.stub(logUtils, "info");
     var pgData = { rows: [{ exists: true }] };
     var pgStub = fakePgPool(pgData);
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
@@ -92,7 +87,6 @@ var databaseControllerTest = function () {
       { databaseId: DATABASE.CREDENTIALS, exp: true, pgStub: fakePgPool(true) },
       { databaseId: DATABASE.CUSTOMER, exp: true, pgStub: fakePgPool(true) },
     ];
-    sinon.stub(logUtils, "info");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -106,7 +100,6 @@ var databaseControllerTest = function () {
     }
   });
   it("remove user from user map - success test", async function () {
-    sinon.stub(logUtils, "info");
     var pgStub = fakePgPool(true);
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -115,8 +108,6 @@ var databaseControllerTest = function () {
     assert.match(result, true);
   });
   it("remove user from user map - exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -136,7 +127,6 @@ var databaseControllerTest = function () {
       },
       { databaseId: DATABASE.CUSTOMER, exp: true, pgStub: fakePgPool(true) },
     ];
-    sinon.stub(logUtils, "info");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -170,7 +160,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPool(true),
       },
     ];
-    sinon.stub(logUtils, "info");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -180,7 +169,6 @@ var databaseControllerTest = function () {
     }
   });
   it("fetch all users for given userId - success test", async function () {
-    sinon.stub(logUtils, "info");
     var pgStub = fakePgPool({ rows: fakeCustomerData });
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -189,8 +177,6 @@ var databaseControllerTest = function () {
     assert.match(result, fakeCustomerData);
   });
   it("fetch all users for given userId - exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -240,7 +226,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPool({ rows: fakeSpecificConversationData }),
       },
     ];
-    sinon.stub(logUtils, "info");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -250,7 +235,6 @@ var databaseControllerTest = function () {
     }
   });
   it("fetch user of given type test", async function () {
-    sinon.stub(logUtils, "info");
     var pgStub = fakePgPool({ rows: fakeSpecificCustomerData });
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -259,7 +243,6 @@ var databaseControllerTest = function () {
     assert.match(result, fakeSpecificCustomerData);
   });
   it("fetch latest remainder test", async function () {
-    sinon.stub(logUtils, "info");
     var pgStub = fakePgPool({ rows: fakeLatestRemainderData });
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -290,8 +273,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPoolException(),
       },
     ];
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -342,8 +323,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPoolException(),
       },
     ];
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -368,8 +347,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPoolException(),
       },
     ];
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -405,8 +382,6 @@ var databaseControllerTest = function () {
         pgStub: fakePgPoolException(),
       },
     ];
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
         pg: testCase.pgStub,
@@ -423,8 +398,6 @@ var databaseControllerTest = function () {
     }
   });
   it("fetch all user of given type exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -436,8 +409,6 @@ var databaseControllerTest = function () {
     }
   });
   it("fetch latest remainder exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -449,8 +420,6 @@ var databaseControllerTest = function () {
     }
   });
   it("existing user check exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
@@ -462,8 +431,6 @@ var databaseControllerTest = function () {
     }
   });
   it("valid user check exception test", async function () {
-    sinon.stub(logUtils, "info");
-    sinon.stub(logUtils, "error");
     var pgStub = fakePgPoolException();
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,

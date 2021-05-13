@@ -111,7 +111,7 @@ function getEditEndpoint() {
   return EDIT;
 }
 
-$(document).on("click", "#insert-btn", async function () {
+$(document).one("click", "#insert-btn", async function () {
   $("form").submit(function (evt) {
     var ADD_ENDPOINT = getAddEndpoint();
     evt.preventDefault();
@@ -126,6 +126,8 @@ $(document).on("click", "#insert-btn", async function () {
       enctype: "multipart/form-data",
       processData: false,
       success: function () {
+        document.getElementById("id_img").value = null;
+        formData = null;
         loadAvatarDiv();
       },
     });

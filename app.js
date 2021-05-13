@@ -15,42 +15,22 @@ app.set(CORE.VIEWS_ID, CORE.VIEWS_NAME);
 app.use(session(CORE.SESSION_PARAMETERS));
 app.use(requestTracer.expressMiddleware())
 
-var login = require("./Backend/Api/login");
-var register = require("./Backend/Api/register");
-var controller = require("./Backend/Controller/landingPage");
-var edit = require("./Backend/Api/edit");
-var add = require("./Backend/Api/insert");
-var remove = require("./Backend/Api/delete");
-var dashboard = require("./Backend/Api/dashboard");
-var email = require("./Backend/Api/email");
-var chat = require("./Backend/Api/chat");
-var constants = require("./Backend/Api/getConstants");
-var remainder = require("./Backend/Api/getLatestRemainder");
-var userType = require("./Backend/Api/getUserType");
-var quotes = require("./Backend/Api/getQuotes");
-var logout = require("./Backend/Api/logout");
+var UIController = require("./Backend/Controller/coreServices");
+var authAPIs = require("./Backend/Api/auth")
+var coreServicesAPIs = require("./Backend/Api/coreServices")
+var userServicesAPIs = require("./Backend/Api/userServices")
 
 /**
  * @description APIs to be used are listed here
  */
 app.use(
   "/",
-  register,
-  login,
-  edit,
-  add,
-  remove,
-  dashboard,
-  email,
-  chat,
-  constants,
-  remainder,
-  userType,
-  quotes,
-  logout
+  authAPIs,
+  coreServicesAPIs,
+  userServicesAPIs
 );
 
-app.get("/", controller.landingPage);
+app.get("/", UIController.landingPage);
 
 app.listen(CORE.PORT, () => {
   logger.info(`app is running at http://localhost:${CORE.PORT}}`);
