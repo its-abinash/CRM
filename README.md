@@ -94,3 +94,6 @@ $ npm start
 # Go the the project directory
 $ npm test
 ```
+## Current Limitations (May 2021)
+
+- If admin removes the customer, then he/she will not be able to undo it. [This is a known issue and will be fixed in next ENH]

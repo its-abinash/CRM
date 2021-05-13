@@ -1,6 +1,5 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var logger = require("../Backend/Logger/log");
 var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
 var { DATABASE } = require("../Configs/constants.config");
 
@@ -17,7 +16,6 @@ const pool = new Pool({
  */
 var insertAtCred = async function (data) {
   try {
-    logger.info(`payload to insert at credential table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `INSERT INTO
                    credentials (email, password, passcode, is_admin)
@@ -39,7 +37,6 @@ var insertAtCred = async function (data) {
  */
 var insertAtCustomer = async function (data) {
   try {
-    logger.info(`payload to insert at customer table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder, img_data)
                    VALUES ($1, $2, $3, $4, $5, $6, $7)`;
@@ -60,7 +57,6 @@ var insertAtCustomer = async function (data) {
  */
 var insertAtUsersMap = async function (data) {
   try {
-    logger.info(`payload to insert at user_map table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `INSERT INTO users_map (user_id1, user_id2)
                    VALUES ($1, $2)`;
@@ -158,7 +154,6 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
  */
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
-    logger.info(`query payload to fetch all users for given userId: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `select customer.email, customer.name
                    from customer
@@ -185,7 +180,6 @@ module.exports.fetchAllUsersForGivenUserId = async function (data) {
  */
 module.exports.fetchAllUserOfGivenType = async function (is_admin = [false]) {
   try {
-    logger.info(`query payload to fetch all user of given type: is_admin = ${is_admin}`);
     const db = await pool.connect();
     const query = `select customer.email, customer.name
                    from customer
@@ -212,7 +206,6 @@ module.exports.fetchAllUserOfGivenType = async function (is_admin = [false]) {
  */
 var updateAtCred = async function (pk_name, pk_value, fields, data) {
   try {
-    logger.info(`payload to update at credentials table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     for (var i = 0; i < fields.length; i++) {
       const query = `UPDATE credentials
@@ -239,7 +232,6 @@ var updateAtCred = async function (pk_name, pk_value, fields, data) {
  */
 var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   try {
-    logger.info(`field to update at customer table: ${JSON.stringify(fields)}`);
     const db = await pool.connect();
     for (var i = 0; i < fields.length; i++) {
       const query = `UPDATE customer
@@ -324,7 +316,6 @@ var removeAtConversation = async function (pk_name, pk_value) {
  */
 var removeUserFromUserMap = async function (data) {
   try {
-    logger.info(`payload to delete user from user_map table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `delete from users_map
                    WHERE user_id1 = $1 and user_id2 = $2`;
@@ -345,7 +336,6 @@ var removeUserFromUserMap = async function (data) {
  */
 var insertAtConversation = async function (data) {
   try {
-    logger.info(`payload to insert at conversation table: ${JSON.stringify(data)}`);
     const db = await pool.connect();
     const query = `INSERT INTO conversation (sender, receiver, msg, timestamp)
                    values ($1, $2, $3, current_timestamp)`;

@@ -79,5 +79,17 @@ module.exports = {
     defaultQuote: "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
     defaultAuthor: "Marva Collins",
     defaultTitle: "Quote of the day for students",
-  }
+  },
+  routes: {
+    server: `http://localhost:${process.env.APP_PORT}/`,
+    reg: "register",
+    login: "login",
+    contact: "contact",
+    edit: "edit",
+    add: "insert",
+    delete: "delete",
+    email: "email",
+    chat: "chat",
+    dashboard: "dashboard/getCustomer",
+  },
 };
