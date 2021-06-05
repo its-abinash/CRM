@@ -1,27 +1,56 @@
 var editServiceDao = require("./editServiceDao");
 var logger = require("../Logger/log");
 const { ResponseIds } = require("../../Configs/constants.config");
-const { buildResponse, getEndMessage, buildErrorReasons } = require("./response_utils");
 const { format, validatePayload, processPayload } = require("./main_utils");
 var httpStatus = require("http-status");
-const { updatePayloadSchema } = require("./schema");
+const { updatePayloadSchema, patchPayloadSchema } = require("./schema");
+
+var isEmptyPropertyFound = async function (payload) {
+  var emptyPropertyList = [];
+  for (const property in payload) {
+    if (
+      payload[property] in [null, "null", "undefined", undefined] ||
+      payload[property].length == 0
+    ) {
+      emptyPropertyList.push(property);
+    }
+  }
+  return emptyPropertyList;
+};
 
 var processAndGetFinalResponse = async function (
   isValidPayload,
   errorList,
-  payload
+  payload,
+  AppRes,
+  updateOperation = false
 ) {
   var response = {};
   if (!isValidPayload) {
     logger.info(`Invalid Payload with errorList = ${errorList}`);
-    var reasons = await buildErrorReasons(errorList);
-    response = await buildResponse(
+    var reasons = await AppRes.buildErrorReasons(errorList);
+    response = await AppRes.buildResponse(
       null,
       reasons,
       httpStatus.UNPROCESSABLE_ENTITY,
       "RI_004"
     );
   } else {
+    if (updateOperation) {
+      var emptyPropertyList = await isEmptyPropertyFound(payload);
+      if (emptyPropertyList.length > 0) {
+        logger.error(
+          `Values not found for properties: [${emptyPropertyList}] in payload for update operation`
+        );
+        response = await AppRes.buildResponse(
+          null,
+          format(ResponseIds.RI_033, [emptyPropertyList]),
+          httpStatus.BAD_REQUEST,
+          "RI_033"
+        );
+        return response
+      }
+    }
     var name = payload.name || "";
     var email = payload.email;
     var phone = payload.phone || "";
@@ -44,17 +73,17 @@ var processAndGetFinalResponse = async function (
     var dataSaved = await editServiceDao.saveEditedData(email, fields, data);
     if (dataSaved) {
       logger.info("successfully updated in db");
-      response = await buildResponse(
+      response = await AppRes.buildResponse(
         null,
-        format(ResponseIds.RI_009, ["User Information", email]),
+        format(ResponseIds.RI_009, ["information", email]),
         httpStatus.OK,
         "RI_009"
       );
     } else {
       logger.error("failed to update in db");
-      response = await buildResponse(
+      response = await AppRes.buildResponse(
         null,
-        format(ResponseIds.RI_010, ["User Information", email]),
+        format(ResponseIds.RI_010, ["information", email]),
         httpStatus.BAD_REQUEST,
         "RI_010"
       );
@@ -66,20 +95,45 @@ var processAndGetFinalResponse = async function (
 /**
  * @function processAndEditUserData
  * @async
- * @description Update details of user
- * @param {Object} req
+ * @description Update details of userlogedinuser:
+ * @param {Class} AppRes
  */
-module.exports.processAndEditUserData = async function (req) {
-  var payload = await processPayload(req.body);
+module.exports.processAndEditUserData = async function (AppRes) {
+  var requestPayload = AppRes.getRequestBody();
+  var payload = await processPayload(requestPayload);
+  payload["phone"] = String(payload["phone"])
   var [isValidPayload, errorList] = await validatePayload(
     payload,
     updatePayloadSchema
   );
+  const updateOperation = true;
   var response = await processAndGetFinalResponse(
     isValidPayload,
     errorList,
-    payload
+    payload,
+    AppRes,
+    updateOperation
   );
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+  return [response.statusCode, response];
+};
+
+/**
+ * @function processAndUpdateUserProperty
+ * @async
+ * @description Patch details of userlogedinuser:
+ * @param {Class} AppRes
+ */
+module.exports.processAndUpdateUserProperty = async function (AppRes) {
+  var qpArgs = AppRes.getQueryParams();
+  var [isValidPayload, errorList] = await validatePayload(
+    qpArgs,
+    patchPayloadSchema
+  );
+  var response = await processAndGetFinalResponse(
+    isValidPayload,
+    errorList,
+    qpArgs,
+    AppRes
+  );
   return [response.statusCode, response];
 };

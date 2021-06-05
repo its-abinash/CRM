@@ -1,10 +1,5 @@
 const session = require("express-session");
 const { processPayload, validatePayload, format } = require("./main_utils");
-const {
-  buildErrorReasons,
-  buildResponse,
-  getEndMessage,
-} = require("./response_utils");
 const { emailPayloadSchema } = require("./schema");
 const httpStatus = require("http-status");
 const emailServiceDao = require("./emailServiceDao");
@@ -25,10 +20,13 @@ const TEXT = "text";
  * @async
  * @description Sends email to user
  * @param {Object} req
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndSendEmail = async function (req) {
-  var payload = await processPayload(req.body);
-  payload[FROM] = req.session.user;
+module.exports.processAndSendEmail = async function (LoggedInUser, AppRes) {
+  var requestPayload = AppRes.getRequestBody();
+  var payload = await processPayload(requestPayload);
+  payload[FROM] = LoggedInUser;
   payload[TO] = payload.email || "";
   delete payload.email;
   payload[SUBJECT] = payload.subject || "";
@@ -40,8 +38,8 @@ module.exports.processAndSendEmail = async function (req) {
   );
   if (!isValidPayload) {
     logger.info(`Invalid Payload with errorList = ${errorList}`);
-    var reasons = await buildErrorReasons(errorList);
-    var response = await buildResponse(
+    var reasons = await AppRes.buildErrorReasons(errorList);
+    var response = await AppRes.buildResponse(
       null,
       reasons,
       httpStatus.UNPROCESSABLE_ENTITY,
@@ -68,17 +66,16 @@ module.exports.processAndSendEmail = async function (req) {
     try {
       await transporter.sendMail(mailOptions);
       logger.info("Successfully sent email");
-      var response = await buildResponse(
+      var response = await AppRes.buildResponse(
         null,
         format(ResponseIds.RI_013, [payload.to]),
         httpStatus.OK,
         "RI_013"
       );
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       return [httpStatus.OK, response];
     } catch (emailException) {
       logger.error(`Error: ${emailException}`);
-      var response = await buildResponse(
+      var response = await AppRes.buildResponse(
         null,
         format(ResponseIds.RI_014, [payload.to]),
         httpStatus.BAD_REQUEST,

@@ -6,11 +6,6 @@ const {
   ResponseIds,
   DATABASE,
 } = require("../../Configs/constants.config");
-const {
-  buildResponse,
-  getEndMessage,
-  buildErrorReasons,
-} = require("./response_utils");
 const { validatePayload, format } = require("./main_utils");
 const httpStatus = require("http-status");
 const { chatPostPayloadSchema } = require("./schema");
@@ -22,9 +17,15 @@ const CryptoJs = require("crypto-js");
  * @method processAndGetConversation
  * @description Fetch conversations between login user and requested user
  * @param {Object} req request object
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndGetConversation = async function (req) {
-  var sender = req.session.user;
+module.exports.processAndGetConversation = async function (
+  req,
+  LoggedInUser,
+  AppRes
+) {
+  var sender = LoggedInUser;
   var receiver = req.params.receiverId;
   var chat = await chatDao.getConversation(
     DATABASE.CONVERSATION,
@@ -45,14 +46,12 @@ module.exports.processAndGetConversation = async function (req) {
     chat[i][CSS.CHAT_COL] =
       chat[i].sender === sender ? CSS.CHAT_SENDER_COL : CSS.CHAT_RECEIVER_COL;
   }
-  logger.info(`Chat between ${sender} and ${receiver} received`);
-  var response = await buildResponse(
+  var response = await AppRes.buildResponse(
     chat,
     format(ResponseIds.RI_001, [sender, receiver]),
     httpStatus.OK,
     "RI_001"
   );
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
   return response;
 };
 
@@ -60,19 +59,24 @@ module.exports.processAndGetConversation = async function (req) {
  * @async
  * @method processAndSaveConversation
  * @description Save conversations between login user and requested user
- * @param {Object} req request object
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndSaveConversation = async function (req) {
-  req.body["sender"] = req.session.user;
-  var payload = req.body;
+module.exports.processAndSaveConversation = async function (
+  LoggedInUser,
+  AppRes
+) {
+  var requestPayload = AppRes.getRequestBody();
+  requestPayload["sender"] = LoggedInUser;
+  var payload = requestPayload;
 
   var [isValidPayload, errorList] = await validatePayload(
     payload,
     chatPostPayloadSchema
   );
   if (!isValidPayload) {
-    var errorReason = await buildErrorReasons(errorList);
-    var response = await buildResponse(
+    var errorReason = await AppRes.buildErrorReasons(errorList);
+    var response = await AppRes.buildResponse(
       null,
       errorReason,
       httpStatus.UNPROCESSABLE_ENTITY,
@@ -99,8 +103,12 @@ module.exports.processAndSaveConversation = async function (req) {
     } else {
       logger.error("Failure status from database");
     }
-    var response = await buildResponse(null, reason, statusCode, responseId);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    var response = await AppRes.buildResponse(
+      null,
+      reason,
+      statusCode,
+      responseId
+    );
     return [statusCode, response];
   }
 };

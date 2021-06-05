@@ -1,9 +1,4 @@
 const { validatePayload, format, processPayload } = require("./main_utils");
-const {
-  buildErrorReasons,
-  buildResponse,
-  getEndMessage,
-} = require("./response_utils");
 const logger = require("../Logger/log");
 const {
   ResponseIds,
@@ -35,9 +30,12 @@ var getDefaultImgUrl = async function () {
  * @async
  * @description Inserts user data
  * @param {Object} req
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndInsertUserData = async function (req) {
-  var payload = await processPayload(req.body);
+module.exports.processAndInsertUserData = async function (req, LoggedInUser, AppRes) {
+  var requestPayload = AppRes.getRequestBody();
+  var payload = await processPayload(requestPayload);
   payload["phone"] = payload["phone"].toString();
   payload["email"] = payload["email"].toLowerCase();
   var [isValidPayload, errorList] = await validatePayload(
@@ -46,14 +44,13 @@ module.exports.processAndInsertUserData = async function (req) {
   );
   if (!isValidPayload) {
     logger.info(`Invalid Payload with errorList = ${errorList}`);
-    var reasons = await buildErrorReasons(errorList);
-    var response = await buildResponse(
+    var reasons = await AppRes.buildErrorReasons(errorList);
+    var response = await AppRes.buildResponse(
       null,
       reasons,
       httpStatus.UNPROCESSABLE_ENTITY,
       "RI_004"
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     return [httpStatus.UNPROCESSABLE_ENTITY, response];
   } else {
     var date = new Date();
@@ -71,8 +68,8 @@ module.exports.processAndInsertUserData = async function (req) {
     ];
     var credData = [payload.email, FAKE_PASSWORD, FAKE_PASSCODE, DEFAULT_ADMIN];
     var usermapData = [
-      [req.session.user, payload.email],
-      [payload.email, req.session.user],
+      [LoggedInUser, payload.email],
+      [payload.email, LoggedInUser],
     ];
     var customerCreated = await insertServiceDao.insertUserData(
       DATABASE.CUSTOMER,
@@ -89,24 +86,22 @@ module.exports.processAndInsertUserData = async function (req) {
 
     if (customerCreated && credentialSaved && usermapCreated) {
       logger.info("Successfully inserted data");
-      var response = await buildResponse(
+      var response = await AppRes.buildResponse(
         null,
         format(ResponseIds.RI_011, ["data", payload.email]),
         httpStatus.CREATED,
         "RI_011"
       );
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       return [httpStatus.CREATED, response];
     } else {
       logger.error("Failed to insert data");
       await deleteServiceDao.removeDataOnFailure(usermapData, payload.email);
-      var response = await buildResponse(
+      var response = await AppRes.buildResponse(
         null,
         format(ResponseIds.RI_012, ["data", payload.email]),
         httpStatus.BAD_REQUEST,
         "RI_012"
       );
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       return [httpStatus.BAD_REQUEST, response];
     }
   }
@@ -117,29 +112,29 @@ module.exports.processAndInsertUserData = async function (req) {
  * @async
  * @description Inserts profile picture of user into db
  * @param {Object} req
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndInsertProfilePicture = async function (req) {
-  if (req.session && req.session.user && req.file) {
+module.exports.processAndInsertProfilePicture = async function (req, LoggedInUser, AppRes) {
+  if (req.session && LoggedInUser && req.file) {
     var base64Uri = req.file.buffer.toString("base64");
     var url = `data:${req.file.mimetype};base64, ${base64Uri}`;
-    await insertServiceDao.saveImageIntoDB(req.session, url);
-    var response = await buildResponse(
+    await insertServiceDao.saveImageIntoDB(LoggedInUser, url);
+    var response = await AppRes.buildResponse(
       null,
-      format(ResponseIds.RI_011, ["Profile Picture", req.session.user]),
+      format(ResponseIds.RI_011, ["Profile Picture", LoggedInUser]),
       httpStatus.OK,
       "RI_011"
     );
     logger.info("Profile Picture Successfully Updated");
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     return [httpStatus.OK, response];
   } else {
-    var response = await buildResponse(
+    var response = await AppRes.buildResponse(
       null,
-      format(ResponseIds.RI_012, ["Profile Picture", req.session.user]),
+      format(ResponseIds.RI_012, ["Profile Picture", LoggedInUser]),
       httpStatus.BAD_REQUEST,
       "RI_012"
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     return [httpStatus.BAD_REQUEST, response];
   }
 };
