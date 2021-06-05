@@ -246,14 +246,14 @@ var deleteControllerTestNegative = function () {
 };
 
 var editControllerTest = function () {
-  it("POST /edit - update user data test", async function () {
+  it("PUT /edit - update user data test", async function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(loggerUtils, "info");
     sinon.stub(editServiceDao, "saveEditedData").returns(true);
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
   });
-  it("POST /edit - update user data failure test", async function () {
+  it("PUT /edit - update user data failure test", async function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
@@ -261,14 +261,14 @@ var editControllerTest = function () {
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 400);
   });
-  it("POST /edit - Exception test", async function () {
+  it("PUT /edit - Exception test", async function () {
     sinon.stub(validator, "validate").throwsException();
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });
-  it("POST /edit payload error test", async function () {
+  it("PUT /edit payload error test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(validator, "validate").returns({ valid: false });
