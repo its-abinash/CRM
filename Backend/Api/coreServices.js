@@ -29,4 +29,7 @@ router.get("/getLoginUser", coreController.getLoginUser);
 // LandingPage Endpoints
 router.get("/landingPage", coreController.landingPage);
 
+// JWT Endpoints
+router.get("/verifyToken", coreController.verifyJWT)
+
 module.exports = router;
