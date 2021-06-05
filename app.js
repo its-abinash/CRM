@@ -19,12 +19,14 @@ var UIController = require("./Backend/Controller/coreServices");
 var authAPIs = require("./Backend/Api/auth")
 var coreServicesAPIs = require("./Backend/Api/coreServices")
 var userServicesAPIs = require("./Backend/Api/userServices")
+var mainUtils = require("./Backend/Controller/main_utils")
 
 /**
- * @description APIs to be used are listed here
+ * @description Middlewares to be used are listed here
  */
 app.use(
   "/",
+  mainUtils.requestTime, // requestTimeTracerMiddleware
   authAPIs,
   coreServicesAPIs,
   userServicesAPIs
@@ -32,6 +34,6 @@ app.use(
 
 app.get("/", UIController.landingPage);
 
-app.listen(CORE.PORT, () => {
+app.listen(CORE.PORT, "0.0.0.0", () => {
   logger.info(`app is running at http://localhost:${CORE.PORT}}`);
 });
