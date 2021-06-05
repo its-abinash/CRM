@@ -202,7 +202,29 @@ var updatePayloadSchema = {
     "type": "object",
     "title": "The update Payload Schema",
     "description": "The root schema comprises the entire JSON document.",
-    "required": ["email"],
+    "required": ["email", "name", "phone", "remfreq"],
+    "properties": {
+        "name": {"$ref": "/nameSchema"},
+        "email": {"$ref": "/chatPostReceiverSchema"},
+        "phone": {"$ref": "/phoneNumberSchema"},
+        "remfreq": {"$ref": "/remainderSchema"}
+    },
+    "additionalProperties": false
+}
+
+var patchPayloadSchema = {
+    "type": "object",
+    "title": "The update Payload Schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "anyOf" : [
+        { "required": ["email", "name"] },
+        { "required": ["email", "phone"] },
+        { "required": ["email", "remfreq"] },
+        { "required": ["email", "name", "remfreq"] },
+        { "required": ["email", "name", "phone"] },
+        { "required": ["email", "phone", "remfreq"] },
+        { "required": ["email", "name", "phone", "remfreq"] },
+    ],
     "properties": {
         "name": {"$ref": "/nameSchema"},
         "email": {"$ref": "/chatPostReceiverSchema"},
@@ -302,3 +324,4 @@ module.exports.emailPayloadSchema = emailPayloadSchema
 module.exports.validator = validator
 module.exports.registrationSchema = registrationSchema
 module.exports.loginPayloadSchema = loginPayloadSchema
+module.exports.patchPayloadSchema = patchPayloadSchema
