@@ -1,4 +1,3 @@
-const { buildResponse, getEndMessage } = require("./response_utils");
 const { ResponseIds } = require("../../Configs/constants.config");
 const httpStatus = require("http-status");
 var logger = require("../Logger/log");
@@ -10,13 +9,16 @@ const CONSTANTS = {
     DECRYPTIONKEY: "#",
   },
   ROUTES: {
+    HOME: "home",
+    LANDINGPAGE: "landingPage",
+    LOGOUT: "logout",
     REG: "register",
     LOGIN: "login",
     CONTACT: "contact",
     EDIT: "edit",
     ADD: "insert",
     UPLOAD: "insert/profilePicture",
-    DELETE: "delete",
+    DELETE: "deleteUser",
     EMAIL: "email",
     CHAT: "chat",
     DASHBOARD: {
@@ -34,16 +36,16 @@ const CONSTID_EXCEPTION = "Requested constantId not found";
  * @description Gets all CONSTANTS
  * @async
  * @param {Object} req
+ * @param {Class} AppRes
  */
-module.exports.processAndGetAllConstants = async function (req) {
+module.exports.processAndGetAllConstants = async function (req, AppRes) {
   logger.info(`All constants are sent`);
-  var response = await buildResponse(
+  var response = await AppRes.buildResponse(
     CONSTANTS,
     format(ResponseIds.RI_006, ["Constants", JSON.stringify(CONSTANTS)]),
     httpStatus.OK,
     "RI_006"
   );
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
   return [httpStatus.OK, response];
 };
 
@@ -52,15 +54,16 @@ module.exports.processAndGetAllConstants = async function (req) {
  * @description Gets a field of specific CONSTANT from CONSTANTS
  * @async
  * @param {Object} req
+ * @param {Class} AppRes
  */
-module.exports.processAndGetSpecificFromConstants = async function (req) {
+module.exports.processAndGetSpecificFromConstants = async function (req, AppRes) {
   var constantId = req.params.constId.toString().toUpperCase();
   var fieldId = req.params.fieldId.toString().toUpperCase();
   logger.info(`constantId: ${constantId}, fieldId: ${fieldId}`);
   if (CONSTANTS.hasOwnProperty(constantId)) {
     if (CONSTANTS[constantId].hasOwnProperty(fieldId)) {
       logger.info(`Data sent : ${CONSTANTS[constantId][fieldId]}`);
-      var response = await buildResponse(
+      var response = await AppRes.buildResponse(
         CONSTANTS[constantId][fieldId],
         format(ResponseIds.RI_006, [
           "Constant",
@@ -69,7 +72,6 @@ module.exports.processAndGetSpecificFromConstants = async function (req) {
         httpStatus.OK,
         "RI_006"
       );
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       return [httpStatus.OK, response];
     } else {
       // If fieldId not found then throwing keyError
@@ -85,13 +87,14 @@ module.exports.processAndGetSpecificFromConstants = async function (req) {
  * @function processAndGetConstant
  * @description Gets specific CONSTANT
  * @param {Object} req
+ * @param {Class} AppRes
  */
-module.exports.processAndGetConstant = async function (req) {
+module.exports.processAndGetConstant = async function (req, AppRes) {
   var constantId = req.params.constId.toString().toUpperCase();
   logger.info(`constantId = ${constantId}`);
   if (CONSTANTS.hasOwnProperty(constantId)) {
     logger.info(`Data sent : ${JSON.stringify(CONSTANTS[constantId])}`);
-    var response = await buildResponse(
+    var response = await AppRes.buildResponse(
       CONSTANTS[constantId],
       format(ResponseIds.RI_006, [
         "Constant",
@@ -100,7 +103,6 @@ module.exports.processAndGetConstant = async function (req) {
       httpStatus.OK,
       "RI_006"
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     return [httpStatus.OK, response];
   } else {
     // If not present then throwing keyError

@@ -1,6 +1,5 @@
 const coreServiceDao = require("./coreServiceDao");
 const { format } = require("./main_utils");
-const { buildResponse, getEndMessage } = require("./response_utils");
 const { ResponseIds } = require("../../Configs/constants.config");
 const httpStatus = require("http-status")
 var logger = require("../Logger/log");
@@ -31,15 +30,15 @@ function getCustomerIds(remainderInfos) {
  * @async
  * @function processRemainderData
  * @description Fetch latest remainder
- * @param {Object} req
+ * @param {Class} AppRes
  */
-module.exports.processRemainderData = async function (req) {
+module.exports.processRemainderData = async function (AppRes) {
   var customerIds = await coreServiceDao.getCustomerForRemainderFromDB();
   var remInfo = getCustomerIds(customerIds);
   logger.info(`Remainder Info = ${JSON.stringify(remInfo, null, 3)}`);
   // Updating next remainder date of the customers
   await coreServiceDao.updateRemainderDateInDB(customerIds);
-  var response = await buildResponse(
+  var response = await AppRes.buildResponse(
     null,
     format(ResponseIds.RI_006, [
       "remainder information",
@@ -48,6 +47,5 @@ module.exports.processRemainderData = async function (req) {
     httpStatus.OK,
     "RI_006"
   );
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
   return [httpStatus.OK, response];
 };
