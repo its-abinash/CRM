@@ -9,8 +9,8 @@ var isEmptyPropertyFound = async function (payload) {
   var emptyPropertyList = [];
   for (const property in payload) {
     if (
-      payload[property] in [null, "null", "undefined", undefined] ||
-      payload[property].length == 0
+      payload[property] in [null, "undefined"] ||
+      String(payload[property]).length == 0
     ) {
       emptyPropertyList.push(property);
     }
@@ -48,7 +48,7 @@ var processAndGetFinalResponse = async function (
           httpStatus.BAD_REQUEST,
           "RI_033"
         );
-        return response
+        return response;
       }
     }
     var name = payload.name || "";
@@ -101,7 +101,7 @@ var processAndGetFinalResponse = async function (
 module.exports.processAndEditUserData = async function (AppRes) {
   var requestPayload = AppRes.getRequestBody();
   var payload = await processPayload(requestPayload);
-  payload["phone"] = String(payload["phone"])
+  payload["phone"] = String(payload["phone"]);
   var [isValidPayload, errorList] = await validatePayload(
     payload,
     updatePayloadSchema

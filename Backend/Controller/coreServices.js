@@ -9,7 +9,7 @@ var logger = require("../Logger/log");
 const axios = require("axios").default;
 const { ResponseIds, URL } = require("../../Configs/constants.config");
 const { format, isLoggedInUser } = require("./main_utils");
-const { decodeJwt } = require("./utils");
+const utils = require("./utils");
 const remainderService = require("./remainderService");
 const OOBService = require("./OOBService");
 const quoteService = require("./quoteService");
@@ -48,7 +48,12 @@ module.exports.getAllConstants = async function (req, res) {
     res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    var response = await AppRes.buildResponse(
+      null,
+      ex,
+      httpStatus.BAD_REQUEST,
+      "RI_015"
+    );
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -124,7 +129,7 @@ module.exports.getQuotes = async function (req, res) {
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var LoggedInUser = await decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     logger.info(`loggedInUser: ${LoggedInUser}`);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
@@ -194,7 +199,7 @@ module.exports.getProfilePicture = async function (req, res) {
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var LoggedInUser = await decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     logger.info(`logedinuser: ${LoggedInUser}`);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
@@ -254,7 +259,7 @@ module.exports.getUserType = async function (req, res) {
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var LoggedInUser = await decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
         null,
@@ -298,7 +303,7 @@ module.exports.getLoginUser = async function (req, res) {
 
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
         null,
@@ -358,7 +363,7 @@ module.exports.latestRemainderInformation = async function (req, res) {
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var LoggedInUser = await decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
         null,
@@ -394,7 +399,7 @@ module.exports.verifyJWT = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var token = req.headers["x-access-token"];
+    var token = AppRes.getAccessToken();
     if (!token) {
       var response = await AppRes.buildResponse(
         null,
@@ -402,27 +407,27 @@ module.exports.verifyJWT = async function (req, res) {
         httpStatus.UNAUTHORIZED,
         "RI_015"
       );
-    }
-    var decodedToken = null;
-    var reasons = ResponseIds.RI_023;
-    var statusCode = httpStatus.BAD_GATEWAY;
-    var responseId = "RI_023";
-    jwt.verify(token, process.env.JWT_SECRET, function (err, decodedJwt) {
-      if (!err) {
-        decodedToken = decodedJwt;
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var reasons = ResponseIds.RI_023;
+      var statusCode = httpStatus.BAD_REQUEST;
+      var responseId = "RI_023";
+      var decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+      if (decodedToken) {
         reasons = ResponseIds.RI_024;
         responseId = "RI_024";
         statusCode = httpStatus.OK;
       }
-    });
-    var response = await AppRes.buildResponse(
-      decodedToken,
-      reasons,
-      statusCode,
-      responseId
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
+      var response = await AppRes.buildResponse(
+        decodedToken,
+        reasons,
+        statusCode,
+        responseId
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);

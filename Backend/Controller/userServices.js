@@ -59,7 +59,7 @@ module.exports.getCustomers = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -100,7 +100,7 @@ module.exports.getAdmins = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -141,7 +141,7 @@ module.exports.getConversation = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -185,7 +185,7 @@ module.exports.chat = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -228,7 +228,7 @@ module.exports.delete = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -267,7 +267,7 @@ module.exports.edit = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -309,7 +309,7 @@ module.exports.updateUserProperty = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -350,7 +350,7 @@ module.exports.insert = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -363,7 +363,6 @@ module.exports.insert = async function (req, res) {
       res.status(httpStatus.UNAUTHORIZED).send(response);
     } else {
       var [statusCode, response] = await insertService.processAndInsertUserData(
-        req,
         LoggedInUser,
         AppRes
       );
@@ -372,7 +371,7 @@ module.exports.insert = async function (req, res) {
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var reasons = [format(ResponseIds.RI_030, [String(ex)])];
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       reasons.push(ResponseIds.RI_015);
@@ -411,7 +410,7 @@ module.exports.insertProfilePicture = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(
@@ -456,7 +455,7 @@ module.exports.email = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(req);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       logger.error("User is unauthorized");
       var response = await AppRes.buildResponse(

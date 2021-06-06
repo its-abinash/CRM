@@ -16,7 +16,7 @@ var session = require("express-session");
 var httpStatus = require("http-status");
 var jp = require("jsonpath");
 var jwt = require("jsonwebtoken");
-const { decodeJwt } = require("./utils");
+const utils = require("./utils");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -31,13 +31,15 @@ var existingUser = async function (email) {
   }
 };
 
-var removeDataOnFailure = async function () {
+var removeDataOnFailure = async function (email) {
   try {
-    await db.remove(DATABASE.CREDENTIALS, "email", email);
-    await db.remove(DATABASE.CUSTOMER, "email", email);
-    await db.remove(DATABASE.USERS_MAP, "user_id1", email);
+    var credRemoved = await db.remove(DATABASE.CREDENTIALS, "email", email);
+    var cusRemoved = await db.remove(DATABASE.CUSTOMER, "email", email);
+    var usermapRemoved = await db.remove(DATABASE.USERS_MAP, "user_id1", email);
+    return credRemoved && cusRemoved && usermapRemoved;
   } catch (ex) {
     logger.error(`Failed to remove user data with err: ${ex}`);
+    return false;
   }
 };
 
@@ -275,7 +277,8 @@ module.exports.register = async function (req, res) {
           res.status(httpStatus.CREATED).send(response);
         } else {
           logger.error("Registration Failed");
-          await removeDataOnFailure();
+          var requestPayload = AppRes.getRequestBody();
+          await removeDataOnFailure(requestPayload.email);
           var response = await AppRes.buildResponse(
             null,
             format(ResponseIds.RI_018, [
@@ -292,7 +295,8 @@ module.exports.register = async function (req, res) {
     }
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    await removeDataOnFailure();
+    var requestPayload = AppRes.getRequestBody();
+    await removeDataOnFailure(requestPayload.email);
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_017, [email, ex]),
@@ -313,7 +317,7 @@ module.exports.register = async function (req, res) {
  */
 module.exports.logout = async function (req, res) {
   var AppRes = new AppResponse(req);
-  var loggedInUser = await decodeJwt(req);
+  var loggedInUser = await utils.decodeJwt(AppRes);
   try {
     AppRes.ApiExecutionBegins();
     logger.info(`Closing session for userId: ${loggedInUser}`);

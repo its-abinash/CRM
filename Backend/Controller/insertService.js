@@ -29,11 +29,10 @@ var getDefaultImgUrl = async function () {
  * @function processAndInsertUserData
  * @async
  * @description Inserts user data
- * @param {Object} req
  * @param {String} LoggedInUser
  * @param {Class} AppRes
  */
-module.exports.processAndInsertUserData = async function (req, LoggedInUser, AppRes) {
+module.exports.processAndInsertUserData = async function (LoggedInUser, AppRes) {
   var requestPayload = AppRes.getRequestBody();
   var payload = await processPayload(requestPayload);
   payload["phone"] = payload["phone"].toString();
