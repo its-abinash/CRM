@@ -94,6 +94,13 @@ $ npm start
 # Go the the project directory
 $ npm test
 ```
+
+- To run specific test, use below command
+```bash
+$ npm test -- Backend/test/{test_file_name} -g {pattern}
+# test_file_name - Backend/test/test_controllers.js (example)
+# pattern - description of test case. We can pick it from describe("pattern", callback) or it("pattern", callback)
+```
 ## Current Limitations (May 2021)
 
 - If admin removes the customer, then he/she will not be able to undo it. [This is a known issue and will be fixed in next ENH]
