@@ -8,6 +8,9 @@ var session = require("express-session");
 const { URL, URLSearchParams } = require("url");
 const qString = require("querystring");
 
+const ACCESS_TOKEN = "x-access-token";
+const HEADERS = "headers";
+
 class AppResponse {
   constructor(request = null) {
     this.request = request || {};
@@ -16,18 +19,25 @@ class AppResponse {
   async destroySession() {
     try {
       await this.request.session.destroy();
-      return true;
+      return;
     } catch (exc) {
       throw exc;
     }
   }
 
+  getAccessToken() {
+    if (HEADERS in this.request && ACCESS_TOKEN in this.request.headers) {
+      return this.request.headers[ACCESS_TOKEN];
+    }
+    return null;
+  }
+
   getQueryParams() {
     const req = this.request;
     const encodedReqUrl = req.originalUrl;
-    const encodedParams = encodedReqUrl.slice(encodedReqUrl.indexOf("?") + 1)
-    if(encodedParams === "") {
-      return {}
+    const encodedParams = encodedReqUrl.slice(encodedReqUrl.indexOf("?") + 1);
+    if (encodedParams === "") {
+      return {};
     }
     const decodedParams = Buffer.from(encodedParams, "base64");
     const reqUrl = req.protocol + "://" + req.get("host") + "?" + decodedParams;
@@ -70,7 +80,7 @@ class AppResponse {
     }
 
     var reasons = reason;
-    if (reason in ["undefined", null, "null"] || !Array.isArray(reason)) {
+    if (reason in ["undefined", null] || !Array.isArray(reason)) {
       reasons = [reason] || ["error"];
     }
     var message = httpStatus[`${statusCode}_MESSAGE`];
@@ -151,7 +161,26 @@ class AppResponse {
   }
 
   ApiReportsError(error) {
-    var message = `Execution of ${this.request.method} ${this.request.path} failed with error: ${error}`;
+    const req = this.request;
+    const OOB_ERRORS_LIST = [
+      Error,
+      EvalError,
+      RangeError,
+      ReferenceError,
+      SyntaxError,
+      TypeError,
+      URIError,
+    ];
+    var errMsg = error; // Considering error is a String and does not belong to any OOB errors
+    var errType = 'Error'; // Common Error
+    for(const eachError of OOB_ERRORS_LIST) {
+      if(error instanceof eachError) {
+        errMsg = error.message;
+        errType = error.name;
+        break;
+      }
+    }
+    var message = `Execution of ${req.method} ${req.path} failed with ${String(errType)}: ${errMsg}`;
     logger.error(message);
   }
 
