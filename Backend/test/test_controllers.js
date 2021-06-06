@@ -766,7 +766,7 @@ var loginControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(jwt, 'sign').returns("XXXXXX.XXXXXXX.XXXXXX")
     await authController.login(loginPayloadRequest, fakeResponse);
-    assert.match(fakeResponse.response, loginSuccessResponse)
+    assert.match(fakeResponse.statusCode, 200)
   });
   it("POST /login - payload validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
