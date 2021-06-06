@@ -1,4 +1,3 @@
-const { buildResponse, getEndMessage } = require("./response_utils");
 const { ResponseIds, StringConstant, URL } = require("../../Configs/constants.config");
 const httpStatus = require("http-status");
 const axios = require("axios").default;
@@ -67,9 +66,9 @@ var getRandomCategory = async function () {
  * @function processAndGetQuotes
  * @async
  * @description fetch random quotes from https://quotes.rest/
- * @param {Object} req
+ * @param {Class} AppRes
  */
-module.exports.processAndGetQuotes = async function (req) {
+module.exports.processAndGetQuotes = async function (AppRes) {
   var category = await getRandomCategory();
   logger.info(`category: ${category}`);
   var result = {};
@@ -89,12 +88,11 @@ module.exports.processAndGetQuotes = async function (req) {
       credit: DEFAULT_DATA.defaultCredit,
     };
   }
-  var response = await buildResponse(
+  var response = await AppRes.buildResponse(
     result,
     format(ResponseIds.RI_006, ["quote", JSON.stringify(result)]),
     httpStatus.OK,
     "RI_006"
   );
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
   return [httpStatus.OK, response];
 };

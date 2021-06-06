@@ -1,20 +1,20 @@
-var deleteServiceDao = require("./deleteServiceDao")
+var deleteServiceDao = require("./deleteServiceDao");
 var logger = require("../Logger/log");
 const { ResponseIds } = require("../../Configs/constants.config");
-const {buildResponse} = require("./response_utils");
 const { format } = require("./main_utils");
-var httpStatus = require("http-status")
+var httpStatus = require("http-status");
 var session = require("express-session");
 
 var processAndGetFinalResponse = async function (
   removedUser,
   removedConversation,
-  email
+  email,
+  AppRes
 ) {
   var response = {};
   if (removedUser && removedConversation) {
     logger.info("Removed user successfully");
-    response = await buildResponse(
+    response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_007, ["userMapping, Conversations", email]),
       httpStatus.OK,
@@ -22,7 +22,7 @@ var processAndGetFinalResponse = async function (
     );
   } else {
     logger.error("Failed to remove user");
-    response = await buildResponse(
+    response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_008, ["userMapping, Conversations", email]),
       httpStatus.BAD_REQUEST,
@@ -36,15 +36,22 @@ var processAndGetFinalResponse = async function (
  * @function processAndDeleteUserData
  * @async
  * @description Delete user's all data
- * @param {Object} req
+ * @param {String} LoggedInUser
+ * @param {Class} AppRes
  */
-module.exports.processAndDeleteUserData = async function (req) {
-  var email = req.body.email;
-  var removeFields = [req.session.user, email];
+module.exports.processAndDeleteUserData = async function (LoggedInUser, AppRes) {
+  var requestPayload = AppRes.getRequestBody();
+  var email = requestPayload.email;
+  var removeFields = [LoggedInUser, email];
   var [isUserRemoved, isChatRemoved] = await deleteServiceDao.removeUserData(
     removeFields,
-    req.session.user
+    LoggedInUser
   );
-  var response = await processAndGetFinalResponse(isUserRemoved, isChatRemoved, email);
+  var response = await processAndGetFinalResponse(
+    isUserRemoved,
+    isChatRemoved,
+    email,
+    AppRes
+  );
   return [response.statusCode, response];
 };

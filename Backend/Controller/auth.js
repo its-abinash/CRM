@@ -9,10 +9,14 @@ var {
   ResponseIds,
   routes,
 } = require("../../Configs/constants.config");
-const { processPayload, validatePayload } = require("./main_utils");
+const { processPayload, validatePayload, format } = require("./main_utils");
 const { registrationSchema, loginPayloadSchema } = require("./schema");
-const { getEndMessage } = require("./response_utils");
+const { AppResponse } = require("./response_utils");
 var session = require("express-session");
+var httpStatus = require("http-status");
+var jp = require("jsonpath");
+var jwt = require("jsonwebtoken");
+const utils = require("./utils");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -27,13 +31,15 @@ var existingUser = async function (email) {
   }
 };
 
-var removeDataOnFailure = async function () {
+var removeDataOnFailure = async function (email) {
   try {
-    await db.remove(DATABASE.CREDENTIALS, "email", email);
-    await db.remove(DATABASE.CUSTOMER, "email", email);
-    await db.remove(DATABASE.USERS_MAP, "user_id1", email);
+    var credRemoved = await db.remove(DATABASE.CREDENTIALS, "email", email);
+    var cusRemoved = await db.remove(DATABASE.CUSTOMER, "email", email);
+    var usermapRemoved = await db.remove(DATABASE.USERS_MAP, "user_id1", email);
+    return credRemoved && cusRemoved && usermapRemoved;
   } catch (ex) {
     logger.error(`Failed to remove user data with err: ${ex}`);
+    return false;
   }
 };
 
@@ -66,36 +72,86 @@ var isValidUser = async function (email, password) {
  * @param {Object} res
  */
 module.exports.login = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /login begins");
-    var payload = await processPayload(req.body);
+    AppRes.ApiExecutionBegins();
+    var requestPayload = AppRes.getRequestBody();
+    var payload = await processPayload(requestPayload);
     var [isValidPayload, errorList] = await validatePayload(
       payload,
       loginPayloadSchema
     );
+    var data = {
+      link: null,
+      auth: false,
+      token: null,
+    };
     if (!isValidPayload) {
-      logger.error(`Invalid Payload with errorList = ${errorList}`);
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-      res.redirect("/login");
+      var errorReason = await AppRes.buildErrorReasons(errorList);
+      var fetch_error_msg_expr = "$[*].error";
+      errorReason.push(data);
+      var errorMessages = jp.query(errorReason, fetch_error_msg_expr);
+      var response = await AppRes.buildResponse(
+        errorReason,
+        errorMessages,
+        httpStatus.UNPROCESSABLE_ENTITY,
+        "RI_004"
+      );
+      logger.info(`Invalid Payload with errorList = ${errorList}`);
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
       var email = payload.email;
       var password = payload.password;
       var validUser = await isValidUser(email, password);
       logger.info(`User Validated: ${validUser}`);
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
       if (validUser) {
         req.session.user = email;
         req.session.password = password;
-        res.redirect("/home");
+        // create access-token
+        var accessToken = jwt.sign({ id: email }, process.env.JWT_SECRET, {
+          expiresIn: 86400, // 24 Hour
+        });
+
+        data = {
+          link: routes.server + routes.home,
+          auth: true,
+          token: accessToken,
+        };
+        var response = await AppRes.buildResponse(
+          data,
+          format(ResponseIds.RI_019, [email]),
+          httpStatus.OK,
+          "RI_019"
+        );
+        AppRes.ApiExecutionEnds();
+        res.status(httpStatus.OK).send(response);
       } else {
-        res.redirect("/login");
+        var response = await AppRes.buildResponse(
+          data,
+          format(ResponseIds.RI_021, [email, "Wrong userId or Password"]),
+          httpStatus.BAD_REQUEST,
+          "RI_021"
+        );
+        AppRes.ApiExecutionEnds();
+        res.status(httpStatus.BAD_REQUEST).send(response);
       }
     }
   } catch (ex) {
-    logger.error(`POST /login Captured Error: ${ex}`);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.redirect("/login");
+    AppRes.ApiReportsError(ex);
+    var data = {
+      link: null,
+      auth: false,
+      token: null,
+    };
+    var response = await AppRes.buildResponse(
+      data,
+      format(ResponseIds.RI_020, [email, ex]),
+      httpStatus.BAD_GATEWAY,
+      "RI_020"
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -134,19 +190,29 @@ var getAdmins = async function () {
  * @param {Object} res
  */
 module.exports.register = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /register begins");
-    var payload = await processPayload(req.body);
+    AppRes.ApiExecutionBegins();
+    var requestPayload = AppRes.getRequestBody();
+    var payload = await processPayload(requestPayload);
     payload["phonenum"] = payload["phonenum"].toString();
     var [isValidPayload, errorList] = await validatePayload(
       payload,
       registrationSchema
     );
     if (!isValidPayload) {
+      var errorReason = await AppRes.buildErrorReasons(errorList);
+      var fetch_error_msg_expr = "$[*].error";
+      var errorMessages = jp.query(errorReason, fetch_error_msg_expr);
+      var response = await AppRes.buildResponse(
+        errorReason,
+        errorMessages,
+        httpStatus.UNPROCESSABLE_ENTITY,
+        "RI_004"
+      );
       logger.info(`Invalid Payload with errorList = ${errorList}`);
-      logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-      res.redirect("/login");
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
       var email = payload.email;
       var username = payload.username;
@@ -158,10 +224,15 @@ module.exports.register = async function (req, res) {
       var isExisting = await existingUser(email);
       logger.info(`isExistingUser = ${isExisting}`);
       if (isExisting) {
-        logger.info(
-          getEndMessage(req, ResponseIds.RI_005, req.method, req.path)
+        logger.error(`UserId: ${email} already exists`);
+        var response = await AppRes.buildResponse(
+          null,
+          format(ResponseIds.RI_022, [email]),
+          httpStatus.CONFLICT,
+          "RI_022"
         );
-        res.redirect("/login");
+        AppRes.ApiExecutionEnds();
+        res.status(httpStatus.CONFLICT).send(response);
       } else {
         var credData = [email, password, passcode, false];
         var date = new Date();
@@ -196,30 +267,48 @@ module.exports.register = async function (req, res) {
         var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
         if (credSaved && dataSaved && usermapCreated) {
           logger.info("User has been successfully registered");
-          logger.info(
-            getEndMessage(req, ResponseIds.RI_005, req.method, req.path)
+          var response = await AppRes.buildResponse(
+            null,
+            format(ResponseIds.RI_016, [email]),
+            httpStatus.CREATED,
+            "RI_016"
           );
-          res.redirect("/login");
+          AppRes.ApiExecutionEnds();
+          res.status(httpStatus.CREATED).send(response);
         } else {
           logger.error("Registration Failed");
-          logger.info(
-            getEndMessage(req, ResponseIds.RI_005, req.method, req.path)
+          var requestPayload = AppRes.getRequestBody();
+          await removeDataOnFailure(requestPayload.email);
+          var response = await AppRes.buildResponse(
+            null,
+            format(ResponseIds.RI_018, [
+              email,
+              "error saving userdata in our databse",
+            ]),
+            httpStatus.BAD_REQUEST,
+            "RI_018"
           );
-          await removeDataOnFailure();
-          res.redirect("/login");
+          AppRes.ApiExecutionEnds();
+          res.status(httpStatus.BAD_REQUEST).send(response);
         }
       }
     }
   } catch (ex) {
-    logger.error(`POST /register Error: ${ex}`);
-    await removeDataOnFailure();
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.redirect("/login");
+    AppRes.ApiReportsError(ex);
+    var requestPayload = AppRes.getRequestBody();
+    await removeDataOnFailure(requestPayload.email);
+    var response = await AppRes.buildResponse(
+      null,
+      format(ResponseIds.RI_017, [email, ex]),
+      httpStatus.BAD_GATEWAY,
+      "RI_017"
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
 
 /**
- * @httpMethod GET
+ * @httpMethod POST
  * @function logout
  * @async
  * @description logging out the user
@@ -227,10 +316,42 @@ module.exports.register = async function (req, res) {
  * @param {Object} res
  */
 module.exports.logout = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("GET /logout begins");
-  logger.info(`Closing session for userId: ${req.session.user}`);
-  await req.session.destroy();
-  logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-  res.redirect("/login");
+  var AppRes = new AppResponse(req);
+  var loggedInUser = await utils.decodeJwt(AppRes);
+  try {
+    AppRes.ApiExecutionBegins();
+    logger.info(`Closing session for userId: ${loggedInUser}`);
+    await AppRes.destroySession();
+    res.cookie("connect.sid", null, {
+      expires: new Date(),
+      httpOnly: true,
+    });
+    var data = {
+      link: routes.server + routes.login,
+      auth: false,
+      token: null,
+    };
+    var response = await AppRes.buildResponse(
+      data,
+      format(ResponseIds.RI_031, [loggedInUser]),
+      httpStatus.OK,
+      "RI_031"
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(httpStatus.OK).send(response);
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var data = {
+      link: null,
+      auth: false,
+      token: null,
+    };
+    var response = await AppRes.buildResponse(
+      data,
+      format(ResponseIds.RI_025, [String(ex)]),
+      httpStatus.BAD_GATEWAY,
+      "RI_025"
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
 };

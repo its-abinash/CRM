@@ -11,10 +11,10 @@ var editService = require("./editService");
 var insertService = require("./insertService");
 var emailService = require("./emailService");
 var dashService = require("./dashService");
-
 const { ResponseIds } = require("../../Configs/constants.config");
-const { buildResponse, getEndMessage } = require("./response_utils");
-const { isLoggedInUser } = require("./main_utils");
+const { AppResponse } = require("./response_utils");
+const utils = require("./utils");
+const { format } = require("./main_utils");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -30,19 +30,18 @@ router.use(cors());
  * @param {Object} res
  */
 module.exports.getDashboardPage = async function (req, res) {
-  logger.info("GET /dashboard begins");
-  var isSessionValid = await isLoggedInUser(req);
-  if (isSessionValid) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
     res.render("dashboard");
-  }else {
-    logger.error(`Error in GET /dashboard: Session is invalid`);
-    var response = await buildResponse(
+  } catch (exc) {
+    AppRes.ApiReportsError(exc);
+    var response = await AppRes.buildResponse(
       null,
       ResponseIds.RI_015,
       httpStatus.BAD_GATEWAY,
       "RI_015"
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -57,15 +56,32 @@ module.exports.getDashboardPage = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getCustomers = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("GET /dashboard/getCustomer begins");
-    var [statusCode, response] = await dashService.processAndGetCustomers(req);
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await dashService.processAndGetCustomers(
+        req,
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Exception: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -81,19 +97,32 @@ module.exports.getCustomers = async function (req, res) {
  * @returns List of Admins
  */
 module.exports.getAdmins = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info(`GET /dashboard/getAdmins begins`);
-    var [statusCode, response] = await dashService.processAndGetAdmins(req);
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await dashService.processAndGetAdmins(
+        req,
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in ${req.method} ${req.path}: ${ex}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      httpStatus.BAD_GATEWAY
-    );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -109,17 +138,32 @@ module.exports.getAdmins = async function (req, res) {
  */
 module.exports.getConversation = async function (req, res) {
   /* When fetching Chat Conversations, we have to decrypt the encoded message */
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    var response = await chatService.processAndGetConversation(req);
-    res.status(httpStatus.OK).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var response = await chatService.processAndGetConversation(
+        req,
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.OK).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in GET /Chat with msg: ${ex}`);
-    var response = await buildResponse(
-      null,
-      "exception",
-      httpStatus.BAD_GATEWAY
-    );
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -138,21 +182,33 @@ module.exports.chat = async function (req, res) {
     The Chat Conversation is end-end protected with encryption. Hence, the messages will be
     stored in the database are totally encrypted.
     */
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /chat begins");
-    var [statusCode, response] = await chatService.processAndSaveConversation(
-      req
-    );
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await chatService.processAndSaveConversation(
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(
-      `Error in POST /chat with msg: ${JSON.stringify(ex, null, 3)}`
-    );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    var response = await buildResponse(
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
       null,
-      "exception",
+      format(ResponseIds.RI_026, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
     res.status(httpStatus.BAD_GATEWAY).send(response);
@@ -160,8 +216,8 @@ module.exports.chat = async function (req, res) {
 };
 
 /**
- * @httpMethod POST
- * @endpoint /delete
+ * @httpMethod DELETE
+ * @endpoint /deleteUser
  * @function delete
  * @async
  * @description Delete user's all data
@@ -169,23 +225,37 @@ module.exports.chat = async function (req, res) {
  * @param {Object} res
  */
 module.exports.delete = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /delete begins");
-    var [statusCode, response] = await deleteService.processAndDeleteUserData(
-      req
-    );
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await deleteService.processAndDeleteUserData(
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in POST /delete: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
 
 /**
- * @httpMethod POST
+ * @httpMethod PUT
  * @endpoint /edit
  * @function edit
  * @async
@@ -194,16 +264,73 @@ module.exports.delete = async function (req, res) {
  * @param {Object} res
  */
 module.exports.edit = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /edit begins");
-    var [statusCode, response] = await editService.processAndEditUserData(req);
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await editService.processAndEditUserData(
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`POST /edit Captured Error: ${ex}`);
-    var response = await buildResponse(
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
       null,
-      "exception",
+      format(ResponseIds.RI_027, [String(ex)]),
+      httpStatus.BAD_GATEWAY
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};
+
+/**
+ * @httpMethod PATCH
+ * @endpoint /edit
+ * @function updateUserProperty
+ * @async
+ * @description Update details of user
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.updateUserProperty = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] =
+        await editService.processAndUpdateUserProperty(AppRes);
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
+      null,
+      format(ResponseIds.RI_027, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
     res.status(httpStatus.BAD_GATEWAY).send(response);
@@ -220,20 +347,53 @@ module.exports.edit = async function (req, res) {
  * @param {Object} res
  */
 module.exports.insert = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /insert begins");
-    var [statusCode, response] = await insertService.processAndInsertUserData(
-      req
-    );
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await insertService.processAndInsertUserData(
+        LoggedInUser,
+        AppRes
+      );
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in POST /insert: ${ex}`);
-    var email = req.body.email;
-    await deleteServiceDao.removeDataOnFailure([], email.toLowerCase());
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    AppRes.ApiReportsError(ex);
+    var reasons = [format(ResponseIds.RI_030, [String(ex)])];
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      reasons.push(ResponseIds.RI_015);
+      var response = await AppRes.buildResponse(
+        null,
+        reasons,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var email = LoggedInUser;
+      await deleteServiceDao.removeDataOnFailure([], email.toLowerCase());
+      var response = await AppRes.buildResponse(
+        null,
+        reasons,
+        httpStatus.BAD_GATEWAY,
+        "RI_030"
+      );
+      res.status(httpStatus.BAD_GATEWAY).send(response);
+    }
   }
 };
 
@@ -247,20 +407,37 @@ module.exports.insert = async function (req, res) {
  * @param {Object} res
  */
 module.exports.insertProfilePicture = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("POST /insert/profilePicture begins");
+  var AppRes = new AppResponse(req);
   try {
-    var [statusCode, response] =
-      await insertService.processAndInsertProfilePicture(req);
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] =
+        await insertService.processAndInsertProfilePicture(
+          req,
+          LoggedInUser,
+          AppRes
+        );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in POST /insert/profilePicture: ${ex}`);
-    var response = await buildResponse(
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
       null,
-      "exception",
+      format(ResponseIds.RI_028, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -275,14 +452,35 @@ module.exports.insertProfilePicture = async function (req, res) {
  * @param {Object} res
  */
 module.exports.email = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("POST /email begins");
-    var [statusCode, response] = await emailService.processAndSendEmail(req);
-    res.status(statusCode).send(response);
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await emailService.processAndSendEmail(
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in POST /email: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
+      null,
+      format(ResponseIds.RI_029, [String(ex)]),
+      httpStatus.BAD_GATEWAY
+    );
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

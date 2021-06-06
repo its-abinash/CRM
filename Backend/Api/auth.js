@@ -13,6 +13,6 @@ router.get("/login", authController.getLoginPage);
 router.post("/login", authController.login);
 
 // Logout Endpoints
-router.get("/logout", authController.logout);
+router.post("/logout", authController.logout);
 
 module.exports = router;

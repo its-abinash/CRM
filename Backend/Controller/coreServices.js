@@ -3,16 +3,18 @@ var router = express.Router();
 var bodyParser = require("body-parser");
 var cors = require("cors");
 var httpStatus = require("http-status");
-var { buildResponse, getEndMessage } = require("./response_utils");
+var { AppResponse } = require("./response_utils");
 var session = require("express-session");
 var logger = require("../Logger/log");
 const axios = require("axios").default;
-const { ResponseIds, routes, URL } = require("../../Configs/constants.config");
+const { ResponseIds, URL } = require("../../Configs/constants.config");
 const { format, isLoggedInUser } = require("./main_utils");
+const utils = require("./utils");
 const remainderService = require("./remainderService");
 const OOBService = require("./OOBService");
 const quoteService = require("./quoteService");
 const coreServiceDao = require("./coreServiceDao");
+const jwt = require("jsonwebtoken");
 
 router.use(express.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -31,18 +33,27 @@ const DEFAULT_DATA = {
  * @param {Object} res
  */
 module.exports.getAllConstants = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("GET /constants begins");
+  var AppRes = new AppResponse(req);
   try {
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
-    if(!isSessionValid) {
+    if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var [statusCode, response] = await OOBService.processAndGetAllConstants(req);
+    var [statusCode, response] = await OOBService.processAndGetAllConstants(
+      req,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
     res.status(statusCode).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /constants ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
+      null,
+      ex,
+      httpStatus.BAD_REQUEST,
+      "RI_015"
+    );
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -56,20 +67,20 @@ module.exports.getAllConstants = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getSpecificFromConstants = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info(`GET /constants/constId/fieldId begins`);
+  var AppRes = new AppResponse(req);
   try {
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
-    if(!isSessionValid) {
+    if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
     var [statusCode, response] =
-      await OOBService.processAndGetSpecificFromConstants(req);
+      await OOBService.processAndGetSpecificFromConstants(req, AppRes);
+    AppRes.ApiExecutionEnds();
     res.status(statusCode).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /constants/constId/fieldId ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -82,18 +93,22 @@ module.exports.getSpecificFromConstants = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getConstant = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("GET /constants/constId begins");
+  var AppRes = new AppResponse(req);
   try {
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
-    if(!isSessionValid) {
+    if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var [statusCode, response] = await OOBService.processAndGetConstant(req);
+    var [statusCode, response] = await OOBService.processAndGetConstant(
+      req,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
     res.status(statusCode).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /constants/constId ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -107,19 +122,34 @@ module.exports.getConstant = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getQuotes = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("GET /getQuotes begins");
+  var AppRes = new AppResponse(req);
   try {
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
-    if(!isSessionValid) {
+    if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var [statusCode, response] = await quoteService.processAndGetQuotes(req);
-    res.status(statusCode).send(response);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    logger.info(`loggedInUser: ${LoggedInUser}`);
+    if (!LoggedInUser) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await quoteService.processAndGetQuotes(
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in GET /getQuotes: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -135,19 +165,20 @@ module.exports.getQuotes = async function (req, res) {
  */
 module.exports.loadHomePage = async function (req, res) {
   // Check if the session is valid
+  var AppRes = new AppResponse(req);
   var isUserSessionValid = await isLoggedInUser(req);
   if (isUserSessionValid) {
-    logger.info(`GET /home begins`);
+    AppRes.ApiExecutionBegins();
     res.render("home");
   } else {
-    logger.error(`Error in GET /home: Session is invalid`);
-    var response = await buildResponse(
+    AppRes.ApiReportsError("Session is invalid");
+    var response = await AppRes.buildResponse(
       null,
       ResponseIds.RI_015,
       httpStatus.BAD_GATEWAY,
       "RI_015"
     );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiExecutionEnds();
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -161,41 +192,53 @@ module.exports.loadHomePage = async function (req, res) {
  * @param {Object} res
  */
 module.exports.getProfilePicture = async function (req, res) {
-  req._initialTime = Date.now();
-  logger.info("GET /getProfilePicture begins");
+  var AppRes = new AppResponse(req);
   try {
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var [imgUrl, username] = await coreServiceDao.getImageOfLoggedInUser(
-      req.session.user
-    );
-    if (!imgUrl) {
-      var img_data = await axios.get(DEFAULT_DATA.defaultProfilePicture, {
-        responseType: "arraybuffer",
-      });
-      var base64Uri = await Buffer.from(img_data.data, "binary").toString(
-        "base64"
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    logger.info(`logedinuser: ${LoggedInUser}`);
+    if (!LoggedInUser) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
       );
-      imgUrl = `data:image/png;base64, ${base64Uri}`;
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [imgUrl, username] = await coreServiceDao.getImageOfLoggedInUser(
+        LoggedInUser
+      );
+      if (!imgUrl) {
+        var img_data = await axios.get(DEFAULT_DATA.defaultProfilePicture, {
+          responseType: "arraybuffer",
+        });
+        var base64Uri = await Buffer.from(img_data.data, "binary").toString(
+          "base64"
+        );
+        imgUrl = `data:image/png;base64, ${base64Uri}`;
+      }
+      var result = {
+        name: username,
+        url: imgUrl,
+      };
+      var response = await AppRes.buildResponse(
+        result,
+        format(ResponseIds.RI_006, ["Img Data", imgUrl]),
+        httpStatus.OK,
+        "RI_006"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.OK).send(response);
     }
-    var result = {
-      name: username,
-      url: imgUrl,
-    };
-    var response = await buildResponse(
-      result,
-      format(ResponseIds.RI_006, ["Img Data", imgUrl]),
-      httpStatus.OK,
-      "RI_006"
-    );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.status(httpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error in GET /getProfilePicture: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
@@ -209,38 +252,39 @@ module.exports.getProfilePicture = async function (req, res) {
  * @returns Boolean :- is_admin
  */
 module.exports.getUserType = async function (req, res) {
-  req._initialTime = Date.now();
   try {
-    logger.info("GET /getUserType begins");
+    var AppRes = new AppResponse(req);
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
     if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var isAdmin = await coreServiceDao.getUserTypeFromDB(req.session.user);
-    logger.info(`user: ${req.session.user} is_admin = ${isAdmin}`);
-    var response = await buildResponse(
-      isAdmin,
-      format(ResponseIds.RI_006, ["is_admin flag", isAdmin]),
-      httpStatus.OK,
-      "RI_006"
-    );
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.status(httpStatus.OK).send(response);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var isAdmin = await coreServiceDao.getUserTypeFromDB(LoggedInUser);
+      logger.info(`user: ${LoggedInUser} is_admin = ${isAdmin}`);
+      var response = await AppRes.buildResponse(
+        isAdmin,
+        format(ResponseIds.RI_006, ["is_admin flag", isAdmin]),
+        httpStatus.OK,
+        "RI_006"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.OK).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error from GET /getUserType = ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
-};
-
-var validateLoginUser = function (request) {
-  return (
-    "session" in request &&
-    request.session &&
-    "user" in request.session &&
-    !(request.session.user in ["undefined", "null", null])
-  );
 };
 
 /**
@@ -251,32 +295,41 @@ var validateLoginUser = function (request) {
  * @param {Object} res
  */
 module.exports.getLoginUser = async function (req, res) {
-  req._initialTime = Date.now();
-
+  var AppRes = new AppResponse(req);
   var data = null,
     reason = ResponseIds.RI_015,
-    statusCode = httpStatus.BAD_REQUEST,
+    statusCode = httpStatus.BAD_GATEWAY,
     responseId = "RI_015";
 
   try {
-    logger.info("GET /getLoginUser begins");
-    var validated = validateLoginUser(req);
-
-    if (validated) {
-      data = req.session.user;
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      data = LoggedInUser;
       reason = format(ResponseIds.RI_006, ["login user", data]);
       statusCode = httpStatus.OK;
       responseId = "RI_006";
-    } else {
-      throw reason;
+
+      var response = await AppRes.buildResponse(
+        data,
+        reason,
+        statusCode,
+        responseId
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.OK).send(response);
     }
-    var response = await buildResponse(data, reason, statusCode, responseId);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
-    res.status(httpStatus.OK).send(response);
   } catch (ex) {
-    logger.error(`Error from GET /getLoginUser = ${ex}`);
-    var response = await buildResponse(data, reason, statusCode, responseId);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(data, ex, statusCode, responseId);
     res.status(statusCode).send(response);
   }
 };
@@ -290,11 +343,8 @@ module.exports.getLoginUser = async function (req, res) {
  * @param {Object} res
  */
 module.exports.landingPage = async function (req, res) {
-  logger.info("GET /landingPage begins");
-  res.render("register", {
-    regEndpoint: routes.server + routes.reg,
-    loginEndpoint: routes.server + routes.login,
-  });
+  logger.info("Execution of GET /landingPage begins");
+  res.render("register");
 };
 
 /**
@@ -306,19 +356,81 @@ module.exports.landingPage = async function (req, res) {
  * @param {Object} res
  */
 module.exports.latestRemainderInformation = async function (req, res) {
-  req._initialTime = Date.now();
+  var AppRes = new AppResponse(req);
   try {
-    logger.info("GET /getLatestRemainderInformation begins");
+    AppRes.ApiExecutionBegins();
     var isSessionValid = await isLoggedInUser(req);
-    if(!isSessionValid) {
+    if (!isSessionValid) {
       throw ResponseIds.RI_015;
     }
-    var [statusCode, response] = await remainderService.processRemainderData(req);
-    res.status(statusCode).send(response);
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await remainderService.processRemainderData(
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
   } catch (ex) {
-    logger.error(`Error in ${req.method} ${req.path}: ${ex}`);
-    var response = await buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    logger.info(getEndMessage(req, ResponseIds.RI_005, req.method, req.path));
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};
+
+/**
+ * @httpMethod GET
+ * @endpoint /verifyToken
+ * @async
+ * @function verifyJWT
+ * @description Verify the access-token
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.verifyJWT = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var token = AppRes.getAccessToken();
+    if (!token) {
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var reasons = ResponseIds.RI_023;
+      var statusCode = httpStatus.BAD_REQUEST;
+      var responseId = "RI_023";
+      var decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+      if (decodedToken) {
+        reasons = ResponseIds.RI_024;
+        responseId = "RI_024";
+        statusCode = httpStatus.OK;
+      }
+      var response = await AppRes.buildResponse(
+        decodedToken,
+        reasons,
+        statusCode,
+        responseId
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

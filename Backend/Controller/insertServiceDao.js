@@ -1,12 +1,12 @@
 const { DATABASE } = require("../../Configs/constants.config");
 var db = require("../../Database/databaseOperations");
 
-module.exports.saveImageIntoDB = async function (userData, imgUri) {
+module.exports.saveImageIntoDB = async function (LoggedInUser, imgUri) {
   try {
     await db.update(
       DATABASE.CUSTOMER,
       "email",
-      userData.user,
+      LoggedInUser,
       ["img_data"],
       [imgUri]
     );

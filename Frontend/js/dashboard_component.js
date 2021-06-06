@@ -43,6 +43,19 @@ function chat(email) {
   $("#customerEmail").attr("value", email);
 }
 
+var getHeaders = function () {
+  var headers = {
+    "x-access-token": localStorage.getItem("x-access-token"),
+  };
+  return headers;
+};
+
+var getEncryptedPayload = function(payload) {
+  payload = JSON.stringify(payload)
+  payload = window.btoa(payload)
+  return payload;
+}
+
 async function processPendingRemainers() {
   const fixedRemainderTime = 9; // AM
   const Noon = 12;
@@ -54,6 +67,7 @@ async function processPendingRemainers() {
       url: `${SERVER}` + "getLatestRemainderInformation",
       method: "GET",
       async: false,
+      headers: getHeaders(),
       success: function (response) {
         remainderInfoList = response.values;
       },
@@ -70,7 +84,20 @@ async function processPendingRemainers() {
   return false;
 }
 
+var checkAndgetPropertyFromCache = function(property) {
+  var routes = JSON.parse(localStorage.getItem("routes"));
+  if(Object.keys(routes).length == 0) {
+    return null;
+  }
+  property = property.toString().toUpperCase();
+  return routes[property] || null;
+}
+
 function getChatEndpoint() {
+  var endpointFromCache = checkAndgetPropertyFromCache("chat");
+  if(endpointFromCache) {
+    return endpointFromCache;
+  }
   var CHAT = "";
   $.ajax({
     url: `${SERVER}` + "constants/routes/chat",
@@ -97,6 +124,10 @@ function getCypherEndpoint() {
 }
 
 function getEmailEndpoint() {
+  var endpointFromCache = checkAndgetPropertyFromCache("email");
+  if(endpointFromCache) {
+    return endpointFromCache;
+  }
   var EMAIL = "";
   $.ajax({
     url: `${SERVER}` + "constants/routes/email",
@@ -110,6 +141,10 @@ function getEmailEndpoint() {
 }
 
 function getEditEndpoint() {
+  var endpointFromCache = checkAndgetPropertyFromCache("edit");
+  if(endpointFromCache) {
+    return endpointFromCache;
+  }
   var EDIT = "";
   $.ajax({
     url: `${SERVER}` + "constants/routes/edit",
@@ -123,6 +158,10 @@ function getEditEndpoint() {
 }
 
 function getDeleteEndpoint() {
+  var endpointFromCache = checkAndgetPropertyFromCache("delete");
+  if(endpointFromCache) {
+    return endpointFromCache;
+  }
   var DELETE = "";
   $.ajax({
     url: `${SERVER}` + "constants/routes/delete",
@@ -136,6 +175,10 @@ function getDeleteEndpoint() {
 }
 
 function getAddEndpoint() {
+  var endpointFromCache = checkAndgetPropertyFromCache("add");
+  if(endpointFromCache) {
+    return endpointFromCache;
+  }
   var ADD = "";
   $.ajax({
     url: `${SERVER}` + "constants/routes/add",
@@ -154,6 +197,7 @@ function checkUserType() {
     url: `${SERVER}` + "getUserType",
     method: "GET",
     dataType: "json",
+    headers: getHeaders(),
     async: false,
     success: function (response) {
       is_admin = response.values[0];
@@ -174,6 +218,7 @@ async function getdashBoard() {
     async: false,
     success: function (response) {
       ROUTES = response.values[0];
+      localStorage.setItem("routes", JSON.stringify(ROUTES));
     },
   });
   var is_admin = checkUserType();
@@ -183,6 +228,7 @@ async function getdashBoard() {
       (is_admin === true ? ROUTES.DASHBOARD.CUSTOMER : ROUTES.DASHBOARD.ADMIN),
     method: "GET",
     dataType: "json",
+    headers: getHeaders(),
     success: function (response) {
       var responseValue = response.values;
       var html_file = "";
@@ -201,7 +247,11 @@ async function getdashBoard() {
                         <div id="id01" class="modal">
                             <div class="container modal-content animate">
                                 <input id="updatemail" type="hidden" value="" name="email" readonly="readonly"/>
-                                <input type="number" placeholder="reminder frequency" id="id01-rem" name="remfreq">
+                                <input type="text" placeholder="name" id="id01-name" name="name">
+                                <p></p><br>
+                                <input type="text" placeholder="phone" id="id01-phone" name="phone">
+                                <p></p><br>
+                                <input type="text" placeholder="reminder frequency" id="id01-rem" name="remfreq">
                                 <p></p><br>
                                 <button type="submit" id="update-btn">Update</button>
                             </div>
@@ -284,11 +334,13 @@ async function sendEmail(email, subject, body, show_html = false) {
     $.trim(payload.body) != "" &&
     $.trim(payload.email) != ""
   ) {
+    var requestPayload = getEncryptedPayload(payload);
     $.ajax({
       url: SERVER + EMAIL_ENDPOINT,
       method: "POST",
-      data: payload,
+      data: requestPayload,
       dataType: "text",
+      headers: getHeaders(),
       success: function () {
         if (show_html) {
           document.getElementById("email-subject").value = "";
@@ -319,6 +371,7 @@ $(document).on("click", "#email-btn", async function () {
   body = document.getElementById("email-body").value;
   await sendEmail(email, subject, body, (show_html = true));
 });
+
 $(document).on("click", "#chat-btn", async function () {
   var CHAT_ENDPOINT = getChatEndpoint();
   var CYPHER_ENDPOINT = getCypherEndpoint();
@@ -332,11 +385,13 @@ $(document).on("click", "#chat-btn", async function () {
     timestamp: timeStamp.toISOString(),
   };
   if ($.trim(payload.chatmsg) != "") {
+    var requestPayload = getEncryptedPayload(payload);
     $.ajax({
       url: SERVER + CHAT_ENDPOINT,
       method: "POST",
-      data: payload,
+      data: requestPayload,
       dataType: "text",
+      headers: getHeaders(),
       success: function () {
         document.getElementById("chat-msg").value = "";
       },
@@ -347,26 +402,66 @@ $(document).on("click", "#chat-btn", async function () {
     });
   }
 });
+
+var getRequestPayload = function (payload) {
+  var requestPayload = {};
+  for (const property in payload) {
+    if (
+      payload[property] in [null, "null", "undefined", undefined] ||
+      payload[property].length == 0
+    ) {
+      continue;
+    }
+    requestPayload[property] = payload[property];
+  }
+  return requestPayload;
+};
+
+var getQueryParamString = function (payload) {
+  var qpArgsString = "";
+  for (const property in payload) {
+    qpArgsString += `${property}=${payload[property]}&`;
+  }
+  qpArgsString = qpArgsString.trim(); // Remove trailing/leading white-space and line terminators if any.
+  qpArgsString = qpArgsString.slice(0, -1); // Chop off extra '&'
+  return qpArgsString;
+};
+
 $(document).on("click", "#update-btn", async function () {
   var EDIT_ENDPOINT = getEditEndpoint();
+  var requestUrl = SERVER + EDIT_ENDPOINT;
+  var requestMethod = "PUT";
   var payload = {
     email: document.getElementById("updatemail").value,
+    name: document.getElementById("id01-name").value,
+    phone: document.getElementById("id01-phone").value,
     remfreq: document.getElementById("id01-rem").value,
   };
-  if ($.trim(payload.email) != "") {
-    $.ajax({
-      url: SERVER + EDIT_ENDPOINT,
-      method: "POST",
-      data: payload,
-      dataType: "json",
-      success: function (data) {
-        payload.name = "";
-        payload.phone = "";
-        payload.remfreq = "";
-        getdashBoard(); // Loading Dashboard
-      },
-    });
+  var requestPayload = getRequestPayload(payload);
+  var requestConfigs = {
+    url: requestUrl,
+    method: requestMethod,
+    dataType: "json",
+    headers: getHeaders(),
+    success: function (data) {
+      payload.name = "";
+      payload.phone = "";
+      payload.remfreq = "";
+      getdashBoard(); // Loading Dashboard
+    },
+  };
+  if (Object.keys(payload).length != Object.keys(requestPayload).length) {
+    requestMethod = "PATCH";
+    const qpArgsString = getQueryParamString(requestPayload);
+    const encodedQueryParams = window.btoa(qpArgsString);
+    requestUrl += "?" + encodedQueryParams;
+    requestConfigs["url"] = requestUrl;
+    requestConfigs["method"] = requestMethod;
+  } else {
+    requestPayload = getEncryptedPayload(payload);
+    requestConfigs["data"] = requestPayload;
   }
+  $.ajax(requestConfigs);
 });
 
 $(document).on("click", "#delete-btn", async function () {
@@ -375,11 +470,13 @@ $(document).on("click", "#delete-btn", async function () {
     email: document.getElementById("deletemail").value,
   };
   if ($.trim(payload.email) != "") {
+    var requestPayload = getEncryptedPayload(payload);
     $.ajax({
       url: SERVER + DELETE_ENDPOINT,
-      method: "POST",
-      data: payload,
+      method: "DELETE",
+      data: requestPayload,
       dataType: "text",
+      headers: getHeaders(),
       success: function (data) {
         getdashBoard(); // Loading Dashboard
       },
@@ -397,11 +494,13 @@ $(document).on("click", "#insert-btn", async function () {
     remfreq: document.getElementById("id05_remfreq").value,
   };
   if ($.trim(payload.email) != "") {
+    var requestPayload = getEncryptedPayload(payload);
     $.ajax({
       url: SERVER + ADD_ENDPOINT,
       method: "POST",
-      data: payload,
+      data: requestPayload,
       dataType: "text",
+      headers: getHeaders(),
       success: function (data) {
         getdashBoard(); // Loading Dashboard
       },
@@ -428,6 +527,7 @@ $(document).ready(function () {
         url: `${SERVER + CHAT}/${receiver}`,
         method: "GET",
         dataType: "json",
+        headers: getHeaders(),
         success: function (response) {
           var chat = response.values;
           var html_file = "";

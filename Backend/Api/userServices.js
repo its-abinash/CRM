@@ -20,10 +20,12 @@ router.get("/chat/:receiverId", userController.getConversation);
 router.post("/chat", userController.chat);
 
 // Delete Endpoints
-router.post("/delete", userController.delete);
+router.delete("/deleteUser", userController.delete);
 
 // Edit Endpoints
-router.post("/edit", userController.edit);
+router.put("/edit", userController.edit);
+
+router.patch("/edit", userController.updateUserProperty);
 
 // Insert Endpoints
 router.post("/insert", userController.insert);

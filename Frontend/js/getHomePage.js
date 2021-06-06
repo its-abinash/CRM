@@ -1,5 +1,12 @@
 const SERVER = "http://localhost:3000/";
 
+var getHeaders = function () {
+  var headers = {
+    "x-access-token": localStorage.getItem("x-access-token"),
+  };
+  return headers;
+};
+
 var loadPage = async function () {
   var profileImgString = "";
   var userName = "";
@@ -7,6 +14,7 @@ var loadPage = async function () {
     url: SERVER + "getProfilePicture",
     method: "GET",
     dataType: "json",
+    headers: getHeaders(),
     success: function (response) {
       profileImgString = response.values[0].url;
       userName = response.values[0].name;
@@ -24,7 +32,7 @@ var loadPage = async function () {
                 <li><a href="#sec4"><i class="fas fa-cog"></i>Setting</a></li>
             </ul>
             <div class="social_media">
-            <button type="button" class="btn btn-default btn-sm" onclick="location.href='${SERVER}logout'">
+            <button type="button" class="btn btn-default btn-sm" id="log-out-btn">
                 <span class="glyphicon glyphicon-log-out"></span> Log out
             </button>
             </div>
@@ -42,6 +50,7 @@ var loadAvatarDiv = async function () {
   $.ajax({
     url: SERVER + "getProfilePicture",
     method: "GET",
+    headers: getHeaders(),
     dataType: "json",
     success: function (response) {
       profileImgString = response.values[0].url;
@@ -56,6 +65,7 @@ var getRandomQuote = async function () {
   $.ajax({
     url: `${SERVER}` + "getQuotes",
     method: "GET",
+    headers: getHeaders(),
     dataType: "json",
     success: function (response) {
       quoteResult = response.values[0];
@@ -90,6 +100,7 @@ function getAddEndpoint() {
   $.ajax({
     url: `${SERVER}` + "constants/routes/upload",
     method: "GET",
+    headers: getHeaders(),
     async: false,
     success: function (response) {
       ADD = response.values[0];
@@ -103,6 +114,7 @@ function getEditEndpoint() {
   $.ajax({
     url: `${SERVER}` + "constants/routes/edit",
     method: "GET",
+    headers: getHeaders(),
     async: false,
     success: function (response) {
       EDIT = response.values[0];
@@ -110,6 +122,63 @@ function getEditEndpoint() {
   });
   return EDIT;
 }
+
+function getLogOutEndpoint() {
+  var LOGOUT = "";
+  $.ajax({
+    url: `${SERVER}` + "constants/routes/logout",
+    method: "GET",
+    headers: getHeaders(),
+    async: false,
+    success: function (response) {
+      LOGOUT = response.values[0];
+    },
+  });
+  return LOGOUT;
+}
+
+function getLandingPageEndpoint() {
+  var LANDINGPAGE_ENDPOINT = "";
+  $.ajax({
+    url: `${SERVER}` + "constants/routes/landingpage",
+    method: "GET",
+    headers: getHeaders(),
+    async: false,
+    success: function (response) {
+      LANDINGPAGE_ENDPOINT = response.values[0];
+    },
+  });
+  return LANDINGPAGE_ENDPOINT;
+}
+
+var removeSessionData = function () {
+  localStorage.clear();
+};
+
+async function performLogoutTask(LOGOUT_ENDPOINT) {
+  var payload = {};
+  $.ajax({
+    url: SERVER + LOGOUT_ENDPOINT,
+    method: "POST",
+    dataType: "json",
+    headers: getHeaders(),
+    success: function (response) {
+      if (
+        response.statusCode === 200 &&
+        !response.values[0].auth &&
+        !response.values[0].token
+      ) {
+        removeSessionData();
+        window.location = response.values[0].link;
+      }
+    },
+  });
+}
+
+$(document).on("click", "#log-out-btn", async function () {
+  var LOGOUT_ENDPOINT = getLogOutEndpoint();
+  await performLogoutTask(LOGOUT_ENDPOINT);
+});
 
 $(document).one("click", "#insert-btn", async function () {
   $("form").submit(function (evt) {
@@ -119,8 +188,8 @@ $(document).one("click", "#insert-btn", async function () {
     $.ajax({
       url: SERVER + ADD_ENDPOINT,
       method: "POST",
+      headers: getHeaders(),
       data: formData,
-      async: false,
       cache: false,
       contentType: false,
       enctype: "multipart/form-data",
@@ -147,6 +216,7 @@ var getLoginUserId = function () {
   $.ajax({
     url: `${SERVER}` + "getLoginUser",
     method: "GET",
+    headers: getHeaders(),
     async: false,
     success: function (response) {
       loginUserId = response.values[0];
@@ -155,21 +225,21 @@ var getLoginUserId = function () {
   return loginUserId;
 };
 
-var equal = function(str1, str2) {
+var equal = function (str1, str2) {
   return str1 == str2;
-}
+};
 
 var localStore = {
-  "isClickedBefore": false,
-  "contentBeforeChange": ""
-}
+  isClickedBefore: false,
+  contentBeforeChange: "",
+};
 
 $(document).mouseup(function (event) {
   var container = $("#user-name");
-  var isClickedInside = isClickedInsideElement(event, container, "#user-name")
-  var isClickedBefore = localStore.isClickedBefore
-  var contentBeforeChange = localStore.contentBeforeChange
-  var satisfying = isClickedInside && !isClickedBefore && !contentBeforeChange
+  var isClickedInside = isClickedInsideElement(event, container, "#user-name");
+  var isClickedBefore = localStore.isClickedBefore;
+  var contentBeforeChange = localStore.contentBeforeChange;
+  var satisfying = isClickedInside && !isClickedBefore && !contentBeforeChange;
   if (satisfying) {
     localStore["isClickedBefore"] = true;
     if (!contentBeforeChange) {
@@ -177,24 +247,26 @@ $(document).mouseup(function (event) {
       localStore["contentBeforeChange"] = contentEditable.textContent;
     }
   }
-  var elementChanged = !isClickedInsideElement(event, container, "#user-name") &&
-                        localStore.isClickedBefore;
+  var elementChanged =
+    !isClickedInsideElement(event, container, "#user-name") &&
+    localStore.isClickedBefore;
   if (elementChanged) {
     localStore["isClickedBefore"] = false;
     var contentEditable = document.querySelector("[contenteditable]");
     var contentAfterChange = contentEditable.textContent;
-    var contentBeforeChange = localStore.contentBeforeChange
+    var contentBeforeChange = localStore.contentBeforeChange;
     localStore["contentBeforeChange"] = "";
-    if (contentAfterChange.length > 0 && !equal(contentAfterChange, contentBeforeChange)) {
-      var EDIT_ENDPOINT = getEditEndpoint();
-      var payload = {
-        name: contentAfterChange,
-        email: getLoginUserId(),
-      };
+    if (
+      contentAfterChange.length > 0 &&
+      !equal(contentAfterChange, contentBeforeChange)
+    ) {
+      const editUrl = getEditEndpoint();
+      const qpArgsString = `name=${contentAfterChange}&email=${getLoginUserId()}`
+      const encodedQueryParams = window.btoa(qpArgsString);
       $.ajax({
-        url: SERVER + EDIT_ENDPOINT,
-        method: "POST",
-        data: payload,
+        url: SERVER + editUrl + "?" + encodedQueryParams,
+        method: "PATCH",
+        headers: getHeaders(),
         dataType: "json",
         success: function () {},
       });

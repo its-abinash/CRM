@@ -3,19 +3,25 @@ module.exports.fakeServer = "http://localhost:3000";
 module.exports.fakeChatPOSTRequest = {
   path: "/fake_path",
   method: "fake_method",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   session: {
     user: "sender@gmail.com",
-    password: "password"
+    password: "password",
   },
   body: {
-    receiver: "receiver@gmail.com",
-    chatmsg: "fake_msg",
+    eyJyZWNlaXZlciI6InJlY2VpdmVyQGdtYWlsLmNvbSIsImNoYXRtc2ciOiJmYWtlX21zZyJ9:
+      "",
   },
 };
 
 module.exports.fakeRequest = {
   path: "/fake_path",
   method: "fake_method",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
 };
 
 module.exports.fakeResponse = {
@@ -31,6 +37,7 @@ module.exports.fakeResponse = {
   response: {},
   render: function () {},
   redirect: function () {},
+  cookie: function () {}
 };
 
 // status(200).send
@@ -38,6 +45,9 @@ module.exports.fakeResponse = {
 module.exports.fakeGETChatRequest = {
   session: {
     user: "fake_user@gmail.com",
+  },
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
     receiverId: "fake_receiver@gmail.com",
@@ -49,6 +59,9 @@ module.exports.fakeGETChatRequest = {
 module.exports.fakeGETChatRequest2 = {
   session: {
     user: "sender@gmail.com",
+  },
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
     receiverId: "receiver@gmail.com",
@@ -108,6 +121,10 @@ module.exports.fakeChatResponse2 = {
   ],
 };
 
+module.exports.fakeChatResponse3 = {
+  statusCode: 401,
+};
+
 module.exports.fakeResponseWithException = {
   responseId: "c93mj8-ivym9r-lvxmb5",
   status: "BAD_GATEWAY",
@@ -139,7 +156,7 @@ module.exports.fakeChatPayloadErrorResponse = {
     "The request was well-formed but was unable to be followed due to semantic errors.",
   values: [],
   totalCount: 0,
-  reasons: [[]],
+  reasons: [],
 };
 
 module.exports.fakeChatExceptionResponse = {
@@ -169,8 +186,11 @@ module.exports.fakeChatErrorResponse = {
 module.exports.fakeDeleteUserRequest = {
   path: "/fake_path",
   method: "fake_api",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   body: {
-    email: "user@gmail.com",
+    "eyJlbWFpbCI6InVzZXJAZ21haWwuY29tIn0=": "",
   },
   session: {
     user: "admin@gmail.com",
@@ -332,22 +352,38 @@ module.exports.fakeLatestRemainderData = [
 module.exports.fakeEditRequest = {
   path: "/fake_path",
   method: "fake_method",
-  body: {
-    email: "receiver@gmail.com",
-    name: "receiver",
-    phone: "12345",
-    remfreq: "2",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
+  body: {
+    eyJlbWFpbCI6InJlY2VpdmVyQGdtYWlsLmNvbSIsIm5hbWUiOiJyZWNlaXZlciIsInBob25lIjoiMTIzNDUiLCJyZW1mcmVxIjoiMiJ9:
+      "",
+  },
+};
+
+module.exports.fakePatchRequest = {
+  path: "/fake_path",
+  method: "fake_method",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
+  originalUrl: "/edit?ZW1haWw9c2VuZGVyQGdtYWlsLmNvbSZuYW1lPUFiaW5hc2ggQmlzd2Fs",
+  protocol: "http",
+  get: function(host) {
+    return "localhost";
+  }
 };
 
 module.exports.fakeEmailRequest = {
   session: {
     user: "sender@gmail.com",
   },
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   body: {
-    email: "receiver@gmail.com",
-    subject: "sub",
-    body: "body",
+    eyJlbWFpbCI6InJlY2VpdmVyQGdtYWlsLmNvbSIsInN1YmplY3QiOiJzdWIiLCJib2R5IjoiYm9keSJ9:
+      "",
   },
   path: "/fake_path",
   method: "fake_method",
@@ -371,7 +407,7 @@ module.exports.emailWrongPayloadResponse = {
     "The request was well-formed but was unable to be followed due to semantic errors.",
   values: [],
   totalCount: 0,
-  reasons: [[]],
+  reasons: [],
 };
 
 module.exports.emailExceptionResponse = {
@@ -397,13 +433,16 @@ module.exports.fakeConstants = {
         DECRYPTIONKEY: "#",
       },
       ROUTES: {
+        HOME: "home",
+        LANDINGPAGE: "landingPage",
+        LOGOUT: "logout",
         REG: "register",
         LOGIN: "login",
         CONTACT: "contact",
         EDIT: "edit",
         ADD: "insert",
         UPLOAD: "insert/profilePicture",
-        DELETE: "delete",
+        DELETE: "deleteUser",
         EMAIL: "email",
         CHAT: "chat",
         DASHBOARD: {
@@ -415,14 +454,27 @@ module.exports.fakeConstants = {
   ],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insert/profilePicture","DELETE":"delete","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
+    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"HOME":"home","LANDINGPAGE":"landingPage","LOGOUT":"logout","REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insert/profilePicture","DELETE":"deleteUser","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
   ],
 };
+
+module.exports.getConstantsExceptionResponse = {
+  responseId: 'RI_015',
+  status: 'BAD_REQUEST',
+  statusCode: 400,
+  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  values: [],
+  totalCount: 0,
+  reasons: [ 'User has logged-out or session has expired for the user' ]
+}
 
 module.exports.getSpecificFromConstantsRequest = {
   params: {
     constId: "ROUTES",
     fieldId: "REG",
+  },
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   session: {
     user: "sender@gmail.com",
@@ -470,6 +522,36 @@ module.exports.fakeRemainderResponse = {
   ],
 };
 
+module.exports.JWTAuthSuccessResponse = {
+  responseId: 'RI_024',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [ 'fake_token' ],
+  totalCount: 1,
+  reasons: [ 'Successfully authenticated token' ]
+}
+
+module.exports.JWTAuthFailureResponse = {
+  responseId: 'RI_023',
+  status: 'BAD_REQUEST',
+  statusCode: 400,
+  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  values: [],
+  totalCount: 0,
+  reasons: [ 'Failed to authenticate token' ]
+}
+
+module.exports.JWTUserAuthErrorResponse = {
+  responseId: 'RI_015',
+  status: 'UNAUTHORIZED',
+  statusCode: 401,
+  responseMessage: 'Similar to 403 Forbidden, but specifically for use when authentication is required and has failed or has not yet been provided.',
+  values: [],
+  totalCount: 0,
+  reasons: [ 'User has logged-out or session has expired for the user' ]
+}
+
 module.exports.fakeUserTypeResponse = {
   responseId: "RI_006",
   status: "OK",
@@ -481,26 +563,27 @@ module.exports.fakeUserTypeResponse = {
 };
 
 module.exports.fakeLoginUserResponse = {
-  responseId: 'RI_006',
-  status: 'OK',
+  responseId: "RI_006",
+  status: "OK",
   statusCode: 200,
-  responseMessage: 'Standard response for successful HTTP requests.',
-  values: [ 'sender@gmail.com' ],
+  responseMessage: "Standard response for successful HTTP requests.",
+  values: ["sender@gmail.com"],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the login user with value = sender@gmail.com'
-  ]
-}
+    "Successfully fetched the login user with value = sender@gmail.com",
+  ],
+};
 
 module.exports.fakeLoginUserExpResponse = {
-  responseId: 'RI_015',
-  status: 'BAD_REQUEST',
-  statusCode: 400,
-  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  responseId: "RI_015",
+  status: "UNAUTHORIZED",
+  statusCode: 401,
+  responseMessage:
+    "Similar to 403 Forbidden, but specifically for use when authentication is required and has failed or has not yet been provided.",
   values: [],
   totalCount: 0,
-  reasons: [ 'User has logged-out or session has expired for the user' ]
-}
+  reasons: ["User has logged-out or session has expired for the user"],
+};
 
 module.exports.fakeInsertPayloadRequest = {
   path: "/fake_path",
@@ -508,12 +591,11 @@ module.exports.fakeInsertPayloadRequest = {
   session: {
     user: "sender@gmail.com",
   },
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   body: {
-    name: "c1_name1",
-    email: "c1@gmail.com",
-    phone: "1234568484",
-    gst: "jdbdhbdhd",
-    remfreq: 2,
+    "eyJuYW1lIjoiYzFfbmFtZTEiLCJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBob25lIjoiMTIzNDU2ODQ4NCIsImdzdCI6ImpkYmRoYmRoZCIsInJlbWZyZXEiOjJ9":""
   },
 };
 
@@ -550,7 +632,7 @@ module.exports.insertProfilePictureFailureRes = {
   values: [],
   totalCount: 0,
   reasons: [
-    "Failed to insert Profile Picture of user having userId: undefined",
+    "Failed to insert Profile Picture of user having userId: sender@gmail.com",
   ],
 };
 
@@ -579,29 +661,123 @@ module.exports.insertFailureResponse = {
 module.exports.loginPayloadRequest = {
   path: "/fake_path",
   method: "fake_method",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   session: {
     user: "sender@gmail.com",
     password: "pass",
   },
   body: {
-    email: "c1@gmail.com",
-    password: "pass",
+    "eyJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoicGFzcyJ9": "",
   },
 };
+
+module.exports.loginSuccessResponse = {
+  responseId: 'RI_019',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [
+    {
+      link: 'http://localhost:3000/home',
+      auth: true,
+      token: 'XXXXXX.XXXXXXX.XXXXXX'
+    }
+  ],
+  totalCount: 1,
+  reasons: [ 'User: c1@gmail.com has successfully logged-in' ]
+}
+
+module.exports.loginPayloadValidationErrorResponse = {
+  responseId: 'RI_004',
+  status: 'UNPROCESSABLE_ENTITY',
+  statusCode: 422,
+  responseMessage: 'The request was well-formed but was unable to be followed due to semantic errors.',
+  values: [ { link: null, auth: false, token: null } ],
+  totalCount: 1,
+  reasons: []
+}
+
+module.exports.loginUserValidationErrorResponse = {
+  responseId: 'RI_021',
+  status: 'BAD_REQUEST',
+  statusCode: 400,
+  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  values: [ { link: null, auth: false, token: null } ],
+  totalCount: 1,
+  reasons: [
+    'Failed to logging in user: c1@gmail.com, due to error: Wrong userId or Password'
+  ]
+}
+
+module.exports.loginExceptionResponse = {
+  responseId: 'RI_020',
+  status: 'BAD_GATEWAY',
+  statusCode: 502,
+  responseMessage: 'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+  values: [ { link: null, auth: false, token: null } ],
+  totalCount: 1,
+  reasons: [
+    'Getting exception: c1@gmail.com while logging in user: Error: fake_exp'
+  ]
+}
 
 module.exports.registerPayloadRequest = {
   path: "/fake_path",
   method: "fake_method",
+  headers: {
+    "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+  },
   body: {
-    email: "c1@gmail.com",
-    password: "pass",
-    username: "usename",
-    phonenum: "111111",
-    gstnum: "suhdud",
-    remfreq: "2",
-    passcode: "jdudhdu",
+    "eyJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoicGFzcyIsInVzZXJuYW1lIjoidXNlbmFtZSIsInBob25lbnVtIjoiMTExMTExIiwiZ3N0bnVtIjoic3VoZHVkIiwicmVtZnJlcSI6IjIiLCJwYXNzY29kZSI6ImpkdWRoZHUifQ==":
+      "",
   },
 };
+
+module.exports.registerSuccessResponse = {
+  responseId: 'RI_016',
+  status: 'CREATED',
+  statusCode: 201,
+  responseMessage: 'The request has been fulfilled, resulting in the creation of a new resource.',
+  values: [],
+  totalCount: 0,
+  reasons: [ 'User: c1@gmail.com has successfully registered' ]
+}
+
+module.exports.registerPayloadValidationErrorResponse = {
+  responseId: 'RI_004',
+  status: 'UNPROCESSABLE_ENTITY',
+  statusCode: 422,
+  responseMessage: 'The request was well-formed but was unable to be followed due to semantic errors.',
+  values: [],
+  totalCount: 0,
+  reasons: []
+}
+
+module.exports.registrationFailureResponse = {
+  responseId: 'RI_018',
+  status: 'BAD_REQUEST',
+  statusCode: 400,
+  responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
+  values: [],
+  totalCount: 0,
+  reasons: [
+    'Failed to register user: c1@gmail.com, due to error: error saving userdata in our databse'
+  ]
+}
+
+module.exports.registerExceptionResponse = {
+  responseId: 'RI_017',
+  status: 'BAD_GATEWAY',
+  statusCode: 502,
+  responseMessage: 'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+  values: [],
+  totalCount: 0,
+  reasons: [
+    'Getting exception: c1@gmail.com while registering user: Error: fake_exp'
+  ]
+}
 
 module.exports.fakeAxiosGetData = {
   data: {

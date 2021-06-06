@@ -1,6 +1,5 @@
 var { validator } = require("./schema");
 require("format-unicorn");
-var logger = require("../Logger/log");
 var session = require("express-session");
 var requestTracer = require("cls-rtracer");
 
@@ -53,9 +52,22 @@ module.exports.cloneObject = function (dataObject) {
 };
 
 module.exports.isLoggedInUser = async function (request) {
-  return request.session && request.session.user && request.session.password;
+  return request.session;
 };
 
 module.exports.getRequestId = function () {
   return requestTracer.id() || "main-thread";
+};
+
+/**
+ * @middleware requestTime
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Callback} next
+ * @description This middleware captures the timestamp when request comes to API. This is used to calculate the execution time of an API
+ */
+module.exports.requestTime = function (req, res, next) {
+  var timestamp = Date.now();
+  req.requestTime = timestamp;
+  next();
 };
