@@ -9,6 +9,8 @@ const deleteServiceDao = require("../Controller/deleteServiceDao");
 const editServiceDao = require("../Controller/editServiceDao");
 const emailServiceDao = require("../Controller/emailServiceDao");
 const insertServiceDao = require("../Controller/insertServiceDao");
+const utils = require("../Controller/utils")
+const jwt = require("jsonwebtoken")
 
 var loggerUtils = require("../Logger/log");
 var { validator } = require("../Controller/schema");
@@ -18,7 +20,6 @@ const axios = require("axios").default;
 
 var sinon = require("sinon");
 var assert = sinon.assert;
-// TODO = CHANGE THE dbUtils to the respective domain
 const {
   fakeGETChatRequest,
   fakeGETChatRequest2,
@@ -65,6 +66,20 @@ const {
   insertProfilePictureFailureRes,
   fakeLoginUserResponse,
   fakeLoginUserExpResponse,
+  loginSuccessResponse,
+  loginPayloadValidationErrorResponse,
+  loginUserValidationErrorResponse,
+  loginExceptionResponse,
+  registerSuccessResponse,
+  registerPayloadValidationErrorResponse,
+  registrationFailureResponse,
+  registerExceptionResponse,
+  JWTAuthSuccessResponse,
+  JWTAuthFailureResponse,
+  JWTUserAuthErrorResponse,
+  getConstantsExceptionResponse,
+  fakePatchRequest,
+  fakeChatResponse3
 } = require("./mockData");
 
 var chatControllerTestPositive = function () {
@@ -74,18 +89,28 @@ var chatControllerTestPositive = function () {
       req: fakeGETChatRequest,
       res: fakeResponse,
       exp: fakeChatResponse,
+      jwt: "loginuser_fake_email_id"
     },
     {
       testCaseName: "GET /chat - receiver test",
       req: fakeGETChatRequest2,
       res: fakeResponse,
       exp: fakeChatResponse2,
+      jwt: "loginuser_fake_email_id"
+    },
+    {
+      testCaseName: "GET /chat - failure test",
+      req: fakeGETChatRequest2,
+      res: fakeResponse,
+      exp: fakeChatResponse3,
+      jwt: null
     },
   ];
   for (const testCase of testCases) {
     it(testCase.testCaseName, async function () {
       sinon.stub(chatDao, "getConversation").returns(fakeChatData);
       sinon.stub(loggerUtils, "info");
+      sinon.stub(utils, 'decodeJwt').returns(testCase.jwt);
       await userServicesController.getConversation(testCase.req, testCase.res);
       assert.match(testCase.res.statusCode, testCase.exp.statusCode);
     });
@@ -94,8 +119,15 @@ var chatControllerTestPositive = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(chatDao, "saveConversation").returns(true);
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await userServicesController.chat(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeChatPOSTResponse);
+  });
+  it("POST /chat - user authorization failure Test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.chat(fakeChatPOSTRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -106,6 +138,7 @@ var chatControllerTestNegative = function () {
   it("GET /chat - DB Exception Test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(chatDao, "getConversation").throwsException("");
     await userServicesController.getConversation(
       fakeGETChatRequest,
@@ -141,6 +174,7 @@ var chatControllerTestNegative = function () {
   ];
   for (const testCase of testCases) {
     it(testCase.name, async function () {
+      sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
       sinon.stub(loggerUtils, "info");
       sinon.stub(loggerUtils, "error");
       sinon.stub(validator, "validate").returns(testCase.validationValue);
@@ -174,19 +208,38 @@ var dashboardControllerTestPositive = function () {
     assert.calledOnce(response.render);
   });
   it("GET /dashboard/getAdmins - get all admins test", async function () {
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(loggerUtils, "info");
     sinon.stub(dashDao, "getAllAdmins").returns([]);
     await userServicesController.getAdmins(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
   });
+  it("GET /dashboard/getAdmins - get all admins failure test", async function () {
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(dashDao, "getAllAdmins").returns([]);
+    await userServicesController.getAdmins(fakeChatPOSTRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
+  });
   it("GET /dashboard/getCustomer - Get all customers test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(dashDao, "getAllCustomer").returns([]);
     await userServicesController.getCustomers(
       fakeChatPOSTRequest,
       fakeResponse
     );
     assert.match(fakeResponse.statusCode, 200);
+  });
+  it("GET /dashboard/getCustomer - Get all customers failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    sinon.stub(dashDao, "getAllCustomer").returns([]);
+    await userServicesController.getCustomers(
+      fakeChatPOSTRequest,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 401);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -196,6 +249,7 @@ var dashboardControllerTestPositive = function () {
 var dashboardControllerTestNegative = function () {
   it("GET /dashboard/getAdmins - get all admins test", async function () {
     sinon.stub(dashDao, "getAllAdmins").throwsException();
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     await userServicesController.getAdmins(fakeRequest, fakeResponse);
@@ -204,6 +258,7 @@ var dashboardControllerTestNegative = function () {
   it("GET /dashboard/getCustomer - Get all customers test", async function () {
     sinon.stub(dashDao, "getAllCustomer").throwsException();
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(loggerUtils, "error");
     await userServicesController.getCustomers(fakeRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
@@ -216,6 +271,7 @@ var dashboardControllerTestNegative = function () {
 var deleteControllerTestPositive = function () {
   it("POST /delete - deletion of user success test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(deleteServiceDao, "removeUserData").returns([true, true]);
     await userServicesController.delete(fakeDeleteUserRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
@@ -229,6 +285,7 @@ var deleteControllerTestNegative = function () {
   it("POST /delete - deletion of user failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(deleteServiceDao, "removeUserData").returns([false, false]);
     await userServicesController.delete(fakeDeleteUserRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 400);
@@ -236,9 +293,18 @@ var deleteControllerTestNegative = function () {
   it("POST /delete - deletion of user exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(deleteServiceDao, "removeUserData").throwsException();
     await userServicesController.delete(fakeDeleteUserRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
+  });
+  it("POST /delete - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    sinon.stub(deleteServiceDao, "removeUserData").returns([false, false]);
+    await userServicesController.delete(fakeDeleteUserRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -246,9 +312,11 @@ var deleteControllerTestNegative = function () {
 };
 
 var editControllerTest = function () {
+  // PUT methods
   it("PUT /edit - update user data test", async function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(editServiceDao, "saveEditedData").returns(true);
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
@@ -257,6 +325,7 @@ var editControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(editServiceDao, "saveEditedData").returns(false);
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 400);
@@ -265,15 +334,63 @@ var editControllerTest = function () {
     sinon.stub(validator, "validate").throwsException();
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });
   it("PUT /edit payload error test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(validator, "validate").returns({ valid: false });
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 422);
+  });
+  it("PUT /edit - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.edit(fakeEditRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
+  });
+  // PATCH Methods
+  it("PATCH /edit - patch user data test", async function () {
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
+    sinon.stub(editServiceDao, "saveEditedData").returns(true);
+    await userServicesController.updateUserProperty(fakePatchRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 200);
+  });
+  it("PATCH /edit - patch user data failure test", async function () {
+    sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
+    sinon.stub(editServiceDao, "saveEditedData").returns(false);
+    await userServicesController.updateUserProperty(fakePatchRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 400);
+  });
+  it("PATCH /edit - Exception test", async function () {
+    sinon.stub(validator, "validate").throwsException();
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
+    await userServicesController.updateUserProperty(fakePatchRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 502);
+  });
+  it("PATCH /edit payload error test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
+    sinon.stub(validator, "validate").returns({ valid: false });
+    await userServicesController.updateUserProperty(fakePatchRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 422);
+  });
+  it("PATCH /edit - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.updateUserProperty(fakeEditRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -283,6 +400,7 @@ var editControllerTest = function () {
 var emailControllerTest = function () {
   it("POST /email - success test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(emailServiceDao, "getPassCode").returns(specificCredData);
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(mailer, "createTransport").returns({
@@ -293,10 +411,17 @@ var emailControllerTest = function () {
     await userServicesController.email(fakeEmailRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeEmailResponse);
   });
+  it("POST /email - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.email(fakeEmailRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
+  });
   it("POST /email - payload validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
-    assert.match(fakeResponse.response, fakeEmailResponse);
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(emailServiceDao, "getPassCode").returns(specificCredData);
     sinon.stub(validator, "validate").returns({ valid: false });
     sinon.stub(mailer, "createTransport").returns({
@@ -310,6 +435,7 @@ var emailControllerTest = function () {
   it("POST /email - Request Exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(emailServiceDao, "getPassCode").returns(specificCredData);
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(mailer, "createTransport").returns({
@@ -323,6 +449,7 @@ var emailControllerTest = function () {
   it("POST /email - DB Exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(emailServiceDao, "getPassCode").throwsException();
     sinon.stub(validator, "validate").returns({ valid: true });
     await userServicesController.email(fakeEmailRequest, fakeResponse);
@@ -338,6 +465,16 @@ var constantsControllerTest = function () {
     sinon.stub(loggerUtils, "info");
     await coreServicesController.getAllConstants(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeConstants);
+  });
+  it("GET /constants - exception test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    var req = {
+      path: "/fake_path",
+      method: "fake_method"
+    }
+    await coreServicesController.getAllConstants(req, fakeResponse);
+    assert.match(fakeResponse.response, getConstantsExceptionResponse);
   });
   it("GET /constants/constId/fieldId - success test", async function () {
     sinon.stub(loggerUtils, "info");
@@ -403,6 +540,7 @@ var constantsControllerTest = function () {
 var getLatestRemaindersControllerTest = function () {
   it("GET /getLatestRemainderInformation - success test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(coreServiceDao, "updateRemainderDateInDB").returns(true);
     sinon
       .stub(coreServiceDao, "getCustomerForRemainderFromDB")
@@ -416,6 +554,7 @@ var getLatestRemaindersControllerTest = function () {
   it("GET /getLatestRemainderInformation - exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(coreServiceDao, "updateRemainderDateInDB").returns(true);
     sinon
       .stub(coreServiceDao, "getCustomerForRemainderFromDB")
@@ -424,6 +563,35 @@ var getLatestRemaindersControllerTest = function () {
       fakeRequest,
       fakeResponse
     );
+    assert.match(fakeResponse.statusCode, 502);
+  });
+  it("GET /verifyJWT - success test", async function () {
+    sinon.stub(loggerUtils, 'info')
+    sinon.stub(jwt, 'verify').returns("fake_token");
+    await coreServicesController.verifyJWT(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.response, JWTAuthSuccessResponse)
+  });
+  it("GET /verifyJWT - failure test", async function () {
+    sinon.stub(loggerUtils, 'info')
+    sinon.stub(jwt, 'verify').returns(null);
+    await coreServicesController.verifyJWT(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.response, JWTAuthFailureResponse);
+  });
+  it("GET /verifyJWT - user unauthorized test", async function () {
+    sinon.stub(loggerUtils, 'info')
+    sinon.stub(jwt, 'verify').returns(null);
+    var fakeReq = {
+      'path': '/fakepath',
+      'method': 'fakemethod'
+    }
+    await coreServicesController.verifyJWT(fakeReq, fakeResponse);
+    assert.match(fakeResponse.response, JWTUserAuthErrorResponse);
+  });
+  it("GET /verifyJWT - exception test", async function () {
+    sinon.stub(loggerUtils, 'error')
+    sinon.stub(loggerUtils, 'info')
+    sinon.stub(jwt, 'verify').throwsException(Error("fake_exp"));
+    await coreServicesController.verifyJWT(fakeRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });
   afterEach(function () {
@@ -435,12 +603,14 @@ var getUserTypeUtilsControllerTest = function () {
   it("GET /getUserType - success test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(coreServiceDao, "getUserTypeFromDB").returns(true);
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await coreServicesController.getUserType(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeUserTypeResponse);
   });
   it("GET /getUserType - exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(coreServiceDao, "getUserTypeFromDB").throwsException();
     await coreServicesController.getUserType(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
@@ -448,6 +618,7 @@ var getUserTypeUtilsControllerTest = function () {
   it("GET /getLoginUser - success test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await coreServicesController.getLoginUser(
       fakeChatPOSTRequest,
       fakeResponse
@@ -457,6 +628,7 @@ var getUserTypeUtilsControllerTest = function () {
   it("GET /getLoginUser - exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns(null);
     await coreServicesController.getLoginUser(fakeRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeLoginUserExpResponse);
   });
@@ -472,15 +644,16 @@ var insertControllerTest = function () {
     sinon.stub(insertServiceDao, "insertUserData").returns(true);
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
-    sinon.stub(axios, "get").returns({});
-    sinon.stub(Buffer, "from").returns("");
+    sinon.stub(axios, "get").returns({data:""});
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await userServicesController.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, insertSuccessfulResponse);
   });
   it("POST /insert - payload validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(validator, "validate").returns({ valid: false });
     var insertPayloadErrorResponse = emailWrongPayloadResponse;
     await userServicesController.insert(fakeInsertPayloadRequest, fakeResponse);
@@ -489,13 +662,13 @@ var insertControllerTest = function () {
   it("POST /insert - failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(insertServiceDao, "insertUserData").returns(false);
     sinon.stub(deleteServiceDao, "removeDataOnFailure");
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
-    sinon.stub(axios, "get").returns({});
-    sinon.stub(Buffer, "from").returns("");
+    sinon.stub(axios, "get").returns({data: ""});
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     await userServicesController.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, insertFailureResponse);
@@ -504,19 +677,27 @@ var insertControllerTest = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(insertServiceDao, "insertUserData").throwsException();
     sinon.stub(deleteServiceDao, "removeDataOnFailure");
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
-    sinon.stub(axios, "get").returns({});
-    sinon.stub(Buffer, "from").returns("");
+    sinon.stub(axios, "get").returns({data:""});
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     await userServicesController.insert(fakeInsertPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });
+  it("POST /insert - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.insert(fakeInsertPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
+  });
   it("POST /insertProfilePicture begins - success test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(validator, "validate").returns({ valid: true });
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(insertServiceDao, "saveImageIntoDB");
     await userServicesController.insertProfilePicture(
       fakeInsertPayloadRequest2,
@@ -524,9 +705,20 @@ var insertControllerTest = function () {
     );
     assert.match(fakeResponse.response, insertSuccessfulResponse1);
   });
+  it("POST /insertProfilePicture begins - user authorization failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await userServicesController.insertProfilePicture(
+      fakeInsertPayloadRequest2,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 401);
+  });
   it("POST /insertProfilePicture begins - failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(insertServiceDao, "saveImageIntoDB").throwsException();
     await userServicesController.insertProfilePicture(
@@ -538,6 +730,7 @@ var insertControllerTest = function () {
   it("POST /insertProfilePicture begins - exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(insertServiceDao, "saveImageIntoDB").throwsException();
     await userServicesController.insertProfilePicture(
@@ -571,43 +764,32 @@ var loginControllerTest = function () {
     sinon.stub(dbUtils, "isExistingUser").returns(true);
     sinon.stub(dbUtils, "isValidUser").returns(true);
     sinon.stub(validator, "validate").returns({ valid: true });
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.login(loginPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    sinon.stub(jwt, 'sign').returns("XXXXXX.XXXXXXX.XXXXXX")
+    await authController.login(loginPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, loginSuccessResponse)
   });
   it("POST /login - payload validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(validator, "validate").returns({ valid: false });
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.login(loginPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.login(loginPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, loginPayloadValidationErrorResponse)
   });
   it("POST /login - user validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(dbUtils, "isExistingUser").returns(false);
     sinon.stub(validator, "validate").returns({ valid: true });
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.login(loginPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.login(loginPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, loginUserValidationErrorResponse);
   });
   it("POST /login - DB exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
-    sinon.stub(dbUtils, "isExistingUser").throwsException();
+    sinon.stub(dbUtils, "isExistingUser").throwsException(Error("fake_exp"));
     sinon.stub(validator, "validate").returns({ valid: true });
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.login(loginPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.login(loginPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, loginExceptionResponse);
   });
   it("GET /login", async function () {
     sinon.stub(loggerUtils, "info");
@@ -625,7 +807,18 @@ var loginControllerTest = function () {
 var logoutControllerTest = function () {
   it("GET /logout test", async function () {
     sinon.stub(loggerUtils, "info");
-    authController.logout(loginPayloadRequest, fakeResponse);
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
+    var req = {
+      path: "/fake_path",
+      method: "fake_method",
+      headers: {
+        "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
+      },
+      session: {
+        destroy: function () {}
+      }
+    };
+    authController.logout(req, fakeResponse);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -651,21 +844,15 @@ var registerControllerTest = function () {
         name: "user2",
       },
     ]);
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.register(registerPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, registerSuccessResponse);
   });
   it("POST /register - payload validation failure test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(validator, "validate").returns({ valid: false });
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.register(registerPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, registerPayloadValidationErrorResponse);
   });
   it("POST /register - registration failure test", async function () {
     sinon.stub(loggerUtils, "info");
@@ -674,25 +861,21 @@ var registerControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(dbUtils, "insert").returns(false);
     sinon.stub(dbUtils, "fetchAllUserOfGivenType").returns([]);
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.register(registerPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    sinon.stub(dbUtils, 'remove').returns(true);
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, registrationFailureResponse);
   });
   it("POST /register - DB exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
-    sinon.stub(dbUtils, "isExistingUser").throwsException();
+    sinon.stub(dbUtils, "isExistingUser").throwsException(Error("fake_exp"));
+    sinon.stub(dbUtils, 'remove').returns(true);
     sinon.stub(validator, "validate").returns({ valid: true });
     var dateObj = new Date();
     sinon.stub(dateObj, "setDate");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
-    var response = {
-      redirect: sinon.spy(),
-    };
-    await authController.register(registerPayloadRequest, response);
-    assert.calledOnce(response.redirect);
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.response, registerExceptionResponse);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -704,11 +887,13 @@ var getQuotesTest = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(Math, "random").returns(0);
     sinon.stub(axios, "get").returns(fakeAxiosGetData);
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, fakeGetQuotesResponse);
   });
   it("GET /getQuotes - get default category success test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(
@@ -718,6 +903,7 @@ var getQuotesTest = function () {
   });
   it("GET /getQuotes - get default category success test", async function () {
     sinon.stub(loggerUtils, "info");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(
@@ -728,11 +914,19 @@ var getQuotesTest = function () {
   it("GET /getQuotes - exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
     var stubFunc = sinon.stub(axios, "get");
     stubFunc.onCall(0).returns(fakeAxiosGetData);
     stubFunc.onCall(1).returns(fakeAxiosGetEmptyData);
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
+  });
+  it("GET /getQuotes - user unauthorized test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, 'decodeJwt').returns(null);
+    await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 401);
   });
   it("GET /loadHomePage - with session values - success test", async function () {
     // This test is for coverage only.
@@ -743,6 +937,14 @@ var getQuotesTest = function () {
     );
   });
   it("GET /loadHomePage - without session values - success test", async function () {
+    // This test is for coverage only.
+    sinon.stub(loggerUtils, "info");
+    await coreServicesController.loadHomePage(
+      fakeRequest,
+      fakeResponse
+    );
+  });
+  it("GET /loadHomePage - without session values - failure test", async function () {
     // This test is for coverage only.
     sinon.stub(loggerUtils, "info");
     await coreServicesController.loadHomePage(
@@ -784,6 +986,7 @@ var getProfilePicture = async function () {
   for (const testCase of testCases) {
     it(testCase.name, async function () {
       sinon.stub(loggerUtils, "info");
+      sinon.stub(utils, 'decodeJwt').returns("sender@gmail.com");
       sinon.stub(axios, "get").returns({});
       sinon.stub(Buffer, "from").returns("fakeImgUrl");
       sinon.stub(dbUtils, "fetch").returns(testCase.fetchValue);

@@ -5,6 +5,7 @@ var { validator } = require("../Controller/schema");
 var main_utils = require("../Controller/main_utils");
 var loggerUtils = require("../Logger/log");
 var responseUtils = require("../Controller/response_utils");
+var utils = require("../Controller/utils");
 const {
   fakeBuildResponse1,
   fakeBuildResponse2,
@@ -13,6 +14,7 @@ const {
   fakeBuildErrorReasonsPayload,
   fakeBuildErrorReasons,
 } = require("./mockData");
+var jwt = require("jsonwebtoken");
 
 var mainUtilsControllerTest = function () {
   it("String format check test", function () {
@@ -61,6 +63,11 @@ var mainUtilsControllerTest = function () {
 };
 
 var responseUtilsControllerTest = function () {
+  var AppRes = new responseUtils.AppResponse({
+    session: {
+      destroy: function () {},
+    },
+  });
   var testCases = [
     {
       tc_name: "buildResponse test-1",
@@ -98,7 +105,7 @@ var responseUtilsControllerTest = function () {
   for (const testCase of testCases) {
     it(testCase.tc_name, async function () {
       sinon.stub(loggerUtils, "info");
-      var result = await responseUtils.buildResponse(
+      var result = await AppRes.buildResponse(
         testCase.data,
         testCase.reasons,
         testCase.statusCode,
@@ -109,10 +116,34 @@ var responseUtilsControllerTest = function () {
   }
   it("buildErrorReasons test", async function () {
     sinon.stub(loggerUtils, "info");
-    var result = await responseUtils.buildErrorReasons(
-      fakeBuildErrorReasonsPayload
-    );
+    var result = await AppRes.buildErrorReasons(fakeBuildErrorReasonsPayload);
     assert.match(result, fakeBuildErrorReasons);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+};
+
+var testUtils = function () {
+  var AppRes = new responseUtils.AppResponse({
+    headers: {
+      "x-access-token": "XXXXXXX.XXXXXXX.XXXXXXX",
+    },
+  });
+  it("decodeJwt - success test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(jwt, "verify").returns({ id: "fake_id@gmail.com" });
+    var loggedInUserId = await utils.decodeJwt(AppRes);
+    assert.match(loggedInUserId, "fake_id@gmail.com");
+  });
+  it("decodeJwt - exception test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(jwt, "verify").throwsException(Error('fake_exp'));
+    try {
+      await utils.decodeJwt(AppRes);
+    } catch (ex) {
+      assert.match(ex.message, "fake_exp");
+    }
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -121,3 +152,4 @@ var responseUtilsControllerTest = function () {
 
 describe("test_main_utils", mainUtilsControllerTest);
 describe("test_response_utils", responseUtilsControllerTest);
+describe("test_utils", testUtils);
