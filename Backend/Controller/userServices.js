@@ -217,7 +217,7 @@ module.exports.chat = async function (req, res) {
 
 /**
  * @httpMethod DELETE
- * @endpoint /delete
+ * @endpoint /deleteUser
  * @function delete
  * @async
  * @description Delete user's all data
