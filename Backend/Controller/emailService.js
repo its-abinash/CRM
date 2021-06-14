@@ -1,12 +1,9 @@
-const session = require("express-session");
 const { processPayload, validatePayload, format } = require("./main_utils");
 const { emailPayloadSchema } = require("./schema");
 const httpStatus = require("http-status");
 const emailServiceDao = require("./emailServiceDao");
 const { ResponseIds, CYPHER } = require("../../Configs/constants.config");
 const mailer = require("nodemailer");
-var AES = require("crypto-js/aes"); // Advanced Encryption Standard
-const CryptoJs = require("crypto-js");
 const logger = require("../Logger/log");
 
 const SERVICE_NAME = "gmail";
@@ -55,13 +52,8 @@ module.exports.processAndSendEmail = async function (LoggedInUser, AppRes) {
       },
     };
     var transporter = mailer.createTransport(transportFields);
-    payload[SUBJECT] = AES.decrypt(
-      payload.subject,
-      CYPHER.DECRYPTION_KEY
-    ).toString(CryptoJs.enc.Utf8);
-    payload[TEXT] = AES.decrypt(payload.text, CYPHER.DECRYPTION_KEY).toString(
-      CryptoJs.enc.Utf8
-    );
+    payload[SUBJECT] = AppRes.decryptKey(payload.subject);
+    payload[TEXT] = AppRes.decryptKey(payload.text);
     var mailOptions = payload;
     try {
       await transporter.sendMail(mailOptions);
