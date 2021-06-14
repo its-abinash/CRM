@@ -3,10 +3,10 @@ var logger = require("../Logger/log");
 var main_utils = require("./main_utils");
 var jp = require("jsonpath");
 var { v4: uuid } = require("uuid");
-var { ResponseIds } = require("../../Configs/constants.config");
-var session = require("express-session");
+var { ResponseIds, routes, CYPHER } = require("../../Configs/constants.config");
 const { URL, URLSearchParams } = require("url");
 const qString = require("querystring");
+const CryptoJs = require("crypto-js");
 
 const ACCESS_TOKEN = "x-access-token";
 const HEADERS = "headers";
@@ -16,13 +16,53 @@ class AppResponse {
     this.request = request || {};
   }
 
-  async destroySession() {
-    try {
-      await this.request.session.destroy();
-      return;
-    } catch (exc) {
-      throw exc;
+  destroySession() {
+    var result = {
+      link: routes.server + routes.login,
+      auth: false,
+      token: null,
+    };
+    return result;
+  }
+
+  decryptKey(key) {
+    // Key is AES encoded base64 string. To decrypt it we'll do following operations
+    // 1. get the wordArray to convert the key to utf8 string
+    // 2. get the utf8 string  from the wordArray
+    // 3. use decrypt function of CryptoJs to decrypt the utf8 string
+    var wordArray = CryptoJs.enc.Base64.parse(key);
+    var utf8String = CryptoJs.enc.Utf8.stringify(wordArray);
+    utf8String = utf8String.replace(/ /g, "+");
+    var decryptedKey = CryptoJs.AES.decrypt(String(utf8String), "#").toString(
+      CryptoJs.enc.Utf8
+    );
+    // remove double quotes at any places in decrypted string (If any)
+    // If the decryptedKey is an object string then we need to keep the double quotes
+    if(decryptedKey[0] == '"' && decryptedKey.slice(-1) == '"') {
+      decryptedKey = decryptedKey.replace(/['"]+/g, '');
     }
+    return decryptedKey;
+  }
+
+  encryptKey(key) {
+    var encryptedKey = CryptoJs.AES.encrypt(
+      JSON.stringify(key),
+      "#"
+    ).toString();
+    return encryptedKey;
+  }
+
+  encryptKeyStable(key) {
+    // This function encrypts key by ensuring that the encrypted key must remain same
+    // if the same key is encrypted again by this function
+    var encryptedKey = Buffer.from(String(key)).toString("base64");
+    return encryptedKey;
+  }
+
+  decryptKeyStable(key) {
+    // NOTE: This method decrypts key which is encoded by encryptKeyStable() function
+    var decryptedKey = Buffer.from(String(key), "base64").toString();
+    return decryptedKey;
   }
 
   getAccessToken() {
@@ -39,7 +79,7 @@ class AppResponse {
     if (encodedParams === "") {
       return {};
     }
-    const decodedParams = Buffer.from(encodedParams, "base64");
+    const decodedParams = this.decryptKey(encodedParams);
     const reqUrl = req.protocol + "://" + req.get("host") + "?" + decodedParams;
     const parsedUrl = new URL(reqUrl);
     const searchParamsObject = new URLSearchParams(parsedUrl.searchParams);
@@ -48,10 +88,24 @@ class AppResponse {
     return decodedQPArgs;
   }
 
+  getCommaSepPathParams() {
+    const req = this.request;
+    const params = req.params;
+    for (const eachPathParam in params) {
+      const decodedPathParams = this.decryptKey(params[eachPathParam]);
+      params[eachPathParam] = decodedPathParams.split(",");
+    }
+    return params;
+  }
+
   getRequestBody() {
-    const encodedRequestBody = Object.keys(this.request.body)[0];
-    var decodedRequestBodyString = Buffer.from(encodedRequestBody, "base64");
-    const requestBodyObject = JSON.parse(decodedRequestBodyString.toString());
+    var encodedRequestBody = Object.keys(this.request.body)[0];
+    // AES encoded string may contain '+', and the client understand '+' as white-space.
+    // Eg: encodedRequestBody = "axjs&/sjsn+h". But when client sends this payload it becomes
+    // encodedRequestBody = "axjs&/sjsn h". So this may cause decryption error.
+    // So we'll make sure all white-spaces are replaced with '+'.
+    var decodedRequestBodyString = this.decryptKey(encodedRequestBody);
+    const requestBodyObject = JSON.parse(decodedRequestBodyString);
     return requestBodyObject;
   }
 
@@ -172,16 +226,19 @@ class AppResponse {
       URIError,
     ];
     var errMsg = error; // Considering error is a String and does not belong to any OOB errors
-    var errType = 'Error'; // Common Error
-    for(const eachError of OOB_ERRORS_LIST) {
-      if(error instanceof eachError) {
+    var errType = "Error"; // Common Error
+    for (const eachError of OOB_ERRORS_LIST) {
+      if (error instanceof eachError) {
         errMsg = error.message;
         errType = error.name;
         break;
       }
     }
-    var message = `Execution of ${req.method} ${req.path} failed with ${String(errType)}: ${errMsg}`;
+    var message = `Execution of ${req.method} ${req.path} failed with ${String(
+      errType
+    )}: ${errMsg}`;
     logger.error(message);
+    logger.error(`${error.stack}`);
   }
 
   ApiExecutionEnds() {
