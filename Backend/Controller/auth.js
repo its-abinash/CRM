@@ -12,7 +12,6 @@ var {
 const { processPayload, validatePayload, format } = require("./main_utils");
 const { registrationSchema, loginPayloadSchema } = require("./schema");
 const { AppResponse } = require("./response_utils");
-var session = require("express-session");
 var httpStatus = require("http-status");
 var jp = require("jsonpath");
 var jwt = require("jsonwebtoken");
@@ -106,8 +105,6 @@ module.exports.login = async function (req, res) {
       var validUser = await isValidUser(email, password);
       logger.info(`User Validated: ${validUser}`);
       if (validUser) {
-        req.session.user = email;
-        req.session.password = password;
         // create access-token
         var accessToken = jwt.sign({ id: email }, process.env.JWT_SECRET, {
           expiresIn: 86400, // 24 Hour
@@ -321,16 +318,7 @@ module.exports.logout = async function (req, res) {
   try {
     AppRes.ApiExecutionBegins();
     logger.info(`Closing session for userId: ${loggedInUser}`);
-    await AppRes.destroySession();
-    res.cookie("connect.sid", null, {
-      expires: new Date(),
-      httpOnly: true,
-    });
-    var data = {
-      link: routes.server + routes.login,
-      auth: false,
-      token: null,
-    };
+    var data = AppRes.destroySession();
     var response = await AppRes.buildResponse(
       data,
       format(ResponseIds.RI_031, [loggedInUser]),
