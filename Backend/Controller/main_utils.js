@@ -1,6 +1,5 @@
 var { validator } = require("./schema");
 require("format-unicorn");
-var session = require("express-session");
 var requestTracer = require("cls-rtracer");
 
 /**
@@ -49,10 +48,6 @@ module.exports.getMemoryUsage = function () {
 module.exports.cloneObject = function (dataObject) {
   var copy = JSON.parse(JSON.stringify(dataObject || {}));
   return copy;
-};
-
-module.exports.isLoggedInUser = async function (request) {
-  return request.session;
 };
 
 module.exports.getRequestId = function () {
