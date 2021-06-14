@@ -4,11 +4,10 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 var httpStatus = require("http-status");
 var { AppResponse } = require("./response_utils");
-var session = require("express-session");
 var logger = require("../Logger/log");
 const axios = require("axios").default;
 const { ResponseIds, URL } = require("../../Configs/constants.config");
-const { format, isLoggedInUser } = require("./main_utils");
+const { format } = require("./main_utils");
 const utils = require("./utils");
 const remainderService = require("./remainderService");
 const OOBService = require("./OOBService");
@@ -36,10 +35,6 @@ module.exports.getAllConstants = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var [statusCode, response] = await OOBService.processAndGetAllConstants(
       req,
       AppRes
@@ -70,10 +65,6 @@ module.exports.getSpecificFromConstants = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var [statusCode, response] =
       await OOBService.processAndGetSpecificFromConstants(req, AppRes);
     AppRes.ApiExecutionEnds();
@@ -96,10 +87,6 @@ module.exports.getConstant = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var [statusCode, response] = await OOBService.processAndGetConstant(
       req,
       AppRes
@@ -125,10 +112,6 @@ module.exports.getQuotes = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var LoggedInUser = await utils.decodeJwt(AppRes);
     logger.info(`loggedInUser: ${LoggedInUser}`);
     if (!LoggedInUser) {
@@ -164,23 +147,9 @@ module.exports.getQuotes = async function (req, res) {
  * @param {Object} res
  */
 module.exports.loadHomePage = async function (req, res) {
-  // Check if the session is valid
   var AppRes = new AppResponse(req);
-  var isUserSessionValid = await isLoggedInUser(req);
-  if (isUserSessionValid) {
-    AppRes.ApiExecutionBegins();
-    res.render("home");
-  } else {
-    AppRes.ApiReportsError("Session is invalid");
-    var response = await AppRes.buildResponse(
-      null,
-      ResponseIds.RI_015,
-      httpStatus.BAD_GATEWAY,
-      "RI_015"
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
+  AppRes.ApiExecutionBegins();
+  res.render("home");
 };
 
 /**
@@ -195,10 +164,6 @@ module.exports.getProfilePicture = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var LoggedInUser = await utils.decodeJwt(AppRes);
     logger.info(`logedinuser: ${LoggedInUser}`);
     if (!LoggedInUser) {
@@ -255,10 +220,6 @@ module.exports.getUserType = async function (req, res) {
   try {
     var AppRes = new AppResponse(req);
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
@@ -359,10 +320,6 @@ module.exports.latestRemainderInformation = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var isSessionValid = await isLoggedInUser(req);
-    if (!isSessionValid) {
-      throw ResponseIds.RI_015;
-    }
     var LoggedInUser = await utils.decodeJwt(AppRes);
     if (!LoggedInUser) {
       var response = await AppRes.buildResponse(
