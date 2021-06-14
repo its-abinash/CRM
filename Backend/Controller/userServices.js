@@ -129,7 +129,7 @@ module.exports.getAdmins = async function (req, res) {
 
 /**
  * @httpMethod GET
- * @endpoint /chat/{receiverId}
+ * @endpoint /chat/receivers/{receiverId}/senders/{senderId}
  * @async
  * @function getConversation
  * @description Fetch conversations between login user and requested user
@@ -211,6 +211,44 @@ module.exports.chat = async function (req, res) {
       format(ResponseIds.RI_026, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};
+
+/**
+ * @function getNotification
+ * @async
+ * @endpoint /chat/notification/{userIds}
+ * @description Checks new notification for the user and returns it as boolean (True/False)
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.getNotification = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await chatService.checkAndGetNotifications(
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
