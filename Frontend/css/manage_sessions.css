@@ -1,0 +1,17 @@
+.session-timeout-notification
+{
+    text-align:center;
+    background-color: whitesmoke;
+    border-bottom: 3px solid cyan;
+    color: black;
+    display:block;
+    padding: 10px;
+}
+
+strong {
+    color: red;
+}
+
+strong.time {
+    color: royalblue;
+}
