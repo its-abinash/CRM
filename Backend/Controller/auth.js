@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
@@ -18,7 +17,7 @@ var jwt = require("jsonwebtoken");
 const utils = require("./utils");
 
 router.use(express.json());
-router.use(bodyParser.urlencoded({ extended: true }));
+router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 
 var existingUser = async function (email) {

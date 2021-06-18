@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var bodyParser = require("body-parser");
 var cors = require("cors");
 var httpStatus = require("http-status");
 var { AppResponse } = require("./response_utils");
@@ -16,7 +15,7 @@ const coreServiceDao = require("./coreServiceDao");
 const jwt = require("jsonwebtoken");
 
 router.use(express.json());
-router.use(bodyParser.urlencoded({ extended: true }));
+router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 
 const DEFAULT_DATA = {

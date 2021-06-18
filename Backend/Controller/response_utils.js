@@ -99,7 +99,7 @@ class AppResponse {
   }
 
   getRequestBody() {
-    var encodedRequestBody = Object.keys(this.request.body)[0];
+    var encodedRequestBody = this.request.body.payload;
     // AES encoded string may contain '+', and the client understand '+' as white-space.
     // Eg: encodedRequestBody = "axjs&/sjsn+h". But when client sends this payload it becomes
     // encodedRequestBody = "axjs&/sjsn h". So this may cause decryption error.

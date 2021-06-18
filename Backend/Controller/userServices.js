@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var bodyParser = require("body-parser");
 var cors = require("cors");
 var logger = require("../Logger/log");
 var httpStatus = require("http-status");
@@ -17,7 +16,7 @@ const utils = require("./utils");
 const { format } = require("./main_utils");
 
 router.use(express.json());
-router.use(bodyParser.urlencoded({ extended: true }));
+router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 
 /**
