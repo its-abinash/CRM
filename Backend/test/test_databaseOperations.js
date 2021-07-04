@@ -81,11 +81,11 @@ var databaseControllerTest = function () {
     var testCases = [
       {
         databaseId: DATABASE.CONVERSATION,
-        exp: true,
-        pgStub: fakePgPool(true),
+        exp: 1,
+        pgStub: fakePgPool({rowCount: 1}),
       },
-      { databaseId: DATABASE.CREDENTIALS, exp: true, pgStub: fakePgPool(true) },
-      { databaseId: DATABASE.CUSTOMER, exp: true, pgStub: fakePgPool(true) },
+      { databaseId: DATABASE.CREDENTIALS, exp: 1, pgStub: fakePgPool({rowCount: 1}) },
+      { databaseId: DATABASE.CUSTOMER, exp: 1, pgStub: fakePgPool({rowCount: 1}) },
     ];
     for (const testCase of testCases) {
       var dbUtils = proxyrequire("../../Database/databaseOperations", {
@@ -100,12 +100,12 @@ var databaseControllerTest = function () {
     }
   });
   it("remove user from user map - success test", async function () {
-    var pgStub = fakePgPool(true);
+    var pgStub = fakePgPool({rowCount: 1});
     var dbUtils = proxyrequire("../../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.remove(DATABASE.USERS_MAP, null, null);
-    assert.match(result, true);
+    assert.match(result, 1);
   });
   it("remove user from user map - exception test", async function () {
     var pgStub = fakePgPoolException();

@@ -131,9 +131,14 @@ var daoControllerTestPositive = function () {
   });
   it("deleteServiceDao - success test", async function () {
     var removefields = ["field1", "field2"];
-    sinon.stub(dbUtils, "remove").returns(true);
+    sinon.stub(dbUtils, "remove").returns(1);
     await deleteServiceDao.removeUserData(removefields, "user@domain.com");
     await deleteServiceDao.removeDataOnFailure([], "user@domain.com");
+  });
+  it("deleteServiceDao with valid userMap - success test", async function () {
+    var userMap = ["field1", "field2"];
+    sinon.stub(dbUtils, "remove").returns(1);
+    await deleteServiceDao.removeDataOnFailure(userMap, "user@domain.com");
   });
   it("deleteServiceDao - removeUserData exception test", async function () {
     var removefields = ["field1", "field2"];

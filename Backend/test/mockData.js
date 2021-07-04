@@ -11,10 +11,30 @@ module.exports.fakeChatPOSTRequest = {
     password: "password",
   },
   body: {
-    eyJyZWNlaXZlciI6InJlY2VpdmVyQGdtYWlsLmNvbSIsImNoYXRtc2ciOiJmYWtlX21zZyJ9:
-      "",
+    "payload": "U2FsdGVkX19gTxvETA5pwvCzaFwFATnzvth3aNVVk2Vs/yWuxbheVIfxZG03hl/wLKBsWqKKSGQzq2+AeHa9CJNMAIoeKUXhYdnIbAePkgXm2zv6HEEg29X2pauJDf3QoX5w27cs/iqKQcZmXHOD6A=="
   },
 };
+
+module.exports.GetNotificationRequest = {
+  path: "/notifications",
+  method: "GET",
+  headers: {"x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX"},
+  params: {
+    "userIds": "U2FsdGVkX1+v91wqk9V1YzDMnJJEUZqDMCuJEYjB7svxxL8G+ClQzuNNSEgRZtXtdYcXE24t9vum8RwdcYOB1ga17yPZXr2k/eS3RfDP+jg="
+  }
+}
+
+module.exports.getNotificationsResponse = {
+  responseId: 'aaef2374-bcb8-4d28-aa14-46ccb9a59b39',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [
+    'U2FsdGVkX19hCoVARr1klPtaLWUHoEl3Fs/NnRZJ1yX7sO9AixhXr7y4Tn45Z/6m63+s/5/yfFy2LTXKw6zNb3E82yIot5Thzoqw06uoNrgUdRGhKuYcRAiEOdTOIRRF'
+  ],
+  totalCount: 1,
+  reasons: [ '' ]
+}
 
 module.exports.fakeRequest = {
   path: "/fake_path",
@@ -50,9 +70,10 @@ module.exports.fakeGETChatRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
-    receiverId: "fake_receiver@gmail.com",
+    senderId: "sender@gmail.com",
+    receiverId: "receiver@gmail.com",
   },
-  path: "/fake_path",
+  path: "/chat",
   method: "fake_method",
 };
 
@@ -64,7 +85,8 @@ module.exports.fakeGETChatRequest2 = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
-    receiverId: "receiver@gmail.com",
+    senderId: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
+    receiverId: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
   },
   path: "/fake_path",
   method: "fake_method",
@@ -72,8 +94,8 @@ module.exports.fakeGETChatRequest2 = {
 
 module.exports.fakeChatData = [
   {
-    sender: "sender@gmail.com",
-    receiver: "receiver@gmail.com",
+    sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
+    receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
     msg: "U2FsdGVkX1/0568a5bCQKN4RqauV23i4IdFIMsCwIAA=",
     timestamp: "2021-01-24T10:09:50.762Z",
   },
@@ -86,8 +108,8 @@ module.exports.fakeChatResponse = {
   responseMessage: "Standard response for successful HTTP requests.",
   values: [
     {
-      sender: "sender@gmail.com",
-      receiver: "receiver@gmail.com",
+      sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
+      receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
       msg: "ello",
       timestamp: "3:39:50 PM",
       time_loc: "time-left",
@@ -190,7 +212,7 @@ module.exports.fakeDeleteUserRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    "eyJlbWFpbCI6InVzZXJAZ21haWwuY29tIn0=": "",
+    "payload": "U2FsdGVkX19FKrxTprxbiqvhkThZ+eXNSLd7+i6/wPwtZZIqvt9lNLR1Z8FYOX1p"
   },
   session: {
     user: "admin@gmail.com",
@@ -356,8 +378,7 @@ module.exports.fakeEditRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    eyJlbWFpbCI6InJlY2VpdmVyQGdtYWlsLmNvbSIsIm5hbWUiOiJyZWNlaXZlciIsInBob25lIjoiMTIzNDUiLCJyZW1mcmVxIjoiMiJ9:
-      "",
+    "payload": "U2FsdGVkX1+H3qu8M5Fs0Tj/Iz49Al8/uUCRbVlJn1JPhhskpVYdTDkXjKLnDtzQTAfW2zZWHXza+fl/CBqUrEvngBw6S+BzwlylzGUEPIj7b6J+/IVcxC/tkyvbv1R/"
   },
 };
 
@@ -367,7 +388,7 @@ module.exports.fakePatchRequest = {
   headers: {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
-  originalUrl: "/edit?ZW1haWw9c2VuZGVyQGdtYWlsLmNvbSZuYW1lPUFiaW5hc2ggQmlzd2Fs",
+  originalUrl: "/edit?U2FsdGVkX19V1+/i6aWXl4N29DXsRZ3qbQBP14Hn1RbQbu76DvwsDUoAqDkpUVY1PpYPMxoY777m0mIjkUv9E0sbb3U/TtM+GqKGwFYMDm4=",
   protocol: "http",
   get: function(host) {
     return "localhost";
@@ -382,8 +403,7 @@ module.exports.fakeEmailRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    eyJlbWFpbCI6InJlY2VpdmVyQGdtYWlsLmNvbSIsInN1YmplY3QiOiJzdWIiLCJib2R5IjoiYm9keSJ9:
-      "",
+    "payload": "U2FsdGVkX1+0w9xkFT/qO08+/ICDI721xonDrl1HMkrw1lXusFBWqOmN0qa5ViQe3Ljgtf+7y6C//ef1bBpHLSTBiHohm1KYJyB0Rjn8Kjs8ZBwEMJG33Cgel0hj+p3+"
   },
   path: "/fake_path",
   method: "fake_method",
@@ -595,7 +615,7 @@ module.exports.fakeInsertPayloadRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    "eyJuYW1lIjoiYzFfbmFtZTEiLCJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBob25lIjoiMTIzNDU2ODQ4NCIsImdzdCI6ImpkYmRoYmRoZCIsInJlbWZyZXEiOjJ9":""
+    "payload": "U2FsdGVkX1/3cNu05aMEdZg7caIhuU/qmDkttcufu+kMu4Yjd1k0ZH9Ew2XBpZEDryPk+FU0/V+ud0jRjtQvph1oLsUhRpkbbq4yvA6DQ81tXws2smNkbMc8coknxoHBPEOI6j94dlJWgWzrrUqC8g=="
   },
 };
 
@@ -669,7 +689,7 @@ module.exports.loginPayloadRequest = {
     password: "pass",
   },
   body: {
-    "eyJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoicGFzcyJ9": "",
+    "payload": "U2FsdGVkX1+WXa4uthXqvrCDKBwsXsJ5ia2O0bO2Ke0sBIGV662EOcQCBPbyFgEXRMHQWSsCwnbGfcYZy6dBCKdt64rV64csyIOkPiWPwQs="
   },
 };
 
@@ -694,7 +714,7 @@ module.exports.loginPayloadValidationErrorResponse = {
   status: 'UNPROCESSABLE_ENTITY',
   statusCode: 422,
   responseMessage: 'The request was well-formed but was unable to be followed due to semantic errors.',
-  values: [ { link: null, auth: false, token: null } ],
+  values: [ { auth: false, token: null } ],
   totalCount: 1,
   reasons: []
 }
@@ -704,10 +724,10 @@ module.exports.loginUserValidationErrorResponse = {
   status: 'BAD_REQUEST',
   statusCode: 400,
   responseMessage: 'The server cannot or will not process the request due to an apparent client error.',
-  values: [ { link: null, auth: false, token: null } ],
+  values: [ { auth: false, token: null } ],
   totalCount: 1,
   reasons: [
-    'Failed to logging in user: c1@gmail.com, due to error: Wrong userId or Password'
+    'Failed to logging in user: user@gmail.com, due to error: Wrong userId or Password'
   ]
 }
 
@@ -716,10 +736,10 @@ module.exports.loginExceptionResponse = {
   status: 'BAD_GATEWAY',
   statusCode: 502,
   responseMessage: 'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
-  values: [ { link: null, auth: false, token: null } ],
+  values: [ { auth: false, token: null } ],
   totalCount: 1,
   reasons: [
-    'Getting exception: c1@gmail.com while logging in user: Error: fake_exp'
+    'Getting exception: user@gmail.com while logging in user: Error: fake_exp'
   ]
 }
 
@@ -730,8 +750,7 @@ module.exports.registerPayloadRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    "eyJlbWFpbCI6ImMxQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoicGFzcyIsInVzZXJuYW1lIjoidXNlbmFtZSIsInBob25lbnVtIjoiMTExMTExIiwiZ3N0bnVtIjoic3VoZHVkIiwicmVtZnJlcSI6IjIiLCJwYXNzY29kZSI6ImpkdWRoZHUifQ==":
-      "",
+    "payload": "U2FsdGVkX1/1x2mDV7KUuae0/uhXx4qm6BeuwzMepFlBHroqi75T0m362J3dmXWktwYbGldDCiCaHA+gmiEq3XeP7HtfS5MZlbFuGYKIaWZYqyFL3GfNXDEjMkYoXF8phdOQZj/Y24008f91sqO3xaV9lBiFL8vcYTkmDBEVksDUwypEDEKfHpCURQn57F+xesROiHJ4g2RLLki591Dqp3JuXr8D04pndI5N7KdVYvg="
   },
 };
 
@@ -742,7 +761,7 @@ module.exports.registerSuccessResponse = {
   responseMessage: 'The request has been fulfilled, resulting in the creation of a new resource.',
   values: [],
   totalCount: 0,
-  reasons: [ 'User: c1@gmail.com has successfully registered' ]
+  reasons: [ 'User: user@gmail.com has successfully registered' ]
 }
 
 module.exports.registerPayloadValidationErrorResponse = {
@@ -763,7 +782,7 @@ module.exports.registrationFailureResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Failed to register user: c1@gmail.com, due to error: error saving userdata in our databse'
+    'Failed to register user: user@gmail.com, due to error: error saving userdata in our databse'
   ]
 }
 
@@ -775,7 +794,7 @@ module.exports.registerExceptionResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Getting exception: c1@gmail.com while registering user: Error: fake_exp'
+    'Getting exception: user@gmail.com while registering user: Error: fake_exp'
   ]
 }
 
