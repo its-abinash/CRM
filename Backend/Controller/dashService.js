@@ -1,8 +1,22 @@
-const { ResponseIds } = require("../../Configs/constants.config");
+const { ResponseIds, URL } = require("../../Configs/constants.config");
 const dashDao = require("./dashDao");
 const { format } = require("./main_utils");
-const logger = require("../Logger/log")
-const httpStatus = require("http-status")
+const logger = require("../Logger/log");
+const httpStatus = require("http-status");
+
+var massageAndGetClientList = function (clientList) {
+  var result = [];
+  for (var each_client of clientList) {
+    result.push({
+      email: each_client["email"],
+      image: !each_client["img_data"]
+        ? URL.defaultProfilePictureUrl
+        : each_client["img_data"],
+      name: each_client["name"],
+    });
+  }
+  return result;
+};
 
 /**
  * @function processAndGetCustomers
@@ -12,9 +26,14 @@ const httpStatus = require("http-status")
  * @param {String} LoggedInUser
  * @param {Class} AppRes
  */
-module.exports.processAndGetCustomers = async function (req, LoggedInUser, AppRes) {
+module.exports.processAndGetCustomers = async function (
+  req,
+  LoggedInUser,
+  AppRes
+) {
   var customers = await dashDao.getAllCustomer(LoggedInUser);
-  logger.info(`Customers: ${JSON.stringify(customers, null, 3)}`);
+  customers = massageAndGetClientList(customers);
+  logger.info(`Total Customers: ${customers.length}`);
   var response = await AppRes.buildResponse(
     customers,
     format(ResponseIds.RI_006, ["Customers", JSON.stringify(customers)]),
@@ -33,9 +52,14 @@ module.exports.processAndGetCustomers = async function (req, LoggedInUser, AppRe
  * @param {Class} AppRes
  * @returns List of Admins
  */
-module.exports.processAndGetAdmins = async function (req, LoggedInUser, AppRes) {
+module.exports.processAndGetAdmins = async function (
+  req,
+  LoggedInUser,
+  AppRes
+) {
   var admins = await dashDao.getAllAdmins(LoggedInUser);
-  logger.info(`adminList: ${JSON.stringify(admins, null, 3)}`);
+  admins = massageAndGetClientList(admins);
+  logger.info(`total admin: ${admins.length}`);
   var response = await AppRes.buildResponse(
     admins,
     format(ResponseIds.RI_006, ["getAdmins", JSON.stringify(admins)]),

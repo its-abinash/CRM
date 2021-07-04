@@ -155,7 +155,7 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `select customer.email, customer.name
+    const query = `select customer.email, customer.name, customer.img_data
                    from customer
                    inner join users_map on
                    users_map.user_id2 = customer.email
