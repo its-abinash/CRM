@@ -2,15 +2,13 @@ const chatDao = require("./chatDao");
 const logger = require("../Logger/log");
 const {
   CSS,
-  CYPHER,
   ResponseIds,
   DATABASE,
+  redisClient,
 } = require("../../Configs/constants.config");
 const { validatePayload, format } = require("./main_utils");
 const httpStatus = require("http-status");
 const { chatPostPayloadSchema } = require("./schema");
-const AES = require("crypto-js/aes"); // Advanced Encryption Standard
-const CryptoJs = require("crypto-js");
 
 /**
  * @async
@@ -25,8 +23,8 @@ module.exports.processAndGetConversation = async function (
   LoggedInUser,
   AppRes
 ) {
-  var sender = LoggedInUser;
-  var receiver = req.params.receiverId;
+  var sender = AppRes.decryptKey(req.params.senderId) || LoggedInUser;
+  var receiver = AppRes.decryptKey(req.params.receiverId);
   var chat = await chatDao.getConversation(
     DATABASE.CONVERSATION,
     DATABASE.FETCH_SPECIFIC,
@@ -35,9 +33,7 @@ module.exports.processAndGetConversation = async function (
   );
 
   for (var i = 0; i < chat.length; i++) {
-    chat[i].msg = AES.decrypt(chat[i].msg, CYPHER.DECRYPTION_KEY).toString(
-      CryptoJs.enc.Utf8
-    );
+    chat[i].msg = AppRes.decryptKey(chat[i].msg);
     chat[i].timestamp = new Date(
       chat[i].timestamp.toString()
     ).toLocaleTimeString();
@@ -111,4 +107,27 @@ module.exports.processAndSaveConversation = async function (
     );
     return [statusCode, response];
   }
+};
+
+module.exports.decodeChatRequestPayload = function (AppRes, EncString) {
+  var decryptedKey = AppRes.decryptKey(EncString);
+  var payload = JSON.parse(decryptedKey);
+  return payload;
+};
+
+module.exports.checkAndGetNotifications = async function (loginUser, AppRes) {
+  var pathParams = AppRes.getCommaSepPathParams();
+  var result = {};
+  for (const each_param of pathParams.userIds) {
+    var key = String(each_param) + "," + String(loginUser);
+    var encKey = AppRes.encryptKeyStable(key);
+    var isNotificationFound = await redisClient.getAsync(encKey);
+    result[each_param] = Boolean(isNotificationFound) || false;
+    if (Boolean(isNotificationFound)) {
+      await redisClient.delAsync(encKey);
+    }
+  }
+  var encResult = AppRes.encryptKey(result);
+  var response = await AppRes.buildResponse(encResult, "", httpStatus.OK);
+  return [httpStatus.OK, response];
 };

@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var bodyParser = require("body-parser");
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
@@ -12,14 +11,13 @@ var {
 const { processPayload, validatePayload, format } = require("./main_utils");
 const { registrationSchema, loginPayloadSchema } = require("./schema");
 const { AppResponse } = require("./response_utils");
-var session = require("express-session");
 var httpStatus = require("http-status");
 var jp = require("jsonpath");
 var jwt = require("jsonwebtoken");
 const utils = require("./utils");
 
 router.use(express.json());
-router.use(bodyParser.urlencoded({ extended: true }));
+router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 
 var existingUser = async function (email) {
@@ -82,7 +80,6 @@ module.exports.login = async function (req, res) {
       loginPayloadSchema
     );
     var data = {
-      link: null,
       auth: false,
       token: null,
     };
@@ -106,15 +103,12 @@ module.exports.login = async function (req, res) {
       var validUser = await isValidUser(email, password);
       logger.info(`User Validated: ${validUser}`);
       if (validUser) {
-        req.session.user = email;
-        req.session.password = password;
         // create access-token
         var accessToken = jwt.sign({ id: email }, process.env.JWT_SECRET, {
           expiresIn: 86400, // 24 Hour
         });
 
         data = {
-          link: routes.server + routes.home,
           auth: true,
           token: accessToken,
         };
@@ -140,7 +134,6 @@ module.exports.login = async function (req, res) {
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var data = {
-      link: null,
       auth: false,
       token: null,
     };
@@ -321,16 +314,7 @@ module.exports.logout = async function (req, res) {
   try {
     AppRes.ApiExecutionBegins();
     logger.info(`Closing session for userId: ${loggedInUser}`);
-    await AppRes.destroySession();
-    res.cookie("connect.sid", null, {
-      expires: new Date(),
-      httpOnly: true,
-    });
-    var data = {
-      link: routes.server + routes.login,
-      auth: false,
-      token: null,
-    };
+    var data = AppRes.destroySession();
     var response = await AppRes.buildResponse(
       data,
       format(ResponseIds.RI_031, [loggedInUser]),

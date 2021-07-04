@@ -125,6 +125,9 @@ module.exports.processAndEditUserData = async function (AppRes) {
  */
 module.exports.processAndUpdateUserProperty = async function (AppRes) {
   var qpArgs = AppRes.getQueryParams();
+  if(!qpArgs) {
+    throw "QUERY_PARAMS_NOT_FOUND_IN_URL"
+  }
   var [isValidPayload, errorList] = await validatePayload(
     qpArgs,
     patchPayloadSchema

@@ -7,6 +7,17 @@ var getHeaders = function () {
   return headers;
 };
 
+async function getEncryptedValue(key, ENCRYPTION_KEY) {
+  var encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(key),
+    ENCRYPTION_KEY
+  ).toString();
+  // Converting into base64 string
+  var wordArray = CryptoJS.enc.Utf8.parse(String(encrypted));
+  encrypted = CryptoJS.enc.Base64.stringify(wordArray).toString();
+  return encrypted;
+}
+
 var loadPage = async function () {
   var profileImgString = "";
   var userName = "";
@@ -152,7 +163,10 @@ function getLandingPageEndpoint() {
 }
 
 var removeSessionData = function () {
-  localStorage.clear();
+  localStorage.removeItem("x-access-token");
+  localStorage.removeItem("routes");
+  localStorage.removeItem("loginUser");
+  localStorage.removeItem("allUsersInDash");
 };
 
 async function performLogoutTask(LOGOUT_ENDPOINT) {
@@ -234,7 +248,7 @@ var localStore = {
   contentBeforeChange: "",
 };
 
-$(document).mouseup(function (event) {
+$(document).mouseup(async function (event) {
   var container = $("#user-name");
   var isClickedInside = isClickedInsideElement(event, container, "#user-name");
   var isClickedBefore = localStore.isClickedBefore;
@@ -261,8 +275,8 @@ $(document).mouseup(function (event) {
       !equal(contentAfterChange, contentBeforeChange)
     ) {
       const editUrl = getEditEndpoint();
-      const qpArgsString = `name=${contentAfterChange}&email=${getLoginUserId()}`
-      const encodedQueryParams = window.btoa(qpArgsString);
+      const qpArgsString = `name=${contentAfterChange}&email=${getLoginUserId()}`;
+      const encodedQueryParams = await getEncryptedValue(qpArgsString, "#");
       $.ajax({
         url: SERVER + editUrl + "?" + encodedQueryParams,
         method: "PATCH",
@@ -275,9 +289,15 @@ $(document).mouseup(function (event) {
 });
 
 $(document).ready(function () {
-  loadPage();
-  // load the random quote when the page is refreshed or being loaded for the first time
-  getRandomQuote();
+  if (localStorage.getItem("x-access-token")) {
+    $.getScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    );
+    loadPage();
+
+    // load the random quote when the page is refreshed or being loaded for the first time
+    getRandomQuote();
+  }
 
   $("a").on("click", function (event) {
     // Make sure this.hash has a value before overriding default behavior
@@ -302,6 +322,8 @@ $(document).ready(function () {
   });
 
   setInterval(async function () {
-    getRandomQuote();
+    if (localStorage.getItem("x-access-token")) {
+      getRandomQuote();
+    }
   }, 360000); // API from https://quotes.rest/ is allowing 10 calls/hr
 });

@@ -9,7 +9,6 @@ const httpStatus = require("http-status");
 const insertServiceDao = require("./insertServiceDao");
 const deleteServiceDao = require("./deleteServiceDao");
 const { insertPayloadSchema } = require("./schema");
-const session = require("express-session");
 const axios = require("axios").default;
 
 const FAKE_PASSCODE = "fake_code";
@@ -115,7 +114,7 @@ module.exports.processAndInsertUserData = async function (LoggedInUser, AppRes) 
  * @param {Class} AppRes
  */
 module.exports.processAndInsertProfilePicture = async function (req, LoggedInUser, AppRes) {
-  if (req.session && LoggedInUser && req.file) {
+  if (LoggedInUser && req.file) {
     var base64Uri = req.file.buffer.toString("base64");
     var url = `data:${req.file.mimetype};base64, ${base64Uri}`;
     await insertServiceDao.saveImageIntoDB(LoggedInUser, url);

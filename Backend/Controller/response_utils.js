@@ -4,9 +4,10 @@ var main_utils = require("./main_utils");
 var jp = require("jsonpath");
 var { v4: uuid } = require("uuid");
 var { ResponseIds } = require("../../Configs/constants.config");
-var session = require("express-session");
 const { URL, URLSearchParams } = require("url");
 const qString = require("querystring");
+const CryptoJs = require("crypto-js");
+const _ = require("lodash");
 
 const ACCESS_TOKEN = "x-access-token";
 const HEADERS = "headers";
@@ -16,13 +17,44 @@ class AppResponse {
     this.request = request || {};
   }
 
-  async destroySession() {
+  destroySession() {
+    var result = {
+      auth: false,
+      token: null,
+    };
+    return result;
+  }
+
+  decryptKey(key) {
+    var wordArray = CryptoJs.AES.decrypt(key, "#");
+    var utf8String = wordArray.toString(CryptoJs.enc.Utf8);
     try {
-      await this.request.session.destroy();
-      return;
+      var obj = JSON.parse(utf8String);
+      return obj;
     } catch (exc) {
-      throw exc;
+      return utf8String;
     }
+  }
+
+  encryptKey(key) {
+    var encryptedKey = CryptoJs.AES.encrypt(
+      JSON.stringify(key),
+      "#"
+    ).toString();
+    return encryptedKey;
+  }
+
+  encryptKeyStable(key) {
+    // This function encrypts key by ensuring that the encrypted key must remain same
+    // if the same key is encrypted again by this function
+    var encryptedKey = Buffer.from(String(key)).toString("base64");
+    return encryptedKey;
+  }
+
+  decryptKeyStable(key) {
+    // NOTE: This method decrypts key which is encoded by encryptKeyStable() function
+    var decryptedKey = Buffer.from(String(key), "base64").toString();
+    return decryptedKey;
   }
 
   getAccessToken() {
@@ -34,12 +66,15 @@ class AppResponse {
 
   getQueryParams() {
     const req = this.request;
-    const encodedReqUrl = req.originalUrl;
+    const encodedReqUrl = _.toString(req.originalUrl);
     const encodedParams = encodedReqUrl.slice(encodedReqUrl.indexOf("?") + 1);
     if (encodedParams === "") {
       return {};
     }
-    const decodedParams = Buffer.from(encodedParams, "base64");
+    const decodedParams = this.decryptKey(encodedParams);
+    if (!decodedParams) {
+      return null;
+    }
     const reqUrl = req.protocol + "://" + req.get("host") + "?" + decodedParams;
     const parsedUrl = new URL(reqUrl);
     const searchParamsObject = new URLSearchParams(parsedUrl.searchParams);
@@ -48,10 +83,23 @@ class AppResponse {
     return decodedQPArgs;
   }
 
+  getCommaSepPathParams() {
+    const req = this.request;
+    const params = req.params;
+    for (const eachPathParam in params) {
+      const decodedPathParams = this.decryptKey(params[eachPathParam]);
+      params[eachPathParam] = decodedPathParams[eachPathParam].split(",");
+    }
+    return params;
+  }
+
   getRequestBody() {
-    const encodedRequestBody = Object.keys(this.request.body)[0];
-    var decodedRequestBodyString = Buffer.from(encodedRequestBody, "base64");
-    const requestBodyObject = JSON.parse(decodedRequestBodyString.toString());
+    var encodedRequestBody = this.request.body.payload;
+    // AES encoded string may contain '+', and the client understand '+' as white-space.
+    // Eg: encodedRequestBody = "axjs&/sjsn+h". But when client sends this payload it becomes
+    // encodedRequestBody = "axjs&/sjsn h". So this may cause decryption error.
+    // So we'll make sure all white-spaces are replaced with '+'.
+    var requestBodyObject = this.decryptKey(encodedRequestBody);
     return requestBodyObject;
   }
 
@@ -121,7 +169,7 @@ class AppResponse {
       } else if (errorTypes[i] == "type") {
         // Iterate over the path & args fields for saving individual reason
         reason = [];
-        for (var field = 0; field < path[i].length; field++) {
+        for (var field = 0; path[i] && field < path[i].length; field++) {
           reason.push({
             field: path[i][field],
             error: `Field '${path[i][field]}' is not a type(s) of ${fieldName[field]}`,
@@ -172,16 +220,19 @@ class AppResponse {
       URIError,
     ];
     var errMsg = error; // Considering error is a String and does not belong to any OOB errors
-    var errType = 'Error'; // Common Error
-    for(const eachError of OOB_ERRORS_LIST) {
-      if(error instanceof eachError) {
+    var errType = "Error"; // Common Error
+    for (const eachError of OOB_ERRORS_LIST) {
+      if (error instanceof eachError) {
         errMsg = error.message;
         errType = error.name;
         break;
       }
     }
-    var message = `Execution of ${req.method} ${req.path} failed with ${String(errType)}: ${errMsg}`;
+    var message = `Execution of ${req.method} ${req.path} failed with ${String(
+      errType
+    )}: ${errMsg}`;
     logger.error(message);
+    logger.error(`${error.stack}`);
   }
 
   ApiExecutionEnds() {

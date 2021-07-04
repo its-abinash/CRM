@@ -11,7 +11,7 @@ module.exports.removeUserData = async function (removeFields, loggedInUserId) {
       ["sender", "receiver"],
       [loggedInUserId, email]
     );
-    return [isUserRemoved, isChatRemoved];
+    return [Boolean(isUserRemoved), Boolean(isChatRemoved)];
   } catch (exc) {
     throw exc;
   }
@@ -19,11 +19,14 @@ module.exports.removeUserData = async function (removeFields, loggedInUserId) {
 
 module.exports.removeDataOnFailure = async function (userMap = [], email = null) {
   try {
-    await db.remove(DATABASE.CUSTOMER, "email", email);
-    await db.remove(DATABASE.CREDENTIALS, "email", email);
+    var cusDel = await db.remove(DATABASE.CUSTOMER, "email", email);
+    var credDel = await db.remove(DATABASE.CREDENTIALS, "email", email);
+    var umDel = 0;
     for (const each_map of userMap) {
-      await db.remove(DATABASE.USERS_MAP, null, each_map);
+      var result = await db.remove(DATABASE.USERS_MAP, null, each_map);
+      umDel += result;
     }
+    return Boolean(cusDel) && Boolean(credDel) && Boolean(umDel);
   } catch (exc) {
     throw exc;
   }

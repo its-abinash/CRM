@@ -155,7 +155,7 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `select customer.email, customer.name
+    const query = `select customer.email, customer.name, customer.img_data
                    from customer
                    inner join users_map on
                    users_map.user_id2 = customer.email
@@ -259,9 +259,9 @@ var removeAtCred = async function (pk_name, pk_value) {
     const db = await pool.connect();
     const query = `DELETE FROM credentials
                    WHERE ${pk_name} = $1`;
-    await db.query(query, [pk_value]);
+    var res = await db.query(query, [pk_value]);
     db.release();
-    return true;
+    return res.rowCount;
   } catch (ex) {
     throw ex;
   }
@@ -280,9 +280,9 @@ var removeAtCustomer = async function (pk_name, pk_value) {
     const db = await pool.connect();
     const query = `DELETE FROM customer
                    WHERE ${pk_name} = $1`;
-    await db.query(query, [pk_value]);
+    var res = await db.query(query, [pk_value]);
     db.release();
-    return true;
+    return res.rowCount;
   } catch (ex) {
     throw ex;
   }
@@ -302,9 +302,9 @@ var removeAtConversation = async function (pk_name, pk_value) {
     const query = `DELETE FROM conversation
                    WHERE ${pk_name[0]} = $1 and ${pk_name[1]} = $2
                    or ${pk_name[0]} = $2 and ${pk_name[1]} = $1`;
-    await db.query(query, [pk_value[0], pk_value[1]]);
+    var res = await db.query(query, [pk_value[0], pk_value[1]]);
     db.release();
-    return true;
+    return res.rowCount;
   } catch (ex) {
     throw ex;
   }
@@ -319,9 +319,9 @@ var removeUserFromUserMap = async function (data) {
     const db = await pool.connect();
     const query = `delete from users_map
                    WHERE user_id1 = $1 and user_id2 = $2`;
-    await db.query(query, data);
+    var res = await db.query(query, data);
     db.release();
-    return true;
+    return res.rowCount;
   } catch (ex) {
     throw ex;
   }

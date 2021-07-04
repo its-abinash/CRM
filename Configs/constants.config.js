@@ -1,24 +1,17 @@
 const redis = require("redis");
-const session = require("express-session");
-const redisStore = require("connect-redis")(session);
+const { promisifyAll } = require("bluebird");
+
+promisifyAll(redis); // This enables async/await functionality with redis
+
+const redisClient = redis.createClient({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+});
 
 module.exports = {
   CORE: {
     PORT: process.env.APP_PORT,
-    SESSION_PARAMETERS: {
-      secret: process.env.REDIS_SECRET,
-      rolling: true,           //Reset the cookie Max-Age on every request
-      resave: true,            //Save the session to store if it has changed
-      saveUninitialized: true, //Don't create a session for anonymous users
-      cookie: { maxAge: 30 * 60 * 1000 }, // 30 min
-      store: new redisStore({
-        client: redis.createClient({
-          host: process.env.REDIS_HOST,
-          port: process.env.REDIS_PORT,
-          password: process.env.REDIS_PASSWORD
-        }),
-      }),
-    },
     STATIC_VIEW_PATH: "/Frontend",
     VIEW_ENGINE_NAME: "ejs",
     VIEW_ENGINE_ID: "view engine",
@@ -115,3 +108,5 @@ module.exports = {
     dashboard: "dashboard/getCustomer",
   },
 };
+
+module.exports.redisClient = redisClient;

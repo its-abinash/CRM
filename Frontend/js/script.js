@@ -143,11 +143,21 @@ function getHomeEndpoint() {
   return HOME_ROUTE;
 }
 
-var getEncryptedPayload = function(payload) {
-  payload = JSON.stringify(payload)
-  payload = window.btoa(payload)
-  return payload;
+function getEncryptedValue(key, ENCRYPTION_KEY) {
+  var encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(key),
+    ENCRYPTION_KEY
+  ).toString();
+  // Converting into base64 string
+  var wordArray = CryptoJS.enc.Utf8.parse(String(encrypted));
+  encrypted = CryptoJS.enc.Base64.stringify(wordArray).toString();
+  return encrypted;
 }
+
+var getEncryptedPayload = function (payload) {
+  payload = getEncryptedValue(payload, "#");
+  return payload;
+};
 
 var resetSignUpFormProperties = async function () {
   document.getElementById("username").value = "";
@@ -254,6 +264,9 @@ $(document).on("click", "#sign-in-btnn", submitSignInForm);
 
 $(document).ready(function () {
   loadLandingPage(); // Loading LoginPage [or, Landing Page]
+  $.getScript(
+    "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+  );
   const signUpButton = document.getElementById("signUp");
   const signInButton = document.getElementById("signIn");
   const container = document.getElementById("container");

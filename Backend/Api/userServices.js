@@ -15,9 +15,12 @@ router.get("/dashboard/getAdmins", userController.getAdmins)
 router.get("/dashboard", userController.getDashboardPage);
 
 // Chat Endpoints
-router.get("/chat/:receiverId", userController.getConversation);
+router.get("/chat/receivers/:receiverId/senders/:senderId", userController.getConversation);
 
 router.post("/chat", userController.chat);
+
+// userIds: comma separated string referring to user ids.
+router.get("/chat/notification/:userIds", userController.getNotification);
 
 // Delete Endpoints
 router.delete("/deleteUser", userController.delete);
