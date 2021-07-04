@@ -80,7 +80,6 @@ module.exports.login = async function (req, res) {
       loginPayloadSchema
     );
     var data = {
-      link: null,
       auth: false,
       token: null,
     };
@@ -110,7 +109,6 @@ module.exports.login = async function (req, res) {
         });
 
         data = {
-          link: routes.server + routes.home,
           auth: true,
           token: accessToken,
         };
@@ -136,7 +134,6 @@ module.exports.login = async function (req, res) {
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var data = {
-      link: null,
       auth: false,
       token: null,
     };
