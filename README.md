@@ -1,5 +1,13 @@
 [![Build Status](https://travis-ci.com/AbinashB1997/CRM.svg?branch=master)](https://travis-ci.com/AbinashB1997/CRM)
 
+## Recent Updates [July 2021]
+
+**NOTE:**
+- Code in `/Frontend` is not being managed or used in the app now.
+- It will soon be migrated to another repository (If anyone is interested to learn the crm-client written in plain-javascript, they can refer to `/Frontend` directory).
+- The new repository link for `/Frontend` code will be posted here soon.
+- The brand new crm-client/UI is being developed using **React JS**. Please find the repository link [here](https://github.com/AbinashB1997/crm-client).
+
 ## About CRM
 - Customer Relationship Management (CRM) app is a tool which provides customer service, and support. Most CRM platforms involve businesses analysing customer interactions and improving the customer relationship.
 
