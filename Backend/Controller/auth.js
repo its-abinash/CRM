@@ -140,11 +140,11 @@ module.exports.login = async function (req, res) {
     var response = await AppRes.buildResponse(
       data,
       format(ResponseIds.RI_020, [email, ex]),
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_020"
     );
     AppRes.ApiExecutionEnds();
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -293,10 +293,10 @@ module.exports.register = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_017, [email, ex]),
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_017"
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
