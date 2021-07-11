@@ -208,9 +208,9 @@ module.exports.chat = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_026, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
