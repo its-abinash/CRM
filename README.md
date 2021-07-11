@@ -1,4 +1,4 @@
-
+[![Node.js CI](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml/badge.svg?branch=master)](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml)
 
 ## About CRM
 - Customer Relationship Management (CRM) app is a tool which provides customer service, and support. Most CRM platforms involve businesses analysing customer interactions and improving the customer relationship.
