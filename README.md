@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/AbinashB1997/CRM.svg?branch=master)](https://travis-ci.com/AbinashB1997/CRM)
+
 
 ## About CRM
 - Customer Relationship Management (CRM) app is a tool which provides customer service, and support. Most CRM platforms involve businesses analysing customer interactions and improving the customer relationship.
