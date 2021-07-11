@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/AbinashB1997/CRM.svg?branch=master)](https://travis-ci.com/AbinashB1997/CRM)
+[![Node.js CI](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml/badge.svg?branch=master)](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml)
 
 ## Recent Updates [July 2021]
 
