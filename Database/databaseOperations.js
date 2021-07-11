@@ -338,7 +338,7 @@ var insertAtConversation = async function (data) {
   try {
     const db = await pool.connect();
     const query = `INSERT INTO conversation (sender, receiver, msg, timestamp)
-                   values ($1, $2, $3, current_timestamp)`;
+                   values ($1, $2, $3, $4)`;
     await db.query(query, data);
     db.release();
     return true;
