@@ -1,6 +1,6 @@
 const express = require("express");
 var cors = require("cors");
-var logger = require("./Backend/Logger/log");
+var logger = require("./Api/Logger/log");
 var { CORE } = require("./Configs/constants.config");
 const requestTracer = require('cls-rtracer')
 const app = express();
@@ -12,12 +12,12 @@ app.set(CORE.VIEW_ENGINE_ID, CORE.VIEW_ENGINE_NAME);
 app.set(CORE.VIEWS_ID, CORE.VIEWS_NAME);
 app.use(requestTracer.expressMiddleware())
 
-var authAPIs = require("./Backend/Api/auth")
-var coreServicesAPIs = require("./Backend/Api/coreServices")
-var userServicesAPIs = require("./Backend/Api/userServices")
-var mainUtils = require("./Backend/Controller/main_utils")
-var initTasks = require("./Backend/Controller/initTasks")
-var commonMiddleWare = require("./Backend/Controller/commonMiddleWare")
+var authAPIs = require("./Api/Endpoints/auth")
+var coreServicesAPIs = require("./Api/Endpoints/coreServices")
+var userServicesAPIs = require("./Api/Endpoints/userServices")
+var mainUtils = require("./Api/Controller/main_utils")
+var initTasks = require("./Api/Controller/initTasks")
+var commonMiddleWare = require("./Api/Controller/commonMiddleWare")
 
 /**
  * @description Middlewares to be used are listed here

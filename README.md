@@ -1,5 +1,14 @@
 [![Node.js CI](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml/badge.svg?branch=master)](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml)
 
+## Recent Updates [July 2021]
+
+**NOTE:**
+
+- `/Frontend` directory has been removed from this repository.
+- Code in `/Frontend` is not being managed or used in the app now.
+- It has been migrated to another <u>[repository](https://github.com/AbinashB1997/crm-client-plain-js)</u>. If anyone is interested to learn the crm-client code written in plain-javascript, they can refer to `/Frontend` directory of that repository.
+- The brand new crm-client/UI is being developed using **React JS**. Please find the repository link <u>[here](https://github.com/AbinashB1997/crm-client)</u>.
+
 ## About CRM
 - Customer Relationship Management (CRM) app is a tool which provides customer service, and support. Most CRM platforms involve businesses analysing customer interactions and improving the customer relationship.
 
@@ -97,8 +106,8 @@ $ npm test
 
 - To run specific test, use below command
 ```bash
-$ npm test -- Backend/test/{test_file_name} -g {pattern}
-# test_file_name - Backend/test/test_controllers.js (example)
+$ npm test -- Api/test/{test_file_name} -g {pattern}
+# test_file_name - Api/test/test_controllers.js (example)
 # pattern - description of test case. We can pick it from describe("pattern", callback) or it("pattern", callback)
 ```
 ## Current Limitations (May 2021)
