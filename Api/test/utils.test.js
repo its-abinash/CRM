@@ -13,7 +13,7 @@ const {
   fakeBuildResponse4,
   fakeBuildErrorReasonsPayload,
   fakeBuildErrorReasons,
-} = require("./mockData");
+} = require("../../Configs/mockData");
 var jwt = require("jsonwebtoken");
 
 var mainUtilsControllerTest = function () {

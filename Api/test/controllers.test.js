@@ -80,7 +80,7 @@ const {
   fakeChatResponse3,
   GetNotificationRequest,
   getNotificationsResponse,
-} = require("./mockData");
+} = require("../../Configs/mockData");
 
 var chatControllerTestPositive = function () {
   var testCases = [

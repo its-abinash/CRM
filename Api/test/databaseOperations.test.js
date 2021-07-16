@@ -10,7 +10,7 @@ const {
   fakeConversationData,
   fakeSpecificConversationData,
   fakeLatestRemainderData,
-} = require("./mockData");
+} = require("../../Configs/mockData");
 
 function fakePgPool(fakePgStubData) {
   var pgStub = {
