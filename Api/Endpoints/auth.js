@@ -8,8 +8,6 @@ var router = express.Router();
 router.post("/register", authController.register);
 
 // Login Endpoints
-router.get("/login", authController.getLoginPage);
-
 router.post("/login", authController.login);
 
 // Logout Endpoints
