@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
+var ENV = require("../Configs/db.config.json")
 var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
