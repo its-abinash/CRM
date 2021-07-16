@@ -27,7 +27,6 @@ const {
   fakeResponse,
   fakeChatResponse,
   fakeChatData,
-  fakeChatResponse2,
   fakeResponseWithException,
   fakeChatPOSTRequest,
   fakeChatPOSTResponse,
@@ -67,7 +66,6 @@ const {
   insertProfilePictureFailureRes,
   fakeLoginUserResponse,
   fakeLoginUserExpResponse,
-  loginSuccessResponse,
   loginPayloadValidationErrorResponse,
   loginUserValidationErrorResponse,
   loginExceptionResponse,
@@ -78,7 +76,6 @@ const {
   JWTAuthSuccessResponse,
   JWTAuthFailureResponse,
   JWTUserAuthErrorResponse,
-  getConstantsExceptionResponse,
   fakePatchRequest,
   fakeChatResponse3,
   GetNotificationRequest,
@@ -95,13 +92,6 @@ var chatControllerTestPositive = function () {
       jwt: "loginuser_fake_email_id",
     },
     {
-      testCaseName: "GET /chat - receiver test",
-      req: fakeGETChatRequest2,
-      res: fakeResponse,
-      exp: fakeChatResponse2,
-      jwt: "loginuser_fake_email_id",
-    },
-    {
       testCaseName: "GET /chat - failure test",
       req: fakeGETChatRequest2,
       res: fakeResponse,
@@ -113,6 +103,7 @@ var chatControllerTestPositive = function () {
     it(testCase.testCaseName, async function () {
       sinon.stub(chatDao, "getConversation").returns(fakeChatData);
       sinon.stub(loggerUtils, "info");
+      sinon.stub(loggerUtils, 'error');
       sinon.stub(utils, "decodeJwt").returns(testCase.jwt);
       await userServicesController.getConversation(testCase.req, testCase.res);
       assert.match(testCase.res.statusCode, testCase.exp.statusCode);
@@ -217,17 +208,6 @@ var chatControllerTestNegative = function () {
 };
 
 var dashboardControllerTestPositive = function () {
-  it("GET /dashboard - Render dashboard test", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await userServicesController.getDashboardPage(
-      loginPayloadRequest,
-      response
-    );
-    assert.calledOnce(response.render);
-  });
   it("GET /dashboard/getAdmins - get all admins test", async function () {
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
     sinon.stub(loggerUtils, "info");
@@ -773,20 +753,6 @@ var insertControllerTest = function () {
   });
 };
 
-var landingPageControllerTest = function () {
-  it("GET /landingPage - success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await coreServicesController.landingPage(fakeRequest, response);
-    assert.calledOnce(response.render);
-  });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
 var loginControllerTest = function () {
   it("POST /login - success test", async function () {
     sinon.stub(loggerUtils, "info");
@@ -819,14 +785,6 @@ var loginControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     await authController.login(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, loginExceptionResponse);
-  });
-  it("GET /login", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await authController.getLoginPage(fakeRequest, response);
-    assert.calledOnce(response.render);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -957,27 +915,6 @@ var getQuotesTest = function () {
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 401);
   });
-  it("GET /loadHomePage - with session values - success test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(
-      fakeGetQuoteRequest1,
-      fakeResponse
-    );
-  });
-  it("GET /loadHomePage - without session values - success test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(fakeRequest, fakeResponse);
-  });
-  it("GET /loadHomePage - without session values - failure test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(
-      fakeGetQuoteRequest2,
-      fakeResponse
-    );
-  });
   it("GET /getProfilePicture - all tests", async function () {});
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -1040,7 +977,6 @@ describe("test_constants", constantsControllerTest);
 describe("test_getLatestRemainders", getLatestRemaindersControllerTest);
 describe("test_getUserType", getUserTypeUtilsControllerTest);
 describe("test_insert", insertControllerTest);
-describe("test_landingPage", landingPageControllerTest);
 describe("test_login", loginControllerTest);
 describe("test_logout", logoutControllerTest);
 describe("test_register", registerControllerTest);

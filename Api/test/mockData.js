@@ -70,26 +70,23 @@ module.exports.fakeGETChatRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
-    senderId: "sender@gmail.com",
-    receiverId: "receiver@gmail.com",
+    senderId: "c2VuZGVyQGdtYWlsLmNvbQ==",
+    receiverId: "cmVjZWl2ZXJAZ21haWwuY29t",
   },
   path: "/chat",
   method: "fake_method",
 };
 
 module.exports.fakeGETChatRequest2 = {
-  session: {
-    user: "sender@gmail.com",
-  },
   headers: {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   params: {
-    senderId: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
-    receiverId: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
+    senderId: "c2VuZGVyQGdtYWlsLmNvbQ==",
+    receiverId: "cmVjZWl2ZXJAZ21haWwuY29t",
   },
-  path: "/fake_path",
-  method: "fake_method",
+  path: "/chat",
+  method: "POST",
 };
 
 module.exports.fakeChatData = [
@@ -110,10 +107,8 @@ module.exports.fakeChatResponse = {
     {
       sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
       receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
-      msg: "ello",
+      msg: "U2FsdGVkX1/0568a5bCQKN4RqauV23i4IdFIMsCwIAA=",
       timestamp: "3:39:50 PM",
-      time_loc: "time-left",
-      color: "darker",
     },
   ],
   totalCount: 1,
@@ -123,24 +118,7 @@ module.exports.fakeChatResponse = {
 };
 
 module.exports.fakeChatResponse2 = {
-  responseId: "RI_001",
-  status: "OK",
   statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
-  values: [
-    {
-      sender: "sender@gmail.com",
-      receiver: "receiver@gmail.com",
-      msg: "",
-      timestamp: "Invalid Date",
-      time_loc: "time-right",
-      color: "",
-    },
-  ],
-  totalCount: 1,
-  reasons: [
-    "Conversations between userId: sender@gmail.com and userId: receiver@gmail.com are successfully retrieved",
-  ],
 };
 
 module.exports.fakeChatResponse3 = {
@@ -183,8 +161,8 @@ module.exports.fakeChatPayloadErrorResponse = {
 
 module.exports.fakeChatExceptionResponse = {
   responseId: "a5rva1-szja3m-sd6vya",
-  status: "BAD_GATEWAY",
-  statusCode: 502,
+  status: "INTERNAL_SERVER_ERROR",
+  statusCode: 500,
   responseMessage:
     "The server was acting as a gateway or proxy and received an invalid response from the upstream server.",
   values: [],
@@ -700,7 +678,6 @@ module.exports.loginSuccessResponse = {
   responseMessage: 'Standard response for successful HTTP requests.',
   values: [
     {
-      link: 'http://localhost:3000/home',
       auth: true,
       token: 'XXXXXX.XXXXXXX.XXXXXX'
     }
@@ -733,9 +710,9 @@ module.exports.loginUserValidationErrorResponse = {
 
 module.exports.loginExceptionResponse = {
   responseId: 'RI_020',
-  status: 'BAD_GATEWAY',
-  statusCode: 502,
-  responseMessage: 'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+  status: 'INTERNAL_SERVER_ERROR',
+  statusCode: 500,
+  responseMessage: 'A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.',
   values: [ { auth: false, token: null } ],
   totalCount: 1,
   reasons: [
@@ -788,9 +765,9 @@ module.exports.registrationFailureResponse = {
 
 module.exports.registerExceptionResponse = {
   responseId: 'RI_017',
-  status: 'BAD_GATEWAY',
-  statusCode: 502,
-  responseMessage: 'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+  status: 'INTERNAL_SERVER_ERROR',
+  statusCode: 500,
+  responseMessage: 'A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.',
   values: [],
   totalCount: 0,
   reasons: [
