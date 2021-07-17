@@ -1,4 +1,4 @@
-[![crm-app](https://github.com/AbinashB1997/CRM/actions/workflows/crm-app.yml/badge.svg)](https://github.com/AbinashB1997/CRM/actions/workflows/crm-app.yml)
+[![Build Status](https://app.travis-ci.com/AbinashB1997/CRM.svg?branch=master)](https://app.travis-ci.com/AbinashB1997/CRM)
 
 ## Recent Updates [July 2021]
 

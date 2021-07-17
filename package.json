@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
-    "test": "nyc --reporter=html mocha './tests/*.test.js' --timeout=3000 --exit",
+    "test": "nyc --reporter=html --check-coverage --lines 50 --per-file mocha --timeout=3000 --exit",
     "coverage": "nyc report --reporter=text"
   },
   "author": "Abinash Biswal",
