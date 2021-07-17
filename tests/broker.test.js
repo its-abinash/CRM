@@ -8,18 +8,12 @@ var producerTest = function () {
   it("producer connection - success test", function () {
     producer.rmqPublisher("fake_msg");
   });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
 };
 
 var consumerTest = function () {
   it("consumer connection - success test", function () {
     sinon.stub(amqp, 'connect');
     consumer.consume();
-  });
-  afterEach(function () {
-    sinon.verifyAndRestore();
   });
 };
 
