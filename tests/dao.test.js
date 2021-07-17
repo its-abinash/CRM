@@ -1,14 +1,14 @@
 var sinon = require("sinon");
 var assert = sinon.assert;
 
-const chatDao = require("../Controller/chatDao");
-const coreServiceDao = require("../Controller/coreServiceDao");
-const dashDao = require("../Controller/dashDao");
-const deleteServiceDao = require("../Controller/deleteServiceDao");
-const editServiceDao = require("../Controller/editServiceDao");
-const emailServiceDao = require("../Controller/emailServiceDao");
-const insertServiceDao = require("../Controller/insertServiceDao");
-const dbUtils = require("../../Database/databaseOperations");
+const chatDao = require("../Api/Controller/chatDao");
+const coreServiceDao = require("../Api/Controller/coreServiceDao");
+const dashDao = require("../Api/Controller/dashDao");
+const deleteServiceDao = require("../Api/Controller/deleteServiceDao");
+const editServiceDao = require("../Api/Controller/editServiceDao");
+const emailServiceDao = require("../Api/Controller/emailServiceDao");
+const insertServiceDao = require("../Api/Controller/insertServiceDao");
+const dbUtils = require("../Database/databaseOperations");
 
 var daoControllerTestPositive = function () {
   const tableID = 1;

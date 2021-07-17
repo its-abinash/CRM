@@ -1,7 +1,6 @@
 const chatDao = require("./chatDao");
 const logger = require("../Logger/log");
 const {
-  CSS,
   ResponseIds,
   DATABASE,
   redisClient,
@@ -9,6 +8,8 @@ const {
 const { validatePayload, format } = require("./main_utils");
 const httpStatus = require("http-status");
 const { chatPostPayloadSchema } = require("./schema");
+const { rmqPublisher } = require("../Broker/rmq.producer");
+const lodash = require("lodash")
 
 /**
  * @async
@@ -23,27 +24,22 @@ module.exports.processAndGetConversation = async function (
   LoggedInUser,
   AppRes
 ) {
-  var sender = AppRes.decryptKey(req.params.senderId) || LoggedInUser;
-  var receiver = AppRes.decryptKey(req.params.receiverId);
-  var chat = await chatDao.getConversation(
+  var sender = AppRes.decryptKeyStable(req.params.senderId) || LoggedInUser;
+  var receiver = AppRes.decryptKeyStable(req.params.receiverId);
+  var chatList = await chatDao.getConversation(
     DATABASE.CONVERSATION,
     DATABASE.FETCH_SPECIFIC,
     sender,
     receiver
   );
 
-  for (var i = 0; i < chat.length; i++) {
-    chat[i].msg = AppRes.decryptKey(chat[i].msg);
-    chat[i].timestamp = new Date(
-      chat[i].timestamp.toString()
-    ).toLocaleTimeString();
-    chat[i][CSS.CHAT_TIME_LOC] =
-      chat[i].sender === sender ? CSS.CHAT_FLOAT_RIGHT : CSS.CHAT_FLOAT_LEFT;
-    chat[i][CSS.CHAT_COL] =
-      chat[i].sender === sender ? CSS.CHAT_SENDER_COL : CSS.CHAT_RECEIVER_COL;
+  for(var eachChat of chatList) {
+    eachChat["timestamp"] = lodash.toNumber(eachChat["timestamp"]);
+    eachChat["chatmsg"] = AppRes.decryptKey(eachChat["msg"]);
+    delete eachChat["msg"];
   }
   var response = await AppRes.buildResponse(
-    chat,
+    chatList,
     format(ResponseIds.RI_001, [sender, receiver]),
     httpStatus.OK,
     "RI_001"
@@ -84,15 +80,17 @@ module.exports.processAndSaveConversation = async function (
     var sender = payload.sender;
     var receiver = payload.receiver;
     var message = payload.chatmsg;
+    var timestamp = payload.timestamp;
 
     var reason = format(ResponseIds.RI_002, [sender, receiver]);
     var statusCode = httpStatus.BAD_REQUEST;
     var responseId = "RI_002";
 
-    var data = [sender, receiver, message];
+    var data = [sender, receiver, message, timestamp];
     var jobDone = await chatDao.saveConversation(DATABASE.CONVERSATION, data);
     if (jobDone) {
-      logger.info("Success status from database");
+      logger.info("Chat has been successfully processed, publishing to RMQ");
+      rmqPublisher(payload);
       reason = format(ResponseIds.RI_003, [sender, receiver]);
       statusCode = httpStatus.OK;
       responseId = "RI_003";
@@ -107,12 +105,6 @@ module.exports.processAndSaveConversation = async function (
     );
     return [statusCode, response];
   }
-};
-
-module.exports.decodeChatRequestPayload = function (AppRes, EncString) {
-  var decryptedKey = AppRes.decryptKey(EncString);
-  var payload = JSON.parse(decryptedKey);
-  return payload;
 };
 
 module.exports.checkAndGetNotifications = async function (loginUser, AppRes) {

@@ -6,7 +6,6 @@ var logger = require("../Logger/log");
 var {
   DATABASE,
   ResponseIds,
-  routes,
 } = require("../../Configs/constants.config");
 const { processPayload, validatePayload, format } = require("./main_utils");
 const { registrationSchema, loginPayloadSchema } = require("./schema");
@@ -140,28 +139,12 @@ module.exports.login = async function (req, res) {
     var response = await AppRes.buildResponse(
       data,
       format(ResponseIds.RI_020, [email, ex]),
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_020"
     );
     AppRes.ApiExecutionEnds();
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
-};
-
-/**
- * @httpMethod GET
- * @function getLoginPage
- * @async
- * @description Renders the login-registration html file
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getLoginPage = async function (req, res) {
-  logger.info("GET /login begins");
-  res.render("register", {
-    regEndpoint: routes.server + routes.reg,
-    loginEndpoint: routes.server + routes.login,
-  });
 };
 
 var getAdmins = async function () {
@@ -293,10 +276,10 @@ module.exports.register = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_017, [email, ex]),
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_017"
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -326,7 +309,6 @@ module.exports.logout = async function (req, res) {
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var data = {
-      link: null,
       auth: false,
       token: null,
     };

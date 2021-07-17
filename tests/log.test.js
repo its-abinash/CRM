@@ -1,5 +1,5 @@
 var sinon = require("sinon");
-var logUtils = require("../Logger/log");
+var logUtils = require("../Api/Logger/log");
 var assert = sinon.assert;
 
 describe("test_log_utils", function () {

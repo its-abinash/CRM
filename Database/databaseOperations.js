@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var ENV = JSON.parse(fs.readFileSync("./Configs/db.config.json", "utf8"));
+var ENV = require("../Configs/db.config.json")
 var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
@@ -338,7 +338,7 @@ var insertAtConversation = async function (data) {
   try {
     const db = await pool.connect();
     const query = `INSERT INTO conversation (sender, receiver, msg, timestamp)
-                   values ($1, $2, $3, current_timestamp)`;
+                   values ($1, $2, $3, $4)`;
     await db.query(query, data);
     db.release();
     return true;

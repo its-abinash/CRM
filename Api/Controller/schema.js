@@ -130,7 +130,7 @@ var chatPostMessageSchema = {
 
 var chatPostTimestampSchema = {
     "$id": "/chatPostTimestampSchema",
-    "type": "string",
+    "type": "number",
     "title": "The timestamp schema",
     "description": "timestamp",
     "default": ""

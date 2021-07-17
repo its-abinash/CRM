@@ -21,32 +21,6 @@ router.use(cors());
 
 /**
  * @httpMethod GET
- * @endpoint /dashboard
- * @function getDashboardPage
- * @async
- * @description Render the dashboard html file
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getDashboardPage = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    res.render("dashboard");
-  } catch (exc) {
-    AppRes.ApiReportsError(exc);
-    var response = await AppRes.buildResponse(
-      null,
-      ResponseIds.RI_015,
-      httpStatus.BAD_GATEWAY,
-      "RI_015"
-    );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
  * @endpoint /dashboard/getCustomer
  * @function getCustomers
  * @async
@@ -208,9 +182,9 @@ module.exports.chat = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_026, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 

@@ -1,20 +1,20 @@
-const authController = require("../Controller/auth");
-const coreServicesController = require("../Controller/coreServices");
-const userServicesController = require("../Controller/userServices");
-const dbUtils = require("../../Database/databaseOperations");
-const chatDao = require("../Controller/chatDao");
-const coreServiceDao = require("../Controller/coreServiceDao");
-const dashDao = require("../Controller/dashDao");
-const deleteServiceDao = require("../Controller/deleteServiceDao");
-const editServiceDao = require("../Controller/editServiceDao");
-const emailServiceDao = require("../Controller/emailServiceDao");
-const insertServiceDao = require("../Controller/insertServiceDao");
-const utils = require("../Controller/utils");
+const authController = require("../Api/Controller/auth");
+const coreServicesController = require("../Api/Controller/coreServices");
+const userServicesController = require("../Api/Controller/userServices");
+const dbUtils = require("../Database/databaseOperations");
+const chatDao = require("../Api/Controller/chatDao");
+const coreServiceDao = require("../Api/Controller/coreServiceDao");
+const dashDao = require("../Api/Controller/dashDao");
+const deleteServiceDao = require("../Api/Controller/deleteServiceDao");
+const editServiceDao = require("../Api/Controller/editServiceDao");
+const emailServiceDao = require("../Api/Controller/emailServiceDao");
+const insertServiceDao = require("../Api/Controller/insertServiceDao");
+const utils = require("../Api/Controller/utils");
 const jwt = require("jsonwebtoken");
 const redisMock = require("redis-mock");
 
-var loggerUtils = require("../Logger/log");
-var { validator } = require("../Controller/schema");
+var loggerUtils = require("../Api/Logger/log");
+var { validator } = require("../Api/Controller/schema");
 var jp = require("jsonpath");
 var mailer = require("nodemailer");
 const axios = require("axios").default;
@@ -27,7 +27,6 @@ const {
   fakeResponse,
   fakeChatResponse,
   fakeChatData,
-  fakeChatResponse2,
   fakeResponseWithException,
   fakeChatPOSTRequest,
   fakeChatPOSTResponse,
@@ -67,7 +66,6 @@ const {
   insertProfilePictureFailureRes,
   fakeLoginUserResponse,
   fakeLoginUserExpResponse,
-  loginSuccessResponse,
   loginPayloadValidationErrorResponse,
   loginUserValidationErrorResponse,
   loginExceptionResponse,
@@ -78,12 +76,12 @@ const {
   JWTAuthSuccessResponse,
   JWTAuthFailureResponse,
   JWTUserAuthErrorResponse,
-  getConstantsExceptionResponse,
   fakePatchRequest,
   fakeChatResponse3,
   GetNotificationRequest,
   getNotificationsResponse,
-} = require("./mockData");
+  encodedChatPayload,
+} = require("../Configs/mockData");
 
 var chatControllerTestPositive = function () {
   var testCases = [
@@ -92,13 +90,6 @@ var chatControllerTestPositive = function () {
       req: fakeGETChatRequest,
       res: fakeResponse,
       exp: fakeChatResponse,
-      jwt: "loginuser_fake_email_id",
-    },
-    {
-      testCaseName: "GET /chat - receiver test",
-      req: fakeGETChatRequest2,
-      res: fakeResponse,
-      exp: fakeChatResponse2,
       jwt: "loginuser_fake_email_id",
     },
     {
@@ -113,6 +104,7 @@ var chatControllerTestPositive = function () {
     it(testCase.testCaseName, async function () {
       sinon.stub(chatDao, "getConversation").returns(fakeChatData);
       sinon.stub(loggerUtils, "info");
+      sinon.stub(loggerUtils, 'error');
       sinon.stub(utils, "decodeJwt").returns(testCase.jwt);
       await userServicesController.getConversation(testCase.req, testCase.res);
       assert.match(testCase.res.statusCode, testCase.exp.statusCode);
@@ -148,7 +140,7 @@ var chatControllerTestPositive = function () {
     assert.match(fakeResponse.statusCode, getNotificationsResponse.statusCode);
   });
   afterEach(function () {
-    sinon.verifyAndRestore();
+    sinon.restore();
   });
 };
 
@@ -217,17 +209,6 @@ var chatControllerTestNegative = function () {
 };
 
 var dashboardControllerTestPositive = function () {
-  it("GET /dashboard - Render dashboard test", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await userServicesController.getDashboardPage(
-      loginPayloadRequest,
-      response
-    );
-    assert.calledOnce(response.render);
-  });
   it("GET /dashboard/getAdmins - get all admins test", async function () {
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
     sinon.stub(loggerUtils, "info");
@@ -773,20 +754,6 @@ var insertControllerTest = function () {
   });
 };
 
-var landingPageControllerTest = function () {
-  it("GET /landingPage - success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await coreServicesController.landingPage(fakeRequest, response);
-    assert.calledOnce(response.render);
-  });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
 var loginControllerTest = function () {
   it("POST /login - success test", async function () {
     sinon.stub(loggerUtils, "info");
@@ -819,14 +786,6 @@ var loginControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     await authController.login(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, loginExceptionResponse);
-  });
-  it("GET /login", async function () {
-    sinon.stub(loggerUtils, "info");
-    var response = {
-      render: sinon.spy(),
-    };
-    await authController.getLoginPage(fakeRequest, response);
-    assert.calledOnce(response.render);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -894,6 +853,14 @@ var registerControllerTest = function () {
     await authController.register(registerPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, registrationFailureResponse);
   });
+  it("POST /register - existing user failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(dbUtils, "isExistingUser").returns(true);
+    sinon.stub(validator, "validate").returns({ valid: true });
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 409);
+  });
   it("POST /register - DB exception test", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
@@ -957,27 +924,6 @@ var getQuotesTest = function () {
     await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 401);
   });
-  it("GET /loadHomePage - with session values - success test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(
-      fakeGetQuoteRequest1,
-      fakeResponse
-    );
-  });
-  it("GET /loadHomePage - without session values - success test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(fakeRequest, fakeResponse);
-  });
-  it("GET /loadHomePage - without session values - failure test", async function () {
-    // This test is for coverage only.
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.loadHomePage(
-      fakeGetQuoteRequest2,
-      fakeResponse
-    );
-  });
   it("GET /getProfilePicture - all tests", async function () {});
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -1040,7 +986,6 @@ describe("test_constants", constantsControllerTest);
 describe("test_getLatestRemainders", getLatestRemaindersControllerTest);
 describe("test_getUserType", getUserTypeUtilsControllerTest);
 describe("test_insert", insertControllerTest);
-describe("test_landingPage", landingPageControllerTest);
 describe("test_login", loginControllerTest);
 describe("test_logout", logoutControllerTest);
 describe("test_register", registerControllerTest);

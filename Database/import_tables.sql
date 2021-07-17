@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS conversation (
     sender text,
     receiver text,
     msg text,
-    timestamp TIMESTAMPTZ
+    timestamp text
 );
 CREATE TABLE IF NOT EXISTS credentials (
     email text NOT NULL,

@@ -2,51 +2,46 @@
 
 var amqp = require("amqplib/callback_api");
 var logger = require("../Logger/log");
-var chatService = require("../Controller/chatService");
-var chatDao = require("../Controller/chatDao");
-var { redisClient, DATABASE } = require("../../Configs/constants.config");
-var { AppResponse } = require("../Controller/response_utils");
-
-var massageContent = function (content) {
-  content = content.replace(/['"]+/g, '');
-  return content;
-};
+const { socket } = require("../../Configs/settings");
 
 var consumeUtil = async function (message) {
-  var AppRes = new AppResponse();
-  var payload = chatService.decodeChatRequestPayload(
-    AppRes,
-    massageContent(message.content.toString())
-  );
-  logger.info(`ConsumeSync Received: ${JSON.stringify(payload)}`);
-  // set notification in redis
-  var key = String(payload["sender"]) + "," + String(payload["receiver"]);
-  var encKey = AppRes.encryptKeyStable(key);
-  logger.info(`Setting notification for key: ${key} in redis`);
-  redisClient.setAsync(encKey, true);
-
-  // save chat in DB
-  var data = [payload.sender, payload.receiver, payload.chatmsg];
-  await chatDao.saveConversation(DATABASE.CONVERSATION, data);
+  var routingKey = message.fields.routingKey;
+  var msg = message.content.toString();
+  logger.info(`ConsumeSync Received: ${msg} with RoutingKey: ${routingKey}`);
+  logger.info("Emitting payload to 'websocket'");
+  socket.emit("websocket", msg);
 };
 
-var channelUtil = function (error, channel) {
-  if (error) {
-    throw error;
+var connectionUtil = function (error0, connection) {
+  if (error0) {
+    throw error0;
   }
-  var queue = "chat";
-  var exchange = "web";
-  var exchangeType = "direct";
-  channel.assertExchange(exchange, exchangeType, { durable: true });
-  channel.assertQueue(queue, { durable: true });
-  channel.consume(queue, consumeUtil, { noAck: true });
-};
+  connection.createChannel(function (error1, channel) {
+    if (error1) {
+      throw error1;
+    }
+    var exchange = "web_chat_topic";
 
-var connectionUtil = function (error, connection) {
-  if (error) {
-    throw error;
-  }
-  connection.createChannel(channelUtil);
+    channel.assertExchange(exchange, "topic", {
+      durable: false,
+    });
+
+    channel.assertQueue(
+      "",
+      {
+        exclusive: true,
+      },
+      function (error2, q) {
+        if (error2) {
+          throw error2;
+        }
+        channel.bindQueue(q.queue, exchange, "web_chat.*");
+        channel.consume(q.queue, consumeUtil, {
+          noAck: true,
+        });
+      }
+    );
+  });
 };
 
 module.exports.consume = function () {

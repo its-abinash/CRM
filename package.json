@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
-    "test": "nyc --reporter=html --check-coverage --lines 90 --per-file mocha --recursive ./Api/test/*.js --timeout=3000 --exit",
+    "test": "nyc --reporter=html mocha './tests/*.test.js' --timeout=3000 --exit",
     "coverage": "nyc report --reporter=text"
   },
   "author": "Abinash Biswal",
@@ -17,10 +17,8 @@
     "cls-rtracer": "^2.6.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
-    "ejs": "^3.1.6",
     "express": "^4.17.1",
     "format-unicorn": "^1.1.1",
-    "fs": "^0.0.1-security",
     "http-status": "^1.5.0",
     "jsonpath": "^1.1.1",
     "jsonschema": "^1.4.0",
@@ -35,8 +33,8 @@
     "proxyquire": "^2.1.3",
     "redis": "^3.1.1",
     "redis-mock": "^0.56.3",
-    "request": "^2.88.2",
     "sinon": "^9.2.4",
+    "socket.io": "^4.1.3",
     "winston": "^3.3.3"
   }
 }

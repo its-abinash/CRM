@@ -12,11 +12,6 @@ const redisClient = redis.createClient({
 module.exports = {
   CORE: {
     PORT: process.env.APP_PORT,
-    STATIC_VIEW_PATH: "/Frontend",
-    VIEW_ENGINE_NAME: "ejs",
-    VIEW_ENGINE_ID: "view engine",
-    VIEWS_NAME: "./Frontend/",
-    VIEWS_ID: "views",
     URL_ENCODED_BODY: { extended: true },
   },
   LOGGER: {
@@ -32,14 +27,6 @@ module.exports = {
     CUSTOMER: 3,
     CONVERSATION: 4,
     USERS_MAP: 2
-  },
-  CSS: {
-    CHAT_TIME_LOC: "time_loc",
-    CHAT_COL: "color",
-    CHAT_FLOAT_RIGHT: "time-right",
-    CHAT_FLOAT_LEFT: "time-left",
-    CHAT_SENDER_COL: "",
-    CHAT_RECEIVER_COL: "darker",
   },
   CYPHER: {
     ENCRYPTION_KEY: "#",
@@ -90,22 +77,6 @@ module.exports = {
     defaultQuote: "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
     defaultAuthor: "Marva Collins",
     defaultTitle: "Quote of the day for students",
-  },
-  routes: {
-    server: `http://localhost:${process.env.APP_PORT}/`,
-    verifyJWT: "verifyToken",
-    landingPage: "landingPage",
-    logout: "logout",
-    home: "home",
-    reg: "register",
-    login: "login",
-    contact: "contact",
-    edit: "edit",
-    add: "insert",
-    delete: "delete",
-    email: "email",
-    chat: "chat",
-    dashboard: "dashboard/getCustomer",
   },
 };
 

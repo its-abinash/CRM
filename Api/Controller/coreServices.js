@@ -138,21 +138,6 @@ module.exports.getQuotes = async function (req, res) {
 
 /**
  * @httpMethod GET
- * @endpoint /home
- * @function loadHomePage
- * @async
- * @description Renders the home page
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.loadHomePage = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  AppRes.ApiExecutionBegins();
-  res.render("home");
-};
-
-/**
- * @httpMethod GET
  * @function getProfilePicture
  * @async
  * @description Returns profile picture of logged-in user
@@ -292,19 +277,6 @@ module.exports.getLoginUser = async function (req, res) {
     var response = await AppRes.buildResponse(data, ex, statusCode, responseId);
     res.status(statusCode).send(response);
   }
-};
-
-/**
- * @httpMethod GET
- * @function landingPage
- * @async
- * @description Renders the login-registration html file
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.landingPage = async function (req, res) {
-  logger.info("Execution of GET /landingPage begins");
-  res.render("register");
 };
 
 /**

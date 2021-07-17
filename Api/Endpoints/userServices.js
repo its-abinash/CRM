@@ -12,8 +12,6 @@ router.get("/dashboard/getCustomer", userController.getCustomers);
 
 router.get("/dashboard/getAdmins", userController.getAdmins)
 
-router.get("/dashboard", userController.getDashboardPage);
-
 // Chat Endpoints
 router.get("/chat/receivers/:receiverId/senders/:senderId", userController.getConversation);
 

@@ -1,11 +1,11 @@
 var sinon = require("sinon");
 var assert = sinon.assert;
 
-var { validator } = require("../Controller/schema");
-var main_utils = require("../Controller/main_utils");
-var loggerUtils = require("../Logger/log");
-var responseUtils = require("../Controller/response_utils");
-var utils = require("../Controller/utils");
+var { validator } = require("../Api/Controller/schema");
+var main_utils = require("../Api/Controller/main_utils");
+var loggerUtils = require("../Api/Logger/log");
+var responseUtils = require("../Api/Controller/response_utils");
+var utils = require("../Api/Controller/utils");
 const {
   fakeBuildResponse1,
   fakeBuildResponse2,
@@ -13,7 +13,7 @@ const {
   fakeBuildResponse4,
   fakeBuildErrorReasonsPayload,
   fakeBuildErrorReasons,
-} = require("./mockData");
+} = require("../Configs/mockData");
 var jwt = require("jsonwebtoken");
 
 var mainUtilsControllerTest = function () {
