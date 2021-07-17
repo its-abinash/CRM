@@ -107,18 +107,6 @@ module.exports.processAndSaveConversation = async function (
   }
 };
 
-module.exports.decodeChatRequestPayload = function (AppRes, EncString) {
-  var payload = AppRes.decryptKey(EncString);
-  if(!payload) {
-    try {
-      return JSON.parse(EncString);
-    }catch(exc) {
-      return EncString;
-    }
-  }
-  return payload;
-};
-
 module.exports.checkAndGetNotifications = async function (loginUser, AppRes) {
   var pathParams = AppRes.getCommaSepPathParams();
   var result = {};

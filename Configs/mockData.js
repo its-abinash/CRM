@@ -909,3 +909,5 @@ module.exports.fakeGetProfilePicResponse2 = {
     "Successfully fetched the Img Data with value = data:image/png;base64, fakeImgUrl",
   ],
 };
+
+module.exports.encodedChatPayload = "U2FsdGVkX1/md7zKi591WVz4Y0ylern4Xbl0DKLagMDTfXoyChlNZBx+2DLACxiGSrtFvAtbmnfigu/9m6txfJ11yYM0H88xmjV0PMGJ56MG5TaSvuSifqca/7CHWYlGZOD3E06ezSCnET8Kz+zBufOdgsPq14ZU29QAScwhaRO83YmYz3QZPDNFxwxvcjg+qRTm2nU0mCF0B7ykvsLXGMVP4F7mJEEW2iSVwpvsVV1+4YUGkRwMR3m1kS5+wwZIrPOzE2d9VUV81eku4CKMBA=="

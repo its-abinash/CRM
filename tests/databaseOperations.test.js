@@ -1,7 +1,7 @@
 var proxyrequire = require("proxyquire").noCallThru();
 var sinon = require("sinon");
 var assert = sinon.assert;
-var { DATABASE } = require("../../Configs/constants.config");
+var { DATABASE } = require("../Configs/constants.config");
 const {
   fakeCredData,
   specificCredData,
@@ -10,7 +10,7 @@ const {
   fakeConversationData,
   fakeSpecificConversationData,
   fakeLatestRemainderData,
-} = require("../../Configs/mockData");
+} = require("../Configs/mockData");
 
 function fakePgPool(fakePgStubData) {
   var pgStub = {
@@ -44,7 +44,7 @@ var databaseControllerTest = function () {
   it("valid user check test", async function () {
     let pgData = { rows: [{ email: "demo@gmail.com", password: "pass" }] };
     var pgStub = fakePgPool(pgData);
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.isValidUser(
@@ -57,7 +57,7 @@ var databaseControllerTest = function () {
   it("invalid user check test", async function () {
     var pgData = { rows: [{ email: "demo1@gmail.com", password: "pass1" }] };
     var pgStub = fakePgPool(pgData);
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     // checking user with wrong email_id and password
@@ -71,7 +71,7 @@ var databaseControllerTest = function () {
   it("existing user check test", async function () {
     var pgData = { rows: [{ exists: true }] };
     var pgStub = fakePgPool(pgData);
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.isExistingUser("fake_email", "demo@gmail.com");
@@ -88,7 +88,7 @@ var databaseControllerTest = function () {
       { databaseId: DATABASE.CUSTOMER, exp: 1, pgStub: fakePgPool({rowCount: 1}) },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       var result = await dbUtils.remove(
@@ -101,7 +101,7 @@ var databaseControllerTest = function () {
   });
   it("remove user from user map - success test", async function () {
     var pgStub = fakePgPool({rowCount: 1});
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.remove(DATABASE.USERS_MAP, null, null);
@@ -109,7 +109,7 @@ var databaseControllerTest = function () {
   });
   it("remove user from user map - exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {
@@ -128,7 +128,7 @@ var databaseControllerTest = function () {
       { databaseId: DATABASE.CUSTOMER, exp: true, pgStub: fakePgPool(true) },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       var result = await dbUtils.update(
@@ -161,7 +161,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       var result = await dbUtils.insert(testCase.databaseId, ["fake_data"]);
@@ -170,7 +170,7 @@ var databaseControllerTest = function () {
   });
   it("fetch all users for given userId - success test", async function () {
     var pgStub = fakePgPool({ rows: fakeCustomerData });
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.fetchAllUsersForGivenUserId(null);
@@ -178,7 +178,7 @@ var databaseControllerTest = function () {
   });
   it("fetch all users for given userId - exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {
@@ -227,7 +227,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       var result = await dbUtils.fetch(testCase.databaseId, testCase.fetchType);
@@ -236,7 +236,7 @@ var databaseControllerTest = function () {
   });
   it("fetch user of given type test", async function () {
     var pgStub = fakePgPool({ rows: fakeSpecificCustomerData });
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.fetchAllUserOfGivenType();
@@ -244,7 +244,7 @@ var databaseControllerTest = function () {
   });
   it("fetch latest remainder test", async function () {
     var pgStub = fakePgPool({ rows: fakeLatestRemainderData });
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     var result = await dbUtils.fetchLatestRemainder();
@@ -274,7 +274,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       try {
@@ -324,7 +324,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       try {
@@ -348,7 +348,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       try {
@@ -383,7 +383,7 @@ var databaseControllerTest = function () {
       },
     ];
     for (const testCase of testCases) {
-      var dbUtils = proxyrequire("../../Database/databaseOperations", {
+      var dbUtils = proxyrequire("../Database/databaseOperations", {
         pg: testCase.pgStub,
       });
       try {
@@ -399,7 +399,7 @@ var databaseControllerTest = function () {
   });
   it("fetch all user of given type exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {
@@ -410,7 +410,7 @@ var databaseControllerTest = function () {
   });
   it("fetch latest remainder exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {
@@ -421,7 +421,7 @@ var databaseControllerTest = function () {
   });
   it("existing user check exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {
@@ -432,7 +432,7 @@ var databaseControllerTest = function () {
   });
   it("valid user check exception test", async function () {
     var pgStub = fakePgPoolException();
-    var dbUtils = proxyrequire("../../Database/databaseOperations", {
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
       pg: pgStub,
     });
     try {

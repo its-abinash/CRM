@@ -1,20 +1,20 @@
-const authController = require("../Controller/auth");
-const coreServicesController = require("../Controller/coreServices");
-const userServicesController = require("../Controller/userServices");
-const dbUtils = require("../../Database/databaseOperations");
-const chatDao = require("../Controller/chatDao");
-const coreServiceDao = require("../Controller/coreServiceDao");
-const dashDao = require("../Controller/dashDao");
-const deleteServiceDao = require("../Controller/deleteServiceDao");
-const editServiceDao = require("../Controller/editServiceDao");
-const emailServiceDao = require("../Controller/emailServiceDao");
-const insertServiceDao = require("../Controller/insertServiceDao");
-const utils = require("../Controller/utils");
+const authController = require("../Api/Controller/auth");
+const coreServicesController = require("../Api/Controller/coreServices");
+const userServicesController = require("../Api/Controller/userServices");
+const dbUtils = require("../Database/databaseOperations");
+const chatDao = require("../Api/Controller/chatDao");
+const coreServiceDao = require("../Api/Controller/coreServiceDao");
+const dashDao = require("../Api/Controller/dashDao");
+const deleteServiceDao = require("../Api/Controller/deleteServiceDao");
+const editServiceDao = require("../Api/Controller/editServiceDao");
+const emailServiceDao = require("../Api/Controller/emailServiceDao");
+const insertServiceDao = require("../Api/Controller/insertServiceDao");
+const utils = require("../Api/Controller/utils");
 const jwt = require("jsonwebtoken");
 const redisMock = require("redis-mock");
 
-var loggerUtils = require("../Logger/log");
-var { validator } = require("../Controller/schema");
+var loggerUtils = require("../Api/Logger/log");
+var { validator } = require("../Api/Controller/schema");
 var jp = require("jsonpath");
 var mailer = require("nodemailer");
 const axios = require("axios").default;
@@ -80,7 +80,8 @@ const {
   fakeChatResponse3,
   GetNotificationRequest,
   getNotificationsResponse,
-} = require("../../Configs/mockData");
+  encodedChatPayload,
+} = require("../Configs/mockData");
 
 var chatControllerTestPositive = function () {
   var testCases = [
@@ -851,6 +852,14 @@ var registerControllerTest = function () {
     sinon.stub(dbUtils, "remove").returns(true);
     await authController.register(registerPayloadRequest, fakeResponse);
     assert.match(fakeResponse.response, registrationFailureResponse);
+  });
+  it("POST /register - existing user failure test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(dbUtils, "isExistingUser").returns(true);
+    sinon.stub(validator, "validate").returns({ valid: true });
+    await authController.register(registerPayloadRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 409);
   });
   it("POST /register - DB exception test", async function () {
     sinon.stub(loggerUtils, "info");
