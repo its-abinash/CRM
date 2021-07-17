@@ -1,4 +1,4 @@
-name: Node.js CI
+name: crm-app
 
 on:
   push:
@@ -26,6 +26,9 @@ jobs:
         uses: supercharge/redis-github-action@1.2.0
         with:
           redis-version: ${{ matrix.redis-version }}
-      - run: npm ci
-      - run: npm run test
-      - run: npm run coverage
+      - name: Installing dependencies
+        run: npm ci
+      - name: Running tests
+        run: npm run test
+      - name: Getting coverage report
+        run: npm run coverage
