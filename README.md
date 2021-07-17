@@ -1,4 +1,4 @@
-[![Node.js CI](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml/badge.svg?branch=master)](https://github.com/AbinashB1997/CRM/actions/workflows/github-actions.yml)
+[![crm-app](https://github.com/AbinashB1997/CRM/actions/workflows/crm-app.yml/badge.svg)](https://github.com/AbinashB1997/CRM/actions/workflows/crm-app.yml)
 
 ## Recent Updates [July 2021]
 
