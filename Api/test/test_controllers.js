@@ -139,7 +139,7 @@ var chatControllerTestPositive = function () {
     assert.match(fakeResponse.statusCode, getNotificationsResponse.statusCode);
   });
   afterEach(function () {
-    sinon.verifyAndRestore();
+    sinon.restore();
   });
 };
 
