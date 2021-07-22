@@ -7,8 +7,6 @@ const { socket } = require("../../Configs/settings");
 var consumeUtil = async function (message) {
   var routingKey = message.fields.routingKey;
   var msg = message.content.toString();
-  logger.info(`ConsumeSync Received: ${msg} with RoutingKey: ${routingKey}`);
-  logger.info("Emitting payload to 'websocket'");
   socket.emit("websocket", msg);
 };
 
