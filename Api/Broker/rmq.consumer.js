@@ -1,47 +1,21 @@
 #!/usr/bin/env node
 
-var amqp = require("amqplib/callback_api");
-var logger = require("../Logger/log");
+var amqp = require("amqplib");
 const { socket } = require("../../Configs/settings");
 
-var consumeUtil = async function (message) {
-  var routingKey = message.fields.routingKey;
+var consumeUtil = function (message) {
   var msg = message.content.toString();
   socket.emit("websocket", msg);
 };
 
-var connectionUtil = function (error0, connection) {
-  if (error0) {
-    throw error0;
-  }
-  connection.createChannel(function (error1, channel) {
-    if (error1) {
-      throw error1;
-    }
-    var exchange = "web_chat_topic";
-
-    channel.assertExchange(exchange, "topic", {
-      durable: false,
-    });
-
-    channel.assertQueue(
-      "",
-      {
-        exclusive: true,
-      },
-      function (error2, q) {
-        if (error2) {
-          throw error2;
-        }
-        channel.bindQueue(q.queue, exchange, "web_chat.*");
-        channel.consume(q.queue, consumeUtil, {
-          noAck: true,
-        });
-      }
-    );
-  });
+module.exports.consume = async function () {
+  var connection = await amqp.connect(process.env.RMQ_URL);
+  var channel = await connection.createChannel();
+  var exchange = "web_chat_topic";
+  await channel.assertExchange(exchange, "topic", { durable: false });
+  var queueObj = await channel.assertQueue("", { exclusive: true });
+  await channel.bindQueue(queueObj.queue, exchange, "web_chat.*");
+  await channel.consume(queueObj.queue, consumeUtil, { noAck: true });
 };
 
-module.exports.consume = function () {
-  amqp.connect(process.env.RMQ_URL, connectionUtil);
-};
+module.exports.consumeUtil = consumeUtil;
