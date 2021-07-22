@@ -5,6 +5,7 @@ node_js:
   - 12
 service:
   - redis-server
+  - rabbitmq
 script:
   - npm install
   - npm run test
