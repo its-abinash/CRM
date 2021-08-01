@@ -39,3 +39,25 @@ module.exports.getConversation = async function (
     throw exc;
   }
 };
+
+/**
+ * @function getConversationWithImage
+ * @async
+ * @description Get the conversation between 2 persons from both customer & conversations table
+ * @param {Number} tableID
+ * @param {String} fetchType
+ * @param {String} sender
+ * @param {String} receiver
+ * @returns Acknowledgement of saving conversations(Boolean)
+ */
+module.exports.getConversationWithImage = async function (
+  sender,
+  receiver
+) {
+  try {
+    var chat = await db.fetchConversationWithImg(sender, receiver);
+    return chat;
+  } catch (exc) {
+    throw exc;
+  }
+};
