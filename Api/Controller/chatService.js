@@ -4,12 +4,13 @@ const {
   ResponseIds,
   DATABASE,
   redisClient,
+  URL,
 } = require("../../Configs/constants.config");
 const { validatePayload, format } = require("./main_utils");
 const httpStatus = require("http-status");
 const { chatPostPayloadSchema } = require("./schema");
 const { rmqPublisher } = require("../Broker/rmq.producer");
-const lodash = require("lodash")
+const lodash = require("lodash");
 
 /**
  * @async
@@ -26,17 +27,14 @@ module.exports.processAndGetConversation = async function (
 ) {
   var sender = AppRes.decryptKeyStable(req.params.senderId) || LoggedInUser;
   var receiver = AppRes.decryptKeyStable(req.params.receiverId);
-  var chatList = await chatDao.getConversation(
-    DATABASE.CONVERSATION,
-    DATABASE.FETCH_SPECIFIC,
-    sender,
-    receiver
-  );
+  var chatList = await chatDao.getConversationWithImage(sender, receiver);
 
-  for(var eachChat of chatList) {
+  for (var eachChat of chatList) {
     eachChat["timestamp"] = lodash.toNumber(eachChat["timestamp"]);
     eachChat["chatmsg"] = AppRes.decryptKey(eachChat["msg"]);
+    eachChat["image"] = eachChat["img_data"] || URL.defaultProfilePictureUrl;
     delete eachChat["msg"];
+    delete eachChat["img_data"];
   }
   var response = await AppRes.buildResponse(
     chatList,
