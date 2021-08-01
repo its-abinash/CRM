@@ -5,3 +5,5 @@ coverage
 secret
 DEBUG.txt
 package-lock.json
+personal
+personal.pub
