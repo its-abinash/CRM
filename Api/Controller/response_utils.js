@@ -75,13 +75,13 @@ class AppResponse {
     if (!decodedParams) {
       return null;
     }
-    const reqUrl = req.protocol + "://" + req.get("host") + "?" + decodedParams;
-    const parsedUrl = new URL(reqUrl);
-    const searchParamsObject = new URLSearchParams(parsedUrl.searchParams);
-    const encodedQPArgs = searchParamsObject.toString();
-    const decodedQPArgs = qString.decode(encodedQPArgs);
-    return decodedQPArgs;
-  }
+    var decodedQueryParams = _.chain(decodedParams) // foo=bar&new=watch
+      .split("&")                           // ["foo=bar", "new=watch"]
+      .map(_.partial(_.split, _, "=", 2))   // [["foo", "bar"], ["new", "watch"]]
+      .fromPairs()                          // {"foo": "bar", "new": "watch"}
+      .value();
+    return decodedQueryParams;
+    }
 
   getCommaSepPathParams() {
     const req = this.request;
