@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var ENV = require("../Configs/db.config.json")
+var ENV = require("../Configs/db.config.json");
 var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
@@ -246,6 +246,34 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   }
 };
 
+module.exports.updateMedia = async function (pk_name, pk_value, data) {
+  try {
+    const db = await pool.connect();
+    const query = `UPDATE media
+                   SET image = $1
+                   WHERE ${pk_name} = $2`;
+    await db.query(query, [data, pk_value]);
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+module.exports.insertMedia = async function (pk_value, data) {
+  try {
+    const db = await pool.connect();
+    const query = `INSERT INTO
+                   media (userId, image)
+                   VALUES ($1, $2)`;
+    await db.query(query, [pk_value, data]);
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
 /**
  * @function removeAtCred
  * @async
@@ -454,7 +482,7 @@ module.exports.fetch = async function (
           ? await fetchConversations(pk_name, pk_value)
           : await fetchLimitedConversations(pk_name, pk_value);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -480,7 +508,7 @@ module.exports.insert = async function (database_id, data) {
       case DATABASE.USERS_MAP:
         return await insertAtUsersMap(data);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -509,7 +537,7 @@ module.exports.update = async function (
       case DATABASE.CUSTOMER:
         return await updateAtCustomer(pk_name, pk_value, fields, data);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -539,7 +567,7 @@ module.exports.remove = async function (database_id, pk_name, pk_value) {
       case DATABASE.USERS_MAP:
         return await removeUserFromUserMap(pk_value);
     }
-  }catch (exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -577,6 +605,31 @@ module.exports.isValidUser = async function (pk_name, pk_value, password) {
   try {
     var userData = await fetchSpecificFromCred(pk_name, pk_value);
     return userData[0].email === pk_value && userData[0].password === password;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+module.exports.fetchConversationWithImg = async function (sender, receiver) {
+  try {
+    const db = await pool.connect();
+
+    const query = `select sender,
+                          receiver,
+                          msg,
+                          timestamp,
+                          customer.img_data
+                   from (
+                      select * from conversation
+                      where sender = $1 and receiver = $2
+                      or sender = $2 and receiver = $1
+                   ) sub
+                   inner join customer on
+                   customer.email = receiver
+                   order by timestamp`;
+    var res = await db.query(query, [sender, receiver]);
+    db.release();
+    return res.rows;
   } catch (ex) {
     throw ex;
   }
