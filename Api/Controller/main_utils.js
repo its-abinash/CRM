@@ -1,6 +1,8 @@
 var { validator } = require("./schema");
 require("format-unicorn");
 var requestTracer = require("cls-rtracer");
+var lodash = require("lodash");
+var consts = require("../../Configs/constants.config");
 
 /**
  * @function format
@@ -65,4 +67,29 @@ module.exports.requestTime = function (req, res, next) {
   var timestamp = Date.now();
   req.requestTime = timestamp;
   next();
+};
+
+module.exports.getFieldsAndValuesFromQpArgs = function (object) {
+  var fields = [];
+  var values = [];
+  var tables = [];
+  const OOB_KEYS = {
+    "null": null,
+    "undefined": undefined,
+    "false": false,
+    "true": true
+  };
+  var const_list = lodash.keys(consts.DATABASE.MAPPING);
+  lodash.forOwn(object, function (value, property) {
+    if (lodash.includes(const_list, property)) {
+      fields.push(property);
+      if (lodash.includes(lodash.keys(OOB_KEYS), value)) {
+        values.push(OOB_KEYS[value]);
+      } else {
+        values.push(value);
+      }
+      tables.push(consts.DATABASE.MAPPING[property]);
+    }
+  });
+  return [fields, values, tables];
 };

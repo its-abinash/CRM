@@ -73,7 +73,7 @@ class AppResponse {
     }
     const decodedParams = this.decryptKey(encodedParams);
     if (!decodedParams) {
-      return null;
+      return {};
     }
     var decodedQueryParams = _.chain(decodedParams) // foo=bar&new=watch
       .split("&")                           // ["foo=bar", "new=watch"]
@@ -95,10 +95,6 @@ class AppResponse {
 
   getRequestBody() {
     var encodedRequestBody = this.request.body.payload;
-    // AES encoded string may contain '+', and the client understand '+' as white-space.
-    // Eg: encodedRequestBody = "axjs&/sjsn+h". But when client sends this payload it becomes
-    // encodedRequestBody = "axjs&/sjsn h". So this may cause decryption error.
-    // So we'll make sure all white-spaces are replaced with '+'.
     var requestBodyObject = this.decryptKey(encodedRequestBody);
     return requestBodyObject;
   }
