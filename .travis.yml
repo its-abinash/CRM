@@ -4,7 +4,6 @@ node_js:
 service:
   - redis-server
 script:
-  - npm cache clean -f
   - npm install
   - npm run test
 after_success:
