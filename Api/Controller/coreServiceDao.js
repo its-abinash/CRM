@@ -1,6 +1,6 @@
 const db = require("../../Database/databaseOperations");
 const { DATABASE } = require("../../Configs/constants.config");
-const jp = require("jsonpath")
+const jp = require("jsonpath");
 
 /**
  * @function getCustomerForRemainderFromDB
@@ -48,13 +48,8 @@ module.exports.updateRemainderDateInDB = async function (customers) {
  */
 module.exports.getImageOfLoggedInUser = async function (loggedInUser) {
   try {
-    var userData = await db.fetch(
-      DATABASE.CUSTOMER,
-      DATABASE.FETCH_SPECIFIC,
-      "email",
-      loggedInUser
-    );
-    return [userData[0].img_data, userData[0].name];
+    var userData = await db.fetchUserData(loggedInUser);
+    return [userData[0].image, userData[0].name];
   } catch (ex) {
     throw ex;
   }
