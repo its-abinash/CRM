@@ -12,6 +12,12 @@ router.get("/dashboard/getCustomer", userController.getCustomers);
 
 router.get("/dashboard/getAdmins", userController.getAdmins)
 
+// User Endpoint
+router.get("/user/:userId", userController.getUserInfo)
+
+// Accepts QueryParameter denoting the user properties to be deleted
+router.delete("/user/:userId", userController.deleteUserData)
+
 // Chat Endpoints
 router.get("/chat/receivers/:receiverId/senders/:senderId", userController.getConversation);
 
