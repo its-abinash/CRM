@@ -1,5 +1,6 @@
 const { DATABASE } = require("../../Configs/constants.config");
 var db = require("../../Database/databaseOperations");
+var lodash = require("lodash");
 
 /**
  * @function saveEditedData
@@ -28,9 +29,15 @@ module.exports.saveEditedData = async function (email, fields, data) {
  * @description update user's profile picture
  * @returns Boolean (True/False)
  */
-module.exports.updateProfilePicture = async function (email, blob) {
+module.exports.updateProfilePicture = async function (email, data) {
   try {
-    var imageSaved = await db.updateMedia("email", email, blob);
+    var properties = [];
+    var values = [];
+    lodash.forOwn(data, function (value, property) {
+      properties.push(property);
+      values.push(value);
+    });
+    var imageSaved = await db.updateMedia("email", email, properties, values);
     return imageSaved;
   } catch (exc) {
     throw exc;

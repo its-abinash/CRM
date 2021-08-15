@@ -6,6 +6,8 @@ var httpStatus = require("http-status");
 const { updatePayloadSchema, patchPayloadSchema } = require("./schema");
 var lodash = require("lodash");
 
+const IMAGE_SPECIFIC_FIELDS = ["imagename", "size", "type", "lastModified"];
+
 var isEmptyPropertyFound = async function (payload) {
   var emptyPropertyList = [];
   for (const property in payload) {
@@ -44,7 +46,7 @@ var processAndGetFinalResponse = async function (
     var password = profile_data.password || payload.password;
     var passcode = profile_data.passcode || payload.passcode;
     var rem_freq = profile_data.remainder_freq || payload.remainder_freq;
-    var profile_picture = media.profile_picture || payload.profile_picture;
+    var profile_picture = media;
     var fields = [];
     var data = [];
     if (!lodash.isEmpty(name)) {
@@ -139,14 +141,38 @@ module.exports.processAndUpdateUserProperty = async function (AppRes) {
     throw "QUERY_PARAMS_NOT_FOUND_IN_URL";
   }
   logger.info(`Query Params in URL: ${JSON.stringify(qpArgs)}`);
+
+  var payload = { email: qpArgs.email };
+
+  lodash.forOwn(qpArgs, function (value, property) {
+    if (lodash.includes(IMAGE_SPECIFIC_FIELDS, property)) {
+      if (payload.media) {
+        payload["media"][property] = value;
+      } else {
+        payload["media"] = { [property]: value };
+      }
+    } else {
+      payload[property] = value;
+    }
+  });
   var [isValidPayload, errorList] = await validatePayload(
-    qpArgs,
+    payload,
     patchPayloadSchema
   );
+
+  logger.info(`Final Payload for Patch Request: ${JSON.stringify(payload)}`);
+
+  // DO NOT decode the encoded image data since it is not encrypted using AES
+  // because it is already encrypted using FileReader
+  if (lodash.has(payload, "media")) {
+    var requestBody = AppRes.getRequestBody();
+    payload["media"]["image"] = requestBody.media.profile_picture;
+  }
+
   var response = await processAndGetFinalResponse(
     isValidPayload,
     errorList,
-    qpArgs,
+    payload,
     AppRes
   );
   return [response.statusCode, response];
