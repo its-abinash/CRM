@@ -30,3 +30,18 @@ module.exports.getAllAdmins = async function (logged_in_user_id) {
     throw exc;
   }
 };
+
+/**
+ * @function getUserData
+ * @async
+ * @description Gets an user's info from db
+ */
+ module.exports.getUserData = async function (logged_in_user_id) {
+  try {
+    var data = logged_in_user_id;
+    var userData = await db.fetchUserData(data);
+    return userData;
+  } catch (exc) {
+    throw exc;
+  }
+};
