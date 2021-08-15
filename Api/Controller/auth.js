@@ -3,10 +3,7 @@ var router = express.Router();
 var cors = require("cors");
 var db = require("../../Database/databaseOperations");
 var logger = require("../Logger/log");
-var {
-  DATABASE,
-  ResponseIds,
-} = require("../../Configs/constants.config");
+var { DATABASE, ResponseIds } = require("../../Configs/constants.config");
 const { processPayload, validatePayload, format } = require("./main_utils");
 const { registrationSchema, loginPayloadSchema } = require("./schema");
 const { AppResponse } = require("./response_utils");
@@ -14,6 +11,7 @@ var httpStatus = require("http-status");
 var jp = require("jsonpath");
 var jwt = require("jsonwebtoken");
 const utils = require("./utils");
+const lodash = require("lodash");
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
@@ -157,6 +155,77 @@ var getAdmins = async function () {
   }
 };
 
+var registrationUtil = async function (
+  username,
+  email,
+  firstname,
+  lastname,
+  password,
+  qpArgs
+) {
+  var credData = [email, password, false];
+  // Setting default remainder to every 7 days
+  var next_remainder = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  var userData = [
+    username,
+    email,
+    next_remainder.toString(),
+    firstname,
+    lastname,
+  ];
+  logger.info(`credData: ${credData} and userData: ${userData}`);
+  // Save user cred in db
+  logger.info(`Saving 'credentials' in db for userId: ${email}`);
+  var credSaved = await db.insert(DATABASE.CREDENTIALS, credData);
+
+  if (!credSaved) {
+    return false;
+  }
+
+  // Save user data in db
+  logger.info(`Saving 'customer' with userId: ${email}`);
+  var dataSaved = await db.insert(DATABASE.CUSTOMER, userData);
+
+  if (!dataSaved) {
+    return false;
+  }
+
+  logger.info("Inserting default values into table media");
+  var mediaCreated = await db.insertMedia([
+    email,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
+
+  if (!mediaCreated) {
+    return false;
+  }
+
+  var isAdmin = lodash.has(qpArgs, "isAdmin") ? qpArgs.isAdmin : false;
+  if (!isAdmin) {
+    logger.info(`Mapping present admins with userId: ${email}`);
+    var adminList = await getAdmins();
+    var userMap = [];
+    // Saving user-admin and admin-user in user_map table
+    for (const admin of adminList) {
+      userMap.push([email, admin.email]);
+      userMap.push([admin.email, email]);
+    }
+    if (userMap.length > 0) {
+      logger.info(`userMap: ${JSON.stringify(userMap)}`);
+      var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
+
+      if (!usermapCreated) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 /**
  * @httpMethod POST
  * @function register
@@ -169,9 +238,10 @@ module.exports.register = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var requestPayload = AppRes.getRequestBody();
-    var payload = await processPayload(requestPayload);
-    payload["phonenum"] = payload["phonenum"].toString();
+    var payload = AppRes.getRequestBody();
+    // Allowed values in query params: isAdmin=boolean (True/False)
+    var qpArgs = AppRes.getQueryParams(); // -- TODO -- UI will send isAdmin=true in next ENH
+    logger.info(`qpArgs from URL: ${JSON.stringify(qpArgs)}`);
     var [isValidPayload, errorList] = await validatePayload(
       payload,
       registrationSchema
@@ -191,12 +261,10 @@ module.exports.register = async function (req, res) {
       res.status(httpStatus.UNPROCESSABLE_ENTITY).send(response);
     } else {
       var email = payload.email;
-      var username = payload.username;
-      var phoneNum = payload.phonenum;
-      var gstNum = payload.gstnum;
-      var remFreq = payload.remfreq;
+      var firstname = payload.firstname;
+      var lastname = payload.lastname;
+      var username = `${firstname} ${lastname}`;
       var password = payload.password;
-      var passcode = payload.passcode;
       var isExisting = await existingUser(email);
       logger.info(`isExistingUser = ${isExisting}`);
       if (isExisting) {
@@ -210,38 +278,16 @@ module.exports.register = async function (req, res) {
         AppRes.ApiExecutionEnds();
         res.status(httpStatus.CONFLICT).send(response);
       } else {
-        var credData = [email, password, passcode, false];
-        var date = new Date();
-        date.setDate(date.getDate() + parseInt(remFreq));
-        var next_remainder = date.toLocaleDateString();
-        var default_profile_img_url = "";
-        var userData = [
+        var registrationSuccessfull = await registrationUtil(
           username,
           email,
-          phoneNum,
-          gstNum,
-          remFreq,
-          next_remainder,
-          default_profile_img_url,
-        ];
-        logger.info(`credData: ${credData} and userData: ${userData}`);
-        // Save user cred in db
-        logger.info(`Saving 'credentials' in db for userId: ${email}`);
-        var credSaved = await db.insert(DATABASE.CREDENTIALS, credData);
-        // Save user data in db
-        logger.info(`Saving 'customer' with userId: ${email}`);
-        var dataSaved = await db.insert(DATABASE.CUSTOMER, userData);
-        logger.info(`Mapping present admins with userId: ${email}`);
-        var adminList = await getAdmins();
-        var userMap = [];
-        // Saving user-admin and admin-user in user_map table
-        for (const admin of adminList) {
-          userMap.push([email, admin.email]);
-          userMap.push([admin.email, email]);
-        }
-        logger.info(`userMap: ${JSON.stringify(userMap)}`);
-        var usermapCreated = await db.insert(DATABASE.USERS_MAP, userMap);
-        if (credSaved && dataSaved && usermapCreated) {
+          firstname,
+          lastname,
+          password,
+          qpArgs
+        );
+
+        if (registrationSuccessfull) {
           logger.info("User has been successfully registered");
           var response = await AppRes.buildResponse(
             null,
