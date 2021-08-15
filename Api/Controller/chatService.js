@@ -32,9 +32,7 @@ module.exports.processAndGetConversation = async function (
   for (var eachChat of chatList) {
     eachChat["timestamp"] = lodash.toNumber(eachChat["timestamp"]);
     eachChat["chatmsg"] = AppRes.decryptKey(eachChat["msg"]);
-    eachChat["image"] = eachChat["img_data"] || URL.defaultProfilePictureUrl;
     delete eachChat["msg"];
-    delete eachChat["img_data"];
   }
   var response = await AppRes.buildResponse(
     chatList,
