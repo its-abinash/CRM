@@ -4,4 +4,3 @@ logs/app.log
 coverage
 secret
 DEBUG.txt
-package-lock.json
