@@ -42,7 +42,7 @@ module.exports.processAndGetAllConstants = async function (req, AppRes) {
   logger.info(`All constants are sent`);
   var response = await AppRes.buildResponse(
     CONSTANTS,
-    format(ResponseIds.RI_006, ["Constants", JSON.stringify(CONSTANTS)]),
+    format(ResponseIds.RI_006, ["Constants"]),
     httpStatus.OK,
     "RI_006"
   );
@@ -65,10 +65,7 @@ module.exports.processAndGetSpecificFromConstants = async function (req, AppRes)
       logger.info(`Data sent : ${CONSTANTS[constantId][fieldId]}`);
       var response = await AppRes.buildResponse(
         CONSTANTS[constantId][fieldId],
-        format(ResponseIds.RI_006, [
-          "Constant",
-          CONSTANTS[constantId][fieldId],
-        ]),
+        format(ResponseIds.RI_006, ["Constant"]),
         httpStatus.OK,
         "RI_006"
       );
@@ -96,10 +93,7 @@ module.exports.processAndGetConstant = async function (req, AppRes) {
     logger.info(`Data sent : ${JSON.stringify(CONSTANTS[constantId])}`);
     var response = await AppRes.buildResponse(
       CONSTANTS[constantId],
-      format(ResponseIds.RI_006, [
-        "Constant",
-        JSON.stringify(CONSTANTS[constantId]),
-      ]),
+      format(ResponseIds.RI_006, ["Constant"]),
       httpStatus.OK,
       "RI_006"
     );

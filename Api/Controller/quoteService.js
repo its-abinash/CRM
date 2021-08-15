@@ -90,7 +90,7 @@ module.exports.processAndGetQuotes = async function (AppRes) {
   }
   var response = await AppRes.buildResponse(
     result,
-    format(ResponseIds.RI_006, ["quote", JSON.stringify(result)]),
+    format(ResponseIds.RI_006, ["quote"]),
     httpStatus.OK,
     "RI_006"
   );

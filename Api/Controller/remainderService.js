@@ -1,7 +1,7 @@
 const coreServiceDao = require("./coreServiceDao");
 const { format } = require("./main_utils");
 const { ResponseIds } = require("../../Configs/constants.config");
-const httpStatus = require("http-status")
+const httpStatus = require("http-status");
 var logger = require("../Logger/log");
 
 const REMINDER_SUBJECT = "Check Latest Business Deals!";
@@ -40,10 +40,7 @@ module.exports.processRemainderData = async function (AppRes) {
   await coreServiceDao.updateRemainderDateInDB(customerIds);
   var response = await AppRes.buildResponse(
     null,
-    format(ResponseIds.RI_006, [
-      "remainder information",
-      JSON.stringify(remInfo),
-    ]),
+    format(ResponseIds.RI_006, ["remainder information"]),
     httpStatus.OK,
     "RI_006"
   );
