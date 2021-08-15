@@ -3,13 +3,10 @@ var db = require("../../Database/databaseOperations");
 
 module.exports.saveImageIntoDB = async function (LoggedInUser, imgUri) {
   try {
-    await db.update(
-      DATABASE.CUSTOMER,
-      "email",
-      LoggedInUser,
-      ["img_data"],
-      [imgUri]
-    );
+    var fields = ["image"]
+    var values = [imgUri]
+    var mediaUpdated = await db.updateMedia("email", LoggedInUser, fields, values);
+    return mediaUpdated;
   } catch (exc) {
     throw exc;
   }

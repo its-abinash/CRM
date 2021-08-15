@@ -18,8 +18,8 @@ var insertAtCred = async function (data) {
   try {
     const db = await pool.connect();
     const query = `INSERT INTO
-                   credentials (email, password, passcode, is_admin)
-                   VALUES ($1, $2, $3, $4)`;
+                   credentials (email, password, is_admin)
+                   VALUES ($1, $2, $3)`;
     await db.query(query, data);
     db.release();
     return true;
@@ -38,8 +38,8 @@ var insertAtCred = async function (data) {
 var insertAtCustomer = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder, img_data)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+    const query = `INSERT INTO customer (name, email, next_remainder, firstname, lastname)
+                   VALUES ($1, $2, $3, $4, $5)`;
     await db.query(query, data);
     db.release();
     return true;
@@ -155,15 +155,42 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `select customer.email, customer.name, customer.img_data
+    const query = `select customer.email, customer.name, media.image
                    from customer
                    inner join users_map on
                    users_map.user_id2 = customer.email
                    inner join credentials on
                    credentials.email = users_map.user_id2
+                   inner join media on
+                   media.email = customer.email
                    where
                    users_map.user_id1 = $1 and credentials.is_admin=$2;`;
     var res = await db.query(query, data);
+    db.release();
+    return res.rows;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @async
+ * @description Fetches all user data
+ * @param {Array} data
+ */
+ module.exports.fetchUserData = async function (data) {
+  try {
+    const db = await pool.connect();
+    const query = `select
+                      customer.email, customer.name, customer.phone,
+                      customer.firstname, customer.lastname,
+                      media.image, media.lastmodified, media.imagename,
+                      media.type, media.size
+                   from customer
+                   inner join media on
+                   media.email = customer.email
+                   where customer.email = $1`;
+    var res = await db.query(query, [data]);
     db.release();
     return res.rows;
   } catch (ex) {
@@ -246,13 +273,15 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
   }
 };
 
-module.exports.updateMedia = async function (pk_name, pk_value, data) {
+module.exports.updateMedia = async function (pk_name, pk_value, fields, data) {
   try {
     const db = await pool.connect();
-    const query = `UPDATE media
-                   SET image = $1
-                   WHERE ${pk_name} = $2`;
-    await db.query(query, [data, pk_value]);
+    for (var i = 0; i < fields.length; i++) {
+      const query = `UPDATE media
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
+      await db.query(query, [data[i], pk_value]);
+    }
     db.release();
     return true;
   } catch (ex) {
@@ -260,13 +289,30 @@ module.exports.updateMedia = async function (pk_name, pk_value, data) {
   }
 };
 
-module.exports.insertMedia = async function (pk_value, data) {
+module.exports.insertMedia = async function (data) {
   try {
     const db = await pool.connect();
     const query = `INSERT INTO
-                   media (userId, image)
-                   VALUES ($1, $2)`;
-    await db.query(query, [pk_value, data]);
+                   media (email, imagename, size, type, image, lastmodified)
+                   VALUES ($1, $2, $3, $4, $5, $6)`;
+    await db.query(query, data);
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+
+module.exports.updateSpecificUserData = async function (pk_name, pk_value, fields, values, tables) {
+  try {
+    const db = await pool.connect();
+    for (var i = 0; i < fields.length; i++) {
+      const query = `UPDATE ${tables[i]}
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
+      await db.query(query, [values[i], pk_value]);
+    }
     db.release();
     return true;
   } catch (ex) {
@@ -618,7 +664,7 @@ module.exports.fetchConversationWithImg = async function (sender, receiver) {
                           receiver,
                           msg,
                           timestamp,
-                          customer.img_data
+                          media.image
                    from (
                       select * from conversation
                       where sender = $1 and receiver = $2
@@ -626,6 +672,8 @@ module.exports.fetchConversationWithImg = async function (sender, receiver) {
                    ) sub
                    inner join customer on
                    customer.email = receiver
+                   inner join media on
+                   media.email = receiver
                    order by timestamp`;
     var res = await db.query(query, [sender, receiver]);
     db.release();
