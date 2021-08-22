@@ -50,7 +50,11 @@ var processAndGetFinalResponse = async function (
     }
     logger.info(`fields: ${fields}, data: ${data}`);
     var credentialSaved = false;
-    if (password || passcode) {
+    if (
+      (lodash.has(payload, "profile.password") ||
+        lodash.has(payload, "profile.passcode")) &&
+      (password || passcode)
+    ) {
       logger.info(`Updating password for user: ${email}`);
       credentialSaved = editServiceDao.updateCredential(
         email,
@@ -58,7 +62,7 @@ var processAndGetFinalResponse = async function (
       );
     }
     var profile_picture_updated = false;
-    if (profile_picture) {
+    if (lodash.has(payload, "media")) {
       logger.info(`Updating profile picture for user: ${email}`);
       profile_picture_updated = await editServiceDao.updateProfilePicture(
         email,
@@ -67,11 +71,15 @@ var processAndGetFinalResponse = async function (
     }
     var dataSaved = await editServiceDao.saveEditedData(email, fields, data);
 
-    dataSaved = profile_picture
+    dataSaved = lodash.has(payload, "media")
       ? dataSaved && profile_picture_updated
       : dataSaved;
 
-    dataSaved = password || passcode ? dataSaved && credentialSaved : dataSaved;
+    dataSaved =
+      lodash.has(payload, "profile.password") ||
+      lodash.has(payload, "profile.passcode")
+        ? dataSaved && credentialSaved
+        : dataSaved;
 
     if (dataSaved) {
       logger.info("successfully updated in db");

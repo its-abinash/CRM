@@ -94,7 +94,8 @@ module.exports.fakeChatData = [
     sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
     receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
     msg: "U2FsdGVkX1/0568a5bCQKN4RqauV23i4IdFIMsCwIAA=",
-    timestamp: "2021-01-24T10:09:50.762Z",
+    timestamp: "12345",
+    image: "some encoded string"
   },
 ];
 

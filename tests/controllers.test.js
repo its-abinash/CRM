@@ -104,7 +104,7 @@ var chatControllerTestPositive = function () {
   ];
   for (const testCase of testCases) {
     it(testCase.testCaseName, async function () {
-      sinon.stub(chatDao, "getConversation").returns(fakeChatData);
+      sinon.stub(chatDao, "getConversationWithImage").returns(fakeChatData);
       sinon.stub(loggerUtils, "info");
       sinon.stub(loggerUtils, 'error');
       sinon.stub(utils, "decodeJwt").returns(testCase.jwt);

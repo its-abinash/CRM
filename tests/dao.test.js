@@ -55,6 +55,11 @@ var daoControllerTestPositive = function () {
       assert.match(exc.name, "CONNERR");
     }
   });
+  it("chatDao - getConversationWithImage success test", async function () {
+    sinon.stub(dbUtils, "fetchConversationWithImg").returns([]);
+    var result = await chatDao.getConversationWithImage(sender, receiver);
+    assert.match(result, []);
+  });
   it("coreServicesDao - success test", async function () {
     sinon.stub(dbUtils, "fetchLatestRemainder").returns([]);
     var fetchStub = sinon.stub(dbUtils, "fetch");
@@ -162,12 +167,22 @@ var daoControllerTestPositive = function () {
     }
   });
   it("editServiceDao - success test", async function () {
-    var dataToUpdateProfilePict = {"key1":"val1"}
+    var dataToUpdateProfilePict = { key1: "val1" };
     sinon.stub(dbUtils, "update").returns(true);
     sinon.stub(dbUtils, "updateMedia").returns(true);
-    await editServiceDao.saveEditedData("user@domain.com", ["field1"], ["data1"]);
-    await editServiceDao.updateProfilePicture("email@domain.com", dataToUpdateProfilePict);
-    await editServiceDao.updateCredential("email@domain.com", "some_credential");
+    await editServiceDao.saveEditedData(
+      "user@domain.com",
+      ["field1"],
+      ["data1"]
+    );
+    await editServiceDao.updateProfilePicture(
+      "email@domain.com",
+      dataToUpdateProfilePict
+    );
+    await editServiceDao.updateCredential(
+      "email@domain.com",
+      "some_credential"
+    );
   });
   it("editServiceDao - exception test", async function () {
     sinon.stub(dbUtils, "update").throwsException({ name: "CONNERR" });
@@ -192,9 +207,12 @@ var daoControllerTestPositive = function () {
   });
   it("insertServiceDao - success test", async function () {
     sinon.stub(dbUtils, "insert").returns(true);
-    sinon.stub(dbUtils, "update");
+    sinon.stub(dbUtils, "updateMedia").returns(true);
     await insertServiceDao.insertUserData(1, []);
-    await insertServiceDao.saveImageIntoDB([], "");
+    await insertServiceDao.saveImageIntoDB(
+      "user@gmail.com",
+      "some encoded data"
+    );
   });
   it("insertServiceDao - insertUserData exception test", async function () {
     sinon.stub(dbUtils, "insert").throwsException({ name: "CONNERR" });
@@ -205,9 +223,12 @@ var daoControllerTestPositive = function () {
     }
   });
   it("insertServiceDao - saveImageIntoDB exception test", async function () {
-    sinon.stub(dbUtils, "update").throwsException({ name: "CONNERR" });
+    sinon.stub(dbUtils, "updateMedia").throwsException({ name: "CONNERR" });
     try {
-      await insertServiceDao.saveImageIntoDB([], "");
+      await insertServiceDao.saveImageIntoDB(
+        "user@gmail.com",
+        "some encoded data"
+      );
     } catch (exc) {
       assert.match(exc.name, "CONNERR");
     }

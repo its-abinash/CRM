@@ -10,6 +10,7 @@ const {
   fakeConversationData,
   fakeSpecificConversationData,
   fakeLatestRemainderData,
+  userInfoResponse,
 } = require("../Configs/mockData");
 
 function fakePgPool(fakePgStubData) {
@@ -444,6 +445,41 @@ var databaseControllerTest = function () {
     } catch (exc) {
       assert.match(exc, "CONNERR");
     }
+  });
+  it("fetchUserData - test", async function () {
+    var pgStub = fakePgPool({ rows: userInfoResponse.values });
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.fetchUserData("user@gmail.com");
+  });
+  it("updateMedia - test", async function () {
+    var pgStub = fakePgPool({});
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.updateMedia("email", "user@gmail.com", ["z"], ["x"]);
+  });
+  it("insertMedia - test", async function () {
+    var pgStub = fakePgPool({});
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.insertMedia("user@gmail.com");
+  });
+  it("updateSpecificUserData - test", async function () {
+    var pgStub = fakePgPool({});
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.updateSpecificUserData("email", "user@gmail.com", ["x"], ["y"], ["z"]);
+  });
+  it("fetchConversationWithImg - test", async function () {
+    var pgStub = fakePgPool({rows: []});
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.fetchConversationWithImg("sender@gmail.com", "receiver@gmail.com");
   });
   afterEach(function () {
     sinon.verifyAndRestore();
