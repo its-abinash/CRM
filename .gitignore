@@ -2,5 +2,4 @@ node_modules
 logs/app.log
 .nyc_output
 coverage
-secret
-DEBUG.txt
+package-lock.json
