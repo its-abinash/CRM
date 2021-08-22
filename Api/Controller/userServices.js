@@ -251,9 +251,11 @@ module.exports.delete = async function (req, res) {
       AppRes.ApiExecutionEnds();
       res.status(httpStatus.UNAUTHORIZED).send(response);
     } else {
+      var removeall = true;
       var [statusCode, response] = await deleteService.processAndDeleteUserData(
         LoggedInUser,
-        AppRes
+        AppRes,
+        removeall
       );
       AppRes.ApiExecutionEnds();
       res.status(statusCode).send(response);
@@ -492,6 +494,85 @@ module.exports.email = async function (req, res) {
       format(ResponseIds.RI_029, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};
+
+/**
+ * @httpMethod GET
+ * @endpoint /user/{userId}
+ * @function getUserInfo
+ * @async
+ * @description Returns user informations
+ * @param {Object} req
+ * @param {Object} res
+ */
+ module.exports.getUserInfo = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await dashService.getUserData(LoggedInUser, AppRes)
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
+      null,
+      format(ResponseIds.RI_034, [String(ex)]),
+      httpStatus.BAD_GATEWAY
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
+  }
+};
+
+/**
+ * @httpMethod DELETE
+ * @endpoint /user/{userId}/{deleteProperties}
+ * @function delete
+ * @async
+ * @description Delete specific user data
+ * @param {Object} req
+ * @param {Object} res
+ */
+ module.exports.deleteUserData = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = await utils.decodeJwt(AppRes);
+    if (!LoggedInUser) {
+      logger.error("User is unauthorized");
+      var response = await AppRes.buildResponse(
+        null,
+        ResponseIds.RI_015,
+        httpStatus.UNAUTHORIZED,
+        "RI_015"
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(httpStatus.UNAUTHORIZED).send(response);
+    } else {
+      var [statusCode, response] = await deleteService.processAndDeleteUserData(
+        LoggedInUser,
+        AppRes
+      );
+      AppRes.ApiExecutionEnds();
+      res.status(statusCode).send(response);
+    }
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
     res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };

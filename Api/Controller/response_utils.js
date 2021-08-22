@@ -73,15 +73,15 @@ class AppResponse {
     }
     const decodedParams = this.decryptKey(encodedParams);
     if (!decodedParams) {
-      return null;
+      return {};
     }
-    const reqUrl = req.protocol + "://" + req.get("host") + "?" + decodedParams;
-    const parsedUrl = new URL(reqUrl);
-    const searchParamsObject = new URLSearchParams(parsedUrl.searchParams);
-    const encodedQPArgs = searchParamsObject.toString();
-    const decodedQPArgs = qString.decode(encodedQPArgs);
-    return decodedQPArgs;
-  }
+    var decodedQueryParams = _.chain(decodedParams) // foo=bar&new=watch
+      .split("&")                           // ["foo=bar", "new=watch"]
+      .map(_.partial(_.split, _, "=", 2))   // [["foo", "bar"], ["new", "watch"]]
+      .fromPairs()                          // {"foo": "bar", "new": "watch"}
+      .value();
+    return decodedQueryParams;
+    }
 
   getCommaSepPathParams() {
     const req = this.request;
@@ -95,10 +95,6 @@ class AppResponse {
 
   getRequestBody() {
     var encodedRequestBody = this.request.body.payload;
-    // AES encoded string may contain '+', and the client understand '+' as white-space.
-    // Eg: encodedRequestBody = "axjs&/sjsn+h". But when client sends this payload it becomes
-    // encodedRequestBody = "axjs&/sjsn h". So this may cause decryption error.
-    // So we'll make sure all white-spaces are replaced with '+'.
     var requestBodyObject = this.decryptKey(encodedRequestBody);
     return requestBodyObject;
   }

@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var ENV = require("../Configs/db.config.json")
+var ENV = require("../Configs/db.config.json");
 var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
@@ -18,8 +18,8 @@ var insertAtCred = async function (data) {
   try {
     const db = await pool.connect();
     const query = `INSERT INTO
-                   credentials (email, password, passcode, is_admin)
-                   VALUES ($1, $2, $3, $4)`;
+                   credentials (email, password, is_admin)
+                   VALUES ($1, $2, $3)`;
     await db.query(query, data);
     db.release();
     return true;
@@ -38,8 +38,8 @@ var insertAtCred = async function (data) {
 var insertAtCustomer = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `INSERT INTO customer (name, email, phone, gst, remfreq, next_remainder, img_data)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+    const query = `INSERT INTO customer (name, email, next_remainder, firstname, lastname)
+                   VALUES ($1, $2, $3, $4, $5)`;
     await db.query(query, data);
     db.release();
     return true;
@@ -155,15 +155,42 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `select customer.email, customer.name, customer.img_data
+    const query = `select customer.email, customer.name, media.image
                    from customer
                    inner join users_map on
                    users_map.user_id2 = customer.email
                    inner join credentials on
                    credentials.email = users_map.user_id2
+                   inner join media on
+                   media.email = customer.email
                    where
                    users_map.user_id1 = $1 and credentials.is_admin=$2;`;
     var res = await db.query(query, data);
+    db.release();
+    return res.rows;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @async
+ * @description Fetches all user data
+ * @param {Array} data
+ */
+ module.exports.fetchUserData = async function (data) {
+  try {
+    const db = await pool.connect();
+    const query = `select
+                      customer.email, customer.name, customer.phone,
+                      customer.firstname, customer.lastname,
+                      media.image, media.lastmodified, media.imagename,
+                      media.type, media.size
+                   from customer
+                   inner join media on
+                   media.email = customer.email
+                   where customer.email = $1`;
+    var res = await db.query(query, [data]);
     db.release();
     return res.rows;
   } catch (ex) {
@@ -238,6 +265,53 @@ var updateAtCustomer = async function (pk_name, pk_value, fields, data) {
                      SET ${fields[i]} = $1
                      WHERE ${pk_name} = $2`;
       await db.query(query, [data[i], pk_value]);
+    }
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+module.exports.updateMedia = async function (pk_name, pk_value, fields, data) {
+  try {
+    const db = await pool.connect();
+    for (var i = 0; i < fields.length; i++) {
+      const query = `UPDATE media
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
+      await db.query(query, [data[i], pk_value]);
+    }
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+module.exports.insertMedia = async function (data) {
+  try {
+    const db = await pool.connect();
+    const query = `INSERT INTO
+                   media (email, imagename, size, type, image, lastmodified)
+                   VALUES ($1, $2, $3, $4, $5, $6)`;
+    await db.query(query, data);
+    db.release();
+    return true;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+
+module.exports.updateSpecificUserData = async function (pk_name, pk_value, fields, values, tables) {
+  try {
+    const db = await pool.connect();
+    for (var i = 0; i < fields.length; i++) {
+      const query = `UPDATE ${tables[i]}
+                     SET ${fields[i]} = $1
+                     WHERE ${pk_name} = $2`;
+      await db.query(query, [values[i], pk_value]);
     }
     db.release();
     return true;
@@ -454,7 +528,7 @@ module.exports.fetch = async function (
           ? await fetchConversations(pk_name, pk_value)
           : await fetchLimitedConversations(pk_name, pk_value);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -480,7 +554,7 @@ module.exports.insert = async function (database_id, data) {
       case DATABASE.USERS_MAP:
         return await insertAtUsersMap(data);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -509,7 +583,7 @@ module.exports.update = async function (
       case DATABASE.CUSTOMER:
         return await updateAtCustomer(pk_name, pk_value, fields, data);
     }
-  }catch(exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -539,7 +613,7 @@ module.exports.remove = async function (database_id, pk_name, pk_value) {
       case DATABASE.USERS_MAP:
         return await removeUserFromUserMap(pk_value);
     }
-  }catch (exc) {
+  } catch (exc) {
     throw exc;
   }
 };
@@ -577,6 +651,33 @@ module.exports.isValidUser = async function (pk_name, pk_value, password) {
   try {
     var userData = await fetchSpecificFromCred(pk_name, pk_value);
     return userData[0].email === pk_value && userData[0].password === password;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+module.exports.fetchConversationWithImg = async function (sender, receiver) {
+  try {
+    const db = await pool.connect();
+
+    const query = `select sender,
+                          receiver,
+                          msg,
+                          timestamp,
+                          media.image
+                   from (
+                      select * from conversation
+                      where sender = $1 and receiver = $2
+                      or sender = $2 and receiver = $1
+                   ) sub
+                   inner join customer on
+                   customer.email = receiver
+                   inner join media on
+                   media.email = receiver
+                   order by timestamp`;
+    var res = await db.query(query, [sender, receiver]);
+    db.release();
+    return res.rows;
   } catch (ex) {
     throw ex;
   }

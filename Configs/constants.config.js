@@ -26,7 +26,10 @@ module.exports = {
     CREDENTIALS: 1,
     CUSTOMER: 3,
     CONVERSATION: 4,
-    USERS_MAP: 2
+    USERS_MAP: 2,
+    MAPPING: {
+      "image": "media"
+    }
   },
   CYPHER: {
     ENCRYPTION_KEY: "#",
@@ -38,7 +41,7 @@ module.exports = {
     RI_003: "Conversations between userId: {0} and userId: {1} are successfully inserted in Database",
     RI_004: "Invalid payload/request_body",
     RI_005: "Execution of {0} {1} finished in {2} msecs, which has generated {3} MB of memory",
-    RI_006: "Successfully fetched the {0} with value = {1}",
+    RI_006: "Successfully fetched the {0}",
     RI_007: "Successfully removed {0} of user having userId: {1}",
     RI_008: "Failed to remove {0} of user having userId: {1}",
     RI_009: "Successfully updated {0} of user having userId: {1}",
@@ -65,7 +68,8 @@ module.exports = {
     RI_030: "Getting exception: {0} while inserting user data",
     RI_031: "User: {0} has successfully logged-out",
     RI_032: "Invalid Query Parameters Received: {0}",
-    RI_033: "Empty properties found in request payload or in query params: {0}"
+    RI_033: "Empty properties found in request payload or in query params: {0}",
+    RI_034: "Getting exception: {0} while fetching user data"
   },
   URL: {
     defaultProfilePictureUrl: "https://www.w3schools.com/howto/img_avatar.png",

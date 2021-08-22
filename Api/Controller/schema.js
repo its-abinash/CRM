@@ -107,7 +107,7 @@ var chatPostSenderSchema = {
     "type": "string",
     "title": "The sender schema",
     "description": "Sender will be an user having a valid email id",
-    "pattern": "^\\S+@\\S+[\\.][0-9a-z]+$",
+    "pattern": "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$",
     "default": ""
 }
 
@@ -116,7 +116,7 @@ var chatPostReceiverSchema = {
     "type": "string",
     "title": "The receiver schema",
     "description": "The Receiver Schema",
-    "pattern": "^\\S+@\\S+[\\.][0-9a-z]+$",
+    "pattern": "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$",
     "default": ""
 }
 
@@ -184,32 +184,48 @@ var phoneNumberSchema = {
 
 var remainderSchema = {
     "$id": "/remainderSchema",
-    "type": "integer",
+    "type": "string",
     "title": "The remfreq schema",
     "description": "remainderSchema",
-    "default": 1
+    "default": "1"
 }
 
 var passwordSchema = {
     "$id": "/passwordSchema",
     "type": "string",
     "title": "The password schema",
-    "description": "password validation schema",
+    "description": "8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special character",
     "pattern": "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\\s).{8,15}$"
 }
 
 var updatePayloadSchema = {
-    "type": "object",
-    "title": "The update Payload Schema",
-    "description": "The root schema comprises the entire JSON document.",
-    "required": ["email", "name", "phone", "remfreq"],
+	"type": "object",
     "properties": {
-        "name": {"$ref": "/nameSchema"},
-        "email": {"$ref": "/chatPostReceiverSchema"},
-        "phone": {"$ref": "/phoneNumberSchema"},
-        "remfreq": {"$ref": "/remainderSchema"}
+      	"email": {"type": "string"},
+    	"profile": {
+    		"type": "object",
+        	"properties" : {
+        		"name": {"type": "string"},
+                "password": {"type": "string"},
+                "passcode": {"type": "string"},
+        		"phone": {"type": "string"},
+        		"remainder_freq": {"type": "integer"}
+        	},
+        	"additionalProperties": false,
+            "required": ["name", "password", "passcode",
+                         "phone", "remainder_freq"]
+    	},
+        "media": {
+          	"type": "object",
+            "properties": {
+        		"profile_picture": {"type": "string"}
+            },
+            "additionalProperties": false,
+            "required": ["profile_picture"]
+        }
     },
-    "additionalProperties": false
+  	"additionalProperties": false,
+    "required": ["email", "profile", "media"]
 }
 
 var patchPayloadSchema = {
@@ -219,17 +235,59 @@ var patchPayloadSchema = {
     "anyOf" : [
         { "required": ["email", "name"] },
         { "required": ["email", "phone"] },
-        { "required": ["email", "remfreq"] },
-        { "required": ["email", "name", "remfreq"] },
+        { "required": ["email", "remainder_freq"] },
+        { "required": ["email", "password"] },
+        { "required": ["email", "passcode"] },
+        { "required": ["email", "media"] },
+        { "required": ["email", "name", "remainder_freq"] },
         { "required": ["email", "name", "phone"] },
-        { "required": ["email", "phone", "remfreq"] },
-        { "required": ["email", "name", "phone", "remfreq"] },
+        { "required": ["email", "name", "password"] },
+        { "required": ["email", "name", "passcode"] },
+        { "required": ["email", "name", "media"] },
+        { "required": ["email", "phone", "remainder_freq"] },
+        { "required": ["email", "phone", "password"] },
+        { "required": ["email", "phone", "passcode"] },
+        { "required": ["email", "phone", "media"] },
+        { "required": ["email", "remainder_freq", "password"] },
+        { "required": ["email", "remainder_freq", "passcode"] },
+        { "required": ["email", "remainder_freq", "media"] },
+        { "required": ["email", "password", "passcode"] },
+        { "required": ["email", "password", "media"] },
+        { "required": ["email", "passcode", "media"] },
+        { "required": ["email", "name", "phone", "remainder_freq"] },
+        { "required": ["email", "name", "phone", "password"] },
+        { "required": ["email", "name", "phone", "passcode"] },
+        { "required": ["email", "name", "phone", "media"] },
+        { "required": ["email", "name", "password", "remainder_freq"] },
+        { "required": ["email", "name", "passcode", "remainder_freq"] },
+        { "required": ["email", "name", "media", "remainder_freq"] },
+        { "required": ["email", "password", "phone", "remainder_freq"] },
+        { "required": ["email", "passcode", "phone", "remainder_freq"] },
+        { "required": ["email", "media", "phone", "remainder_freq"] },
+        { "required": ["email", "password", "passcode", "remainder_freq"] },
+        { "required": ["email", "media", "passcode", "remainder_freq"] },
+        { "required": ["email", "media", "password", "remainder_freq"] },
+        { "required": ["email", "name", "phone", "media",
+                       "remainder_freq", "password", "passcode"] },
     ],
     "properties": {
-        "name": {"$ref": "/nameSchema"},
+        "name": {"type": "string"},
         "email": {"$ref": "/chatPostReceiverSchema"},
         "phone": {"$ref": "/phoneNumberSchema"},
-        "remfreq": {"$ref": "/remainderSchema"}
+        "password": {"type": "string"},
+        "passcode": {"type": "string"},
+        "remainder_freq": {"$ref": "/remainderSchema"},
+        "media": {
+            "type": "object",
+            "properties": {
+                "imagename": {"type": "string"},
+                "lastModified": {"type": "string"},
+                "size": {"type": "string"},
+                "type": {"type": "string"}
+            },
+            "required": ["imagename", "lastModified", "size", "type"],
+            "additionalProperties": false
+        }
     },
     "additionalProperties": false
 }
@@ -259,21 +317,15 @@ var registrationSchema = {
     "description": "registrationSchema",
     "required": [
         "email",
-        "username",
-        "phonenum",
-        "gstnum",
-        "remfreq",
-        "password",
-        "passcode"
+        "firstname",
+        "lastname",
+        "password"
     ],
     "properties": {
         "email": {"$ref": "/chatPostReceiverSchema"},
-        "username": {"$ref": "/nameSchema"},
-        "phonenum": {"$ref": "/phoneNumberSchema"},
-        "gstnum": {"$ref": "/chatPostMessageSchema"},
-        "remfreq": {"$ref": "/remainderSchema"},
+        "firstname": {"$ref": "/nameSchema"},
+        "lastname": {"$ref": "/nameSchema"},
         "password": {"$ref": "/passwordSchema"},
-        "passcode": {"$ref": "/chatPostMessageSchema"}
     },
     "additionalProperties": false
 }

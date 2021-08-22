@@ -163,22 +163,13 @@ module.exports.getProfilePicture = async function (req, res) {
       var [imgUrl, username] = await coreServiceDao.getImageOfLoggedInUser(
         LoggedInUser
       );
-      if (!imgUrl) {
-        var img_data = await axios.get(DEFAULT_DATA.defaultProfilePicture, {
-          responseType: "arraybuffer",
-        });
-        var base64Uri = await Buffer.from(img_data.data, "binary").toString(
-          "base64"
-        );
-        imgUrl = `data:image/png;base64, ${base64Uri}`;
-      }
       var result = {
         name: username,
         url: imgUrl,
       };
       var response = await AppRes.buildResponse(
         result,
-        format(ResponseIds.RI_006, ["Img Data", imgUrl]),
+        format(ResponseIds.RI_006, ["Img Data"]),
         httpStatus.OK,
         "RI_006"
       );
@@ -218,7 +209,7 @@ module.exports.getUserType = async function (req, res) {
       logger.info(`user: ${LoggedInUser} is_admin = ${isAdmin}`);
       var response = await AppRes.buildResponse(
         isAdmin,
-        format(ResponseIds.RI_006, ["is_admin flag", isAdmin]),
+        format(ResponseIds.RI_006, ["is_admin flag"]),
         httpStatus.OK,
         "RI_006"
       );
@@ -259,7 +250,7 @@ module.exports.getLoginUser = async function (req, res) {
       res.status(httpStatus.UNAUTHORIZED).send(response);
     } else {
       data = LoggedInUser;
-      reason = format(ResponseIds.RI_006, ["login user", data]);
+      reason = format(ResponseIds.RI_006, ["login user"]);
       statusCode = httpStatus.OK;
       responseId = "RI_006";
 
