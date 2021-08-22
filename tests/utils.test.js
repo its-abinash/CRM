@@ -57,6 +57,13 @@ var mainUtilsControllerTest = function () {
     var res = main_utils.cloneObject(data);
     assert.match(res, data);
   });
+  it("getFieldsAndValuesFromQpArgs Test", function () {
+    var data = {"image" : "value1", "key2" : "null"};
+    var [fields, values, tables] = main_utils.getFieldsAndValuesFromQpArgs(data);
+    assert.match(fields, ["image"]);
+    assert.match(values, ["value1"]);
+    assert.match(tables, ["media"])
+  });
   afterEach(function () {
     sinon.verifyAndRestore();
   });

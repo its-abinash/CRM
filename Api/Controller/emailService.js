@@ -21,8 +21,7 @@ const TEXT = "text";
  * @param {Class} AppRes
  */
 module.exports.processAndSendEmail = async function (LoggedInUser, AppRes) {
-  var requestPayload = AppRes.getRequestBody();
-  var payload = await processPayload(requestPayload);
+  var payload = AppRes.getRequestBody();
   payload[FROM] = LoggedInUser;
   payload[TO] = payload.email || "";
   delete payload.email;
@@ -55,25 +54,15 @@ module.exports.processAndSendEmail = async function (LoggedInUser, AppRes) {
     payload[SUBJECT] = AppRes.decryptKey(payload.subject);
     payload[TEXT] = AppRes.decryptKey(payload.text);
     var mailOptions = payload;
-    try {
-      await transporter.sendMail(mailOptions);
-      logger.info("Successfully sent email");
-      var response = await AppRes.buildResponse(
-        null,
-        format(ResponseIds.RI_013, [payload.to]),
-        httpStatus.OK,
-        "RI_013"
-      );
-      return [httpStatus.OK, response];
-    } catch (emailException) {
-      logger.error(`Error: ${emailException}`);
-      var response = await AppRes.buildResponse(
-        null,
-        format(ResponseIds.RI_014, [payload.to]),
-        httpStatus.BAD_REQUEST,
-        "RI_014"
-      );
-      return [httpStatus.BAD_REQUEST, response];
-    }
+
+    await transporter.sendMail(mailOptions);
+    logger.info("Successfully sent email");
+    var response = await AppRes.buildResponse(
+      null,
+      format(ResponseIds.RI_013, [payload.to]),
+      httpStatus.OK,
+      "RI_013"
+    );
+    return [httpStatus.OK, response];
   }
 };

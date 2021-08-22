@@ -531,7 +531,7 @@ module.exports.email = async function (req, res) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
       null,
-      format(ResponseIds.RI_029, [String(ex)]),
+      format(ResponseIds.RI_034, [String(ex)]),
       httpStatus.BAD_GATEWAY
     );
     res.status(httpStatus.BAD_GATEWAY).send(response);

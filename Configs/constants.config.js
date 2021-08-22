@@ -68,7 +68,8 @@ module.exports = {
     RI_030: "Getting exception: {0} while inserting user data",
     RI_031: "User: {0} has successfully logged-out",
     RI_032: "Invalid Query Parameters Received: {0}",
-    RI_033: "Empty properties found in request payload or in query params: {0}"
+    RI_033: "Empty properties found in request payload or in query params: {0}",
+    RI_034: "Getting exception: {0} while fetching user data"
   },
   URL: {
     defaultProfilePictureUrl: "https://www.w3schools.com/howto/img_avatar.png",

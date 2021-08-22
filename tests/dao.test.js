@@ -58,6 +58,7 @@ var daoControllerTestPositive = function () {
   it("coreServicesDao - success test", async function () {
     sinon.stub(dbUtils, "fetchLatestRemainder").returns([]);
     var fetchStub = sinon.stub(dbUtils, "fetch");
+    sinon.stub(dbUtils, "fetchUserData").returns(["img", "name"]);
     fetchStub.onCall(0).returns(["img_link", "name"]);
     fetchStub.onCall(1).returns({ is_admin: true });
     sinon.stub(dbUtils, "update");
@@ -77,7 +78,7 @@ var daoControllerTestPositive = function () {
     }
   });
   it("coreServicesDao - getImageOfLoggedInUser exception test", async function () {
-    sinon.stub(dbUtils, "fetch").throwsException({ name: "CONNERR" });
+    sinon.stub(dbUtils, "fetchUserData").throwsException({ name: "CONNERR" });
     try {
       await coreServiceDao.getImageOfLoggedInUser("loggedinuser@domain.com");
     } catch (ex) {
@@ -102,10 +103,13 @@ var daoControllerTestPositive = function () {
   });
   it("dashDao - success test", async function () {
     var stub = sinon.stub(dbUtils, "fetchAllUsersForGivenUserId");
+    sinon.stub(dbUtils, "fetchUserData").returns(["img", "username"]);
     stub.onCall(0).returns(["cus1, cus2"]);
     stub.onCall(1).returns(["admin1, admin2"]);
     var cusList = await dashDao.getAllCustomer("loggedinuser@domain.com");
     var adminList = await dashDao.getAllAdmins("loggedinuser@domain.com");
+    var userData = await dashDao.getUserData("loggedinuser@domain.com");
+    assert.match(userData, ["img", "username"]);
     assert.match(cusList, ["cus1, cus2"]);
     assert.match(adminList, ["admin1, admin2"]);
   });
@@ -158,8 +162,12 @@ var daoControllerTestPositive = function () {
     }
   });
   it("editServiceDao - success test", async function () {
+    var dataToUpdateProfilePict = {"key1":"val1"}
     sinon.stub(dbUtils, "update").returns(true);
-    editServiceDao.saveEditedData("user@domain.com", ["field1"], ["data1"]);
+    sinon.stub(dbUtils, "updateMedia").returns(true);
+    await editServiceDao.saveEditedData("user@domain.com", ["field1"], ["data1"]);
+    await editServiceDao.updateProfilePicture("email@domain.com", dataToUpdateProfilePict);
+    await editServiceDao.updateCredential("email@domain.com", "some_credential");
   });
   it("editServiceDao - exception test", async function () {
     sinon.stub(dbUtils, "update").throwsException({ name: "CONNERR" });

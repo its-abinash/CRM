@@ -163,15 +163,6 @@ module.exports.getProfilePicture = async function (req, res) {
       var [imgUrl, username] = await coreServiceDao.getImageOfLoggedInUser(
         LoggedInUser
       );
-      if (!imgUrl) {
-        var img_data = await axios.get(DEFAULT_DATA.defaultProfilePicture, {
-          responseType: "arraybuffer",
-        });
-        var base64Uri = await Buffer.from(img_data.data, "binary").toString(
-          "base64"
-        );
-        imgUrl = `data:image/png;base64, ${base64Uri}`;
-      }
       var result = {
         name: username,
         url: imgUrl,

@@ -356,7 +356,7 @@ module.exports.fakeEditRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    "payload": "U2FsdGVkX1+H3qu8M5Fs0Tj/Iz49Al8/uUCRbVlJn1JPhhskpVYdTDkXjKLnDtzQTAfW2zZWHXza+fl/CBqUrEvngBw6S+BzwlylzGUEPIj7b6J+/IVcxC/tkyvbv1R/"
+    "payload": "U2FsdGVkX1/osmj6wZoHLO99opunVdrLsG0Th71ob2T/gMCjUlNaLlt3oF30ziYdP0y4WM1FJcdOEtIj56Izz7VqoPoksQrDYN2dgpWV4sBSMo+j5MPZaVAy3QYKaFBAF5+ueXn+UbQXeNagexoi58uSh6/o7XtC+vW2KSkUVZLSFgpO/ts35EJSnrhEYoXksjIJxUQYibB70hZY6jWkijSJrZBXXikcSryF6L2r+SkHMI8cW3xDX119aUS6BDwStrZGGuImQO2GBdFLBge6+g79aUum41R40E0CzTjMX2OVuz/GnPoBVa0UepQnD/cL"
   },
 };
 
@@ -452,7 +452,7 @@ module.exports.fakeConstants = {
   ],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the Constants with value = {"CYPHER":{"ENCRYPTIONKEY":"#","DECRYPTIONKEY":"#"},"ROUTES":{"HOME":"home","LANDINGPAGE":"landingPage","LOGOUT":"logout","REG":"register","LOGIN":"login","CONTACT":"contact","EDIT":"edit","ADD":"insert","UPLOAD":"insert/profilePicture","DELETE":"deleteUser","EMAIL":"email","CHAT":"chat","DASHBOARD":{"CUSTOMER":"dashboard/getCustomer","ADMIN":"dashboard/getAdmins"}}}',
+    'Successfully fetched the Constants',
   ],
 };
 
@@ -494,7 +494,7 @@ module.exports.getSpecificFromConstantsResponse = {
   responseMessage: "Standard response for successful HTTP requests.",
   values: ["register"],
   totalCount: 1,
-  reasons: ["Successfully fetched the Constant with value = register"],
+  reasons: ["Successfully fetched the Constant"],
 };
 
 module.exports.fakeLatestRemainderData = [
@@ -516,7 +516,7 @@ module.exports.fakeRemainderResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Successfully fetched the remainder information with value = [{"email":"demo1@gmail.com","subject":"Check Latest Business Deals!","body":"Hello,\\n\\nA gentle remainder to check our latest business deals.\\n\\nPlease let us know about your thoughts.\\n\\nThanks,\\nAbinash Biswal"},{"email":"demo2@gmail.com","subject":"Check Latest Business Deals!","body":"Hello,\\n\\nA gentle remainder to check our latest business deals.\\n\\nPlease let us know about your thoughts.\\n\\nThanks,\\nAbinash Biswal"}]',
+    'Successfully fetched the remainder information',
   ],
 };
 
@@ -557,7 +557,7 @@ module.exports.fakeUserTypeResponse = {
   responseMessage: "Standard response for successful HTTP requests.",
   values: [true],
   totalCount: 1,
-  reasons: ["Successfully fetched the is_admin flag with value = true"],
+  reasons: ["Successfully fetched the is_admin flag"],
 };
 
 module.exports.fakeLoginUserResponse = {
@@ -568,7 +568,7 @@ module.exports.fakeLoginUserResponse = {
   values: ["sender@gmail.com"],
   totalCount: 1,
   reasons: [
-    "Successfully fetched the login user with value = sender@gmail.com",
+    "Successfully fetched the login user",
   ],
 };
 
@@ -727,7 +727,7 @@ module.exports.registerPayloadRequest = {
     "x-access-token": "XXXXXXXXXXX.XXXXXXXXXXXX.XXXXXXXXXXXXX",
   },
   body: {
-    "payload": "U2FsdGVkX1/1x2mDV7KUuae0/uhXx4qm6BeuwzMepFlBHroqi75T0m362J3dmXWktwYbGldDCiCaHA+gmiEq3XeP7HtfS5MZlbFuGYKIaWZYqyFL3GfNXDEjMkYoXF8phdOQZj/Y24008f91sqO3xaV9lBiFL8vcYTkmDBEVksDUwypEDEKfHpCURQn57F+xesROiHJ4g2RLLki591Dqp3JuXr8D04pndI5N7KdVYvg="
+    "payload": "U2FsdGVkX1+/PK/jN8hKQh/gJdb8RqRxilhwAXIVwO8AzrHEytZDtCCVM4s9NIMA0H3O0dYVL+nTt6MqVHB85o9JAf121UY/mtLNayMmgbseLOplme4tt5djBhpJN4TyWiQNxQYnPEg0L7qmrY+YaUYZplzLwU0AIDBa5sd8UDE="
   },
 };
 
@@ -738,7 +738,7 @@ module.exports.registerSuccessResponse = {
   responseMessage: 'The request has been fulfilled, resulting in the creation of a new resource.',
   values: [],
   totalCount: 0,
-  reasons: [ 'User: user@gmail.com has successfully registered' ]
+  reasons: [ 'User: abinashbiswal248@gmail.com has successfully registered' ]
 }
 
 module.exports.registerPayloadValidationErrorResponse = {
@@ -759,7 +759,7 @@ module.exports.registrationFailureResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Failed to register user: user@gmail.com, due to error: error saving userdata in our databse'
+    'Failed to register user: abinashbiswal248@gmail.com, due to error: error saving userdata in our databse'
   ]
 }
 
@@ -771,7 +771,7 @@ module.exports.registerExceptionResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Getting exception: user@gmail.com while registering user: Error: fake_exp'
+    'Getting exception: abinashbiswal248@gmail.com while registering user: Error: fake_exp'
   ]
 }
 
@@ -846,7 +846,7 @@ module.exports.fakeGetQuotesResponse = {
   ],
   totalCount: 1,
   reasons: [
-    'Successfully fetched the quote with value = {"quote":"fake quote","author":"fake author","title":"fake title","imgUrl":"fake background","credit":"fake permalink"}',
+    'Successfully fetched the quote',
   ],
 };
 
@@ -868,7 +868,7 @@ module.exports.fakeGetQuotesResponseForDefaultCategory = {
   ],
   totalCount: 1,
   reasons: [
-    `Successfully fetched the quote with value = {"quote":"Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.","author":"Marva Collins","title":"Quote of the day for students","imgUrl":"https://theysaidso.com/img/qod/qod-students.jpg","credit":"https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher"}`,
+    `Successfully fetched the quote`,
   ],
 };
 
@@ -895,7 +895,7 @@ module.exports.fakeGetProfilePicResponse = {
   responseMessage: "Standard response for successful HTTP requests.",
   values: [{ name: "fake_name", url: "fake_url" }],
   totalCount: 1,
-  reasons: ["Successfully fetched the Img Data with value = fake_url"],
+  reasons: ["Successfully fetched the Img Data"],
 };
 
 module.exports.fakeGetProfilePicResponse2 = {
@@ -903,11 +903,48 @@ module.exports.fakeGetProfilePicResponse2 = {
   status: "OK",
   statusCode: 200,
   responseMessage: "Standard response for successful HTTP requests.",
-  values: [{ name: null, url: "data:image/png;base64, fakeImgUrl" }],
+  values: [ { name: 'Abinash Biswal', url: null } ],
   totalCount: 1,
   reasons: [
-    "Successfully fetched the Img Data with value = data:image/png;base64, fakeImgUrl",
+    "Successfully fetched the Img Data",
   ],
 };
 
 module.exports.encodedChatPayload = "U2FsdGVkX1/md7zKi591WVz4Y0ylern4Xbl0DKLagMDTfXoyChlNZBx+2DLACxiGSrtFvAtbmnfigu/9m6txfJ11yYM0H88xmjV0PMGJ56MG5TaSvuSifqca/7CHWYlGZOD3E06ezSCnET8Kz+zBufOdgsPq14ZU29QAScwhaRO83YmYz3QZPDNFxwxvcjg+qRTm2nU0mCF0B7ykvsLXGMVP4F7mJEEW2iSVwpvsVV1+4YUGkRwMR3m1kS5+wwZIrPOzE2d9VUV81eku4CKMBA=="
+
+module.exports.userInfoResponse = {
+  "responseId":"RI_006",
+  "status":"OK",
+  "statusCode":200,
+  "responseMessage":"Standard response for successful HTTP requests.",
+  "values":[
+    {
+      "media":{
+        "image":"img_data",
+        "size":"1024",
+        "lastmodified":"12345",
+        "type":"img/jpeg",
+        "imagename":"2021-01-05.jpeg"
+      },
+      "email":"abinashbiswal248@gmail.com",
+      "name":"Abinash Biswal",
+      "firstname":"Abinash",
+      "lastname":"Biswal",
+      "phone":"1234567890"
+    }
+  ],
+  "totalCount":1,
+  "reasons":["Successfully fetched the user information"]
+}
+
+module.exports.deleteUserDataResp = {
+  responseId: 'RI_007',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [],
+  totalCount: 0,
+  reasons: [
+    'Successfully removed image of user having userId: sender@gmail.com'
+  ]
+}

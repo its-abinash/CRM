@@ -8,19 +8,6 @@ var lodash = require("lodash");
 
 const IMAGE_SPECIFIC_FIELDS = ["imagename", "size", "type", "lastModified"];
 
-var isEmptyPropertyFound = async function (payload) {
-  var emptyPropertyList = [];
-  for (const property in payload) {
-    if (
-      payload[property] in [null, "undefined"] ||
-      String(payload[property]).length == 0
-    ) {
-      emptyPropertyList.push(property);
-    }
-  }
-  return emptyPropertyList;
-};
-
 var processAndGetFinalResponse = async function (
   isValidPayload,
   errorList,

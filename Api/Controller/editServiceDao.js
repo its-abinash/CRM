@@ -45,7 +45,7 @@ module.exports.updateProfilePicture = async function (email, data) {
 };
 
 /**
- * @function updateProfilePicture
+ * @function updateCredential
  * @async
  * @description update user's credential
  * @returns Boolean (True/False)

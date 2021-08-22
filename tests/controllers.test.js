@@ -5,6 +5,7 @@ const dbUtils = require("../Database/databaseOperations");
 const chatDao = require("../Api/Controller/chatDao");
 const coreServiceDao = require("../Api/Controller/coreServiceDao");
 const dashDao = require("../Api/Controller/dashDao");
+const chatService = require("../Api/Controller/chatService")
 const deleteServiceDao = require("../Api/Controller/deleteServiceDao");
 const editServiceDao = require("../Api/Controller/editServiceDao");
 const emailServiceDao = require("../Api/Controller/emailServiceDao");
@@ -80,7 +81,8 @@ const {
   fakeChatResponse3,
   GetNotificationRequest,
   getNotificationsResponse,
-  encodedChatPayload,
+  userInfoResponse,
+  deleteUserDataResp,
 } = require("../Configs/mockData");
 
 var chatControllerTestPositive = function () {
@@ -139,6 +141,27 @@ var chatControllerTestPositive = function () {
     );
     assert.match(fakeResponse.statusCode, getNotificationsResponse.statusCode);
   });
+  it("GET /notifications - User Unauthorized Test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, "decodeJwt").returns(null);
+    await userServicesController.getNotification(
+      GetNotificationRequest,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 401);
+  });
+  it("GET /notifications - Exception Test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "error");
+    sinon.stub(utils, "decodeJwt").returns("user@domain.com");
+    sinon.stub(chatService, "checkAndGetNotifications").throwsException("CONNERR");
+    await userServicesController.getNotification(
+      GetNotificationRequest,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 502)
+  });
   afterEach(function () {
     sinon.restore();
   });
@@ -149,7 +172,7 @@ var chatControllerTestNegative = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
-    sinon.stub(chatDao, "getConversation").throwsException("");
+    sinon.stub(chatDao, "getConversationWithImage").throwsException("");
     await userServicesController.getConversation(
       fakeGETChatRequest,
       fakeResponse
@@ -319,6 +342,8 @@ var editControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(loggerUtils, "info");
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
+    sinon.stub(editServiceDao, "updateCredential").returns(true);
+    sinon.stub(editServiceDao, "updateProfilePicture").returns(true);
     sinon.stub(editServiceDao, "saveEditedData").returns(true);
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
@@ -328,6 +353,8 @@ var editControllerTest = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
+    sinon.stub(editServiceDao, "updateCredential").returns(false);
+    sinon.stub(editServiceDao, "updateProfilePicture").returns(false);
     sinon.stub(editServiceDao, "saveEditedData").returns(false);
     await userServicesController.edit(fakeEditRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 400);
@@ -455,19 +482,15 @@ var emailControllerTest = function () {
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
     sinon.stub(emailServiceDao, "getPassCode").returns(specificCredData);
     sinon.stub(validator, "validate").returns({ valid: true });
-    sinon.stub(mailer, "createTransport").returns({
-      sendMail: function () {
-        throw "CONNERR";
-      },
-    });
+    sinon.stub(mailer, "createTransport").throwsException("CONNERR");
     await userServicesController.email(fakeEmailRequest, fakeResponse);
-    assert.match(fakeResponse.response, emailExceptionResponse);
+    assert.match(fakeResponse.statusCode, 502);
   });
   it("POST /email - DB Exception test", async function () {
     sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
+    // sinon.stub(loggerUtils, "error");
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
-    sinon.stub(emailServiceDao, "getPassCode").throwsException();
+    sinon.stub(emailServiceDao, "getPassCode").throwsException("DBEXCP");
     sinon.stub(validator, "validate").returns({ valid: true });
     await userServicesController.email(fakeEmailRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
@@ -822,6 +845,7 @@ var registerControllerTest = function () {
     sinon.stub(dateObj, "setDate");
     sinon.stub(dateObj, "toLocaleDateString").returns("01/01/2021");
     sinon.stub(dbUtils, "insert").returns(true);
+    sinon.stub(dbUtils, "insertMedia").returns(true);
     sinon.stub(dbUtils, "fetchAllUserOfGivenType").returns([
       {
         email: "user1@gmail.com",
@@ -848,6 +872,7 @@ var registerControllerTest = function () {
     sinon.stub(dbUtils, "isExistingUser").returns(false);
     sinon.stub(validator, "validate").returns({ valid: true });
     sinon.stub(dbUtils, "insert").returns(false);
+    sinon.stub(dbUtils, "insertMedia").returns(false);
     sinon.stub(dbUtils, "fetchAllUserOfGivenType").returns([]);
     sinon.stub(dbUtils, "remove").returns(true);
     await authController.register(registerPayloadRequest, fakeResponse);
@@ -934,23 +959,13 @@ var getProfilePicture = async function () {
   var testCases = [
     {
       name: "GET /getProfilePicture - valid values from db - success tests",
-      fetchValue: [
-        {
-          img_data: "fake_url",
-          name: "fake_name",
-        },
-      ],
+      fetchValue: ["fake_url", "fake_name"],
       exp: fakeGetProfilePicResponse,
       req: fakeGetQuoteRequest1,
     },
     {
       name: "GET /getProfilePicture - no values found from db - success tests",
-      fetchValue: [
-        {
-          img_data: null,
-          name: null,
-        },
-      ],
+      fetchValue: [null, "Abinash Biswal"],
       exp: fakeGetProfilePicResponse2,
       req: fakeGetQuoteRequest1,
     },
@@ -958,10 +973,9 @@ var getProfilePicture = async function () {
   for (const testCase of testCases) {
     it(testCase.name, async function () {
       sinon.stub(loggerUtils, "info");
+      sinon.stub(loggerUtils, 'error');
       sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
-      sinon.stub(axios, "get").returns({});
-      sinon.stub(Buffer, "from").returns("fakeImgUrl");
-      sinon.stub(dbUtils, "fetch").returns(testCase.fetchValue);
+      sinon.stub(coreServiceDao, "getImageOfLoggedInUser").returns(testCase.fetchValue);
       await coreServicesController.getProfilePicture(
         testCase.req,
         fakeResponse
@@ -972,6 +986,103 @@ var getProfilePicture = async function () {
       sinon.verifyAndRestore();
     });
   }
+  it("GET /getProfilePicture - User Unauthorized Test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, "decodeJwt").returns(null);
+    await coreServicesController.getProfilePicture(
+      fakeGetQuoteRequest1,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 401);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+};
+
+var getUserInfo = async function () {
+  var testCases = [
+    {
+      name: "GET /user/{userId} - valid values from db - success tests",
+      isExp: false,
+      fetchValue: [{
+        "image": "img_data",
+        "size": "1024",
+        "lastmodified": "12345",
+        "type": "img/jpeg",
+        "imagename": "2021-01-05.jpeg",
+        "email": "abinashbiswal248@gmail.com",
+        "name": "Abinash Biswal",
+        "firstname": "Abinash",
+        "lastname": "Biswal",
+        "phone": "1234567890"
+      }],
+      exp: userInfoResponse,
+      req: loginPayloadRequest,
+    },
+    {
+      name: "GET /user/{userId} - exception tests",
+      isExp: true,
+      fetchValue: "CONNERR",
+      exp: userInfoResponse,
+      req: loginPayloadRequest,
+    }
+  ];
+  for (const testCase of testCases) {
+    it(testCase.name, async function () {
+      sinon.stub(loggerUtils, "info");
+      sinon.stub(loggerUtils, 'error');
+      sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
+      if (testCase.isExp) {
+        sinon.stub(dashDao, "getUserData").throwsException(testCase.fetchValue);
+      }else {
+        sinon.stub(dashDao, "getUserData").returns(testCase.fetchValue);
+      }
+      await userServicesController.getUserInfo(
+        testCase.req,
+        fakeResponse
+      );
+      if (testCase.isExp) {
+        assert.match(fakeResponse.statusCode, 502);
+      }else {
+        assert.match(fakeResponse.response, testCase.exp);
+      }
+    });
+    afterEach(function () {
+      sinon.verifyAndRestore();
+    });
+  }
+  it("GET /user/{userId} - User Unauthorized Test", async function() {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, "decodeJwt").returns(null);
+    await userServicesController.getUserInfo(
+      loginPayloadRequest,
+      fakeResponse
+    );
+    assert.match(fakeResponse.statusCode, 401);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+};
+
+var deleteUserInfo = async function () {
+  it("DELETE /user/{userId}/{deleteProperties} - Success Test", async function () {
+    sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, 'error');
+    sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
+    sinon.stub(dbUtils, "updateSpecificUserData").returns(true);
+    await userServicesController.deleteUserData(
+      loginPayloadRequest,
+      fakeResponse
+    );
+    assert.match(fakeResponse.response, deleteUserDataResp);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
 };
 
 describe("test_chat_positive", chatControllerTestPositive);
@@ -991,3 +1102,5 @@ describe("test_logout", logoutControllerTest);
 describe("test_register", registerControllerTest);
 describe("test_getQuotes", getQuotesTest);
 describe("test_getProfilePicture", getProfilePicture);
+describe("test_getUserInfo", getUserInfo);
+describe("test_deleteUser", deleteUserInfo);
