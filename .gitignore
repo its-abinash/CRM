@@ -2,4 +2,3 @@ node_modules
 logs/app.log
 .nyc_output
 coverage
-package-lock.json
