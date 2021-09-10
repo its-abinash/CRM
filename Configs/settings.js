@@ -1,4 +1,5 @@
 const express = require("express");
+const logger = require("../Api/Logger/log")
 
 const app = express();
 
@@ -18,5 +19,8 @@ const io = require("socket.io")(httpServer, {
 module.exports = {
   app: app,
   server: httpServer,
-  socket: io,
+  socket: any = io.on('connection', (socket) => {
+    logger.info(`User with socketId: ${socket.id} connected`);
+    socket.on("disconnect", () => logger.info(`User with socketId: ${socket.id} disconnected`));
+  })
 };
