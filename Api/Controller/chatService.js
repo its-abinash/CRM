@@ -9,8 +9,8 @@ const {
 const { validatePayload, format } = require("./main_utils");
 const httpStatus = require("http-status");
 const { chatPostPayloadSchema } = require("./schema");
-const { rmqPublisher } = require("../Broker/rmq.producer");
 const lodash = require("lodash");
+const { socket } = require("../../Configs/settings");
 
 /**
  * @async
@@ -85,8 +85,10 @@ module.exports.processAndSaveConversation = async function (
     var data = [sender, receiver, message, timestamp];
     var jobDone = await chatDao.saveConversation(DATABASE.CONVERSATION, data);
     if (jobDone) {
-      logger.info("Chat has been successfully processed, publishing to RMQ");
-      rmqPublisher(payload);
+
+      logger.info("Chat has been successfully processed, publishing to socket");
+      socket.emit("ChatSync", payload);
+
       reason = format(ResponseIds.RI_003, [sender, receiver]);
       statusCode = httpStatus.OK;
       responseId = "RI_003";
