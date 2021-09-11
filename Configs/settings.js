@@ -1,4 +1,5 @@
 const express = require("express");
+const logger = require("../Api/Logger/log");
 
 const app = express();
 
@@ -15,8 +16,12 @@ const io = require("socket.io")(httpServer, {
 // I've done this (in singleton design pattern) to avoid
 // creation of app instance more than once.
 
+// In order to debug, we can use socketId inside the callback,
+// i.e (socket) => { console.log(socket.id) }
+var socketInstance = io.on("connection", (socket) => { socket.on("disconnect", () => {}); })
+
 module.exports = {
   app: app,
   server: httpServer,
-  socket: io,
+  socket: socketInstance
 };

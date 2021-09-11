@@ -29,6 +29,6 @@ app.use(
 );
 
 server.listen(CORE.PORT, "0.0.0.0", () => {
-  initTasks.run_init_job();
   logger.info(`app is running at http://localhost:${CORE.PORT}}`);
+  initTasks.run_init_job();
 });

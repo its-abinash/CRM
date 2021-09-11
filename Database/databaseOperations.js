@@ -1,10 +1,10 @@
 const { Pool } = require("pg");
 var fs = require("fs");
-var ENV = require("../Configs/db.config.json");
+var { connectionString } = require("../Configs/db.config.js");
 var { DATABASE } = require("../Configs/constants.config");
 
 const pool = new Pool({
-  connectionString: `${ENV.connectionString}`,
+  connectionString: `${connectionString}`,
 });
 
 /**
@@ -155,7 +155,7 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
 module.exports.fetchAllUsersForGivenUserId = async function (data) {
   try {
     const db = await pool.connect();
-    const query = `select customer.email, customer.name, media.image
+    const query = `select distinct customer.email, customer.name, media.image
                    from customer
                    inner join users_map on
                    users_map.user_id2 = customer.email
@@ -178,7 +178,7 @@ module.exports.fetchAllUsersForGivenUserId = async function (data) {
  * @description Fetches all user data
  * @param {Array} data
  */
- module.exports.fetchUserData = async function (data) {
+module.exports.fetchUserData = async function (data) {
   try {
     const db = await pool.connect();
     const query = `select
@@ -303,8 +303,13 @@ module.exports.insertMedia = async function (data) {
   }
 };
 
-
-module.exports.updateSpecificUserData = async function (pk_name, pk_value, fields, values, tables) {
+module.exports.updateSpecificUserData = async function (
+  pk_name,
+  pk_value,
+  fields,
+  values,
+  tables
+) {
   try {
     const db = await pool.connect();
     for (var i = 0; i < fields.length; i++) {

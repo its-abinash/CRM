@@ -480,9 +480,8 @@ var emailControllerTest = function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
     sinon.stub(utils, "decodeJwt").returns("sender@gmail.com");
-    sinon.stub(emailServiceDao, "getPassCode").returns(specificCredData);
+    sinon.stub(emailServiceDao, "getPassCode").throwsException("CONNERR");
     sinon.stub(validator, "validate").returns({ valid: true });
-    sinon.stub(mailer, "createTransport").throwsException("CONNERR");
     await userServicesController.email(fakeEmailRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
   });

@@ -1,3 +1,0 @@
-{
-  "connectionString": "postgresql://<db_owner>:<db_password>@<server>:<port>/<db_name>"
-}

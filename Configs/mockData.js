@@ -389,14 +389,16 @@ module.exports.fakeEmailRequest = {
 };
 
 module.exports.fakeEmailResponse = {
-  responseId: "RI_013",
-  status: "OK",
-  statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
+  responseId: 'RI_035',
+  status: 'ACCEPTED',
+  statusCode: 202,
+  responseMessage: 'The request has been accepted for processing, but the processing has not been completed.',
   values: [],
   totalCount: 0,
-  reasons: ["Successfully sent email to user with userId: receiver@gmail.com"],
-};
+  reasons: [
+    'Request has been accepted, please check notifications for the updates'
+  ]
+}
 
 module.exports.emailWrongPayloadResponse = {
   responseId: "RI_004",
