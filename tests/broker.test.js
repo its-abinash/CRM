@@ -39,6 +39,7 @@ var producerTest = function () {
       amqplib: rmqStub,
     });
     rmqUtils.rmqPublisher("fake_msg");
+    rmqUtils.publishEmail("fake_msg");
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -49,7 +50,7 @@ var consumerTest = function () {
   it("consumer connection - success test", async function () {
     var rmqStub = getFakeRMQStub();
     sinon.stub(RMQ_INSTANCE, "getInstance").returns(rmqStub);
-    var rmqUtils = proxyrequire("../Api/Broker/consumerUtils", {
+    var rmqUtils = proxyrequire("../Api/Broker/consumerUtils.js", {
       amqplib: rmqStub,
     });
     var firstSpy = sinon.stub(emailServices, "sendEmailUtil");
@@ -73,5 +74,19 @@ var consumerTest = function () {
   });
 };
 
+var rmqConnectionTest = function() {
+  it("RMQ connection test - success test", async function () {
+    var rmqUtils = proxyrequire("../Api/Broker/rmqConnection.js", {
+      amqplib: getFakeRMQStub(),
+    });
+    var connection = await rmqUtils.RMQ_INSTANCE.getInstance();
+    assert.match(Boolean(connection), true);
+  });
+  afterEach(function () {
+    sinon.verifyAndRestore();
+  });
+}
+
 describe("test_producer", producerTest);
 describe("test_consumer", consumerTest);
+describe("test_rmq_connection", rmqConnectionTest);
