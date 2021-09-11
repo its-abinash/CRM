@@ -1,4 +1,4 @@
-const { RMQ_INSTANCE } = require("./rmqConnection");
+const RMQ_INSTANCE = require("./rmqConnection");
 const { RMQ_CONFIGS } = require("./rmqControllers");
 const logger = require("../Logger/log");
 

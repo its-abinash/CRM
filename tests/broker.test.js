@@ -1,8 +1,8 @@
 var { socket } = require("../Configs/settings");
 var proxyrequire = require("proxyquire").noCallThru();
-var { RMQ_INSTANCE } = require("../Api/Broker/rmqConnection");
+var RMQ_INSTANCE = require("../Api/Broker/rmqConnection");
 var emailServices = require("../Api/Controller/emailService");
-var { consumer } = require("../Api/Broker/rmq.consumer")
+var { consumer } = require("../Api/Broker/rmq.consumer");
 var sinon = require("sinon");
 const { assert } = require("sinon");
 
@@ -38,7 +38,7 @@ var producerTest = function () {
     var rmqUtils = proxyrequire("../Api/Broker/rmq.producer", {
       amqplib: rmqStub,
     });
-    rmqUtils.publishEmail("fake_msg");
+    await rmqUtils.publishEmail("fake_msg");
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -66,25 +66,25 @@ var consumerTest = function () {
       },
     };
     sinon.stub(socket, "emit");
-    await consumer({}, rmqStub, null)
+    await consumer({}, rmqStub, null);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
   });
 };
 
-var rmqConnectionTest = function() {
+var rmqConnectionTest = function () {
   it("RMQ connection test - success test", async function () {
     var rmqUtils = proxyrequire("../Api/Broker/rmqConnection.js", {
       amqplib: getFakeRMQStub(),
     });
-    var connection = await rmqUtils.RMQ_INSTANCE.getInstance();
+    var connection = await rmqUtils.getInstance();
     assert.match(Boolean(connection), true);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
   });
-}
+};
 
 describe("test_producer", producerTest);
 describe("test_consumer", consumerTest);

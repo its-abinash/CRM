@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-const { RMQ_INSTANCE } = require("./rmqConnection");
+var amqp = require("amqplib");
 var logger = require("../Logger/log");
 
 module.exports.publishEmail = async function(message) {
-  var connection = await RMQ_INSTANCE.getInstance();
+  var connection = await amqp.connect(process.env.RMQ_URL);
   var channel = await connection.createChannel();
   var exchange = "default";
   var key = "crm_sync.route_key";
