@@ -38,7 +38,6 @@ var producerTest = function () {
     var rmqUtils = proxyrequire("../Api/Broker/rmq.producer", {
       amqplib: rmqStub,
     });
-    rmqUtils.rmqPublisher("fake_msg");
     rmqUtils.publishEmail("fake_msg");
   });
   afterEach(function () {
