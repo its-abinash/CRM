@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var cors = require("cors");
-var logger = require("../Logger/log");
 var httpStatus = require("http-status");
 var deleteServiceDao = require("./deleteServiceDao");
 var chatService = require("./chatService");
@@ -12,7 +11,6 @@ var emailService = require("./emailService");
 var dashService = require("./dashService");
 const { ResponseIds } = require("../../Configs/constants.config");
 const { AppResponse } = require("./response_utils");
-const utils = require("./utils");
 const { format } = require("./main_utils");
 
 router.use(express.json());
@@ -32,26 +30,14 @@ module.exports.getCustomers = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await dashService.processAndGetCustomers(
-        req,
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await dashService.processAndGetCustomers(
+      req,
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
@@ -73,26 +59,14 @@ module.exports.getAdmins = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await dashService.processAndGetAdmins(
-        req,
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await dashService.processAndGetAdmins(
+      req,
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
@@ -114,26 +88,14 @@ module.exports.getConversation = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var response = await chatService.processAndGetConversation(
-        req,
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.OK).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var response = await chatService.processAndGetConversation(
+      req,
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(httpStatus.OK).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
@@ -158,25 +120,13 @@ module.exports.chat = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await chatService.processAndSaveConversation(
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await chatService.processAndSaveConversation(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -200,25 +150,13 @@ module.exports.getNotification = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await chatService.checkAndGetNotifications(
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await chatService.checkAndGetNotifications(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
@@ -239,27 +177,15 @@ module.exports.delete = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var removeall = true;
-      var [statusCode, response] = await deleteService.processAndDeleteUserData(
-        LoggedInUser,
-        AppRes,
-        removeall
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var removeall = true;
+    var [statusCode, response] = await deleteService.processAndDeleteUserData(
+      LoggedInUser,
+      AppRes,
+      removeall
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
@@ -280,24 +206,9 @@ module.exports.edit = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await editService.processAndEditUserData(
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var [statusCode, response] = await editService.processAndEditUserData(AppRes);
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -322,23 +233,9 @@ module.exports.updateUserProperty = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] =
-        await editService.processAndUpdateUserProperty(AppRes);
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var [statusCode, response] = await editService.processAndUpdateUserProperty(AppRes);
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -363,50 +260,24 @@ module.exports.insert = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await insertService.processAndInsertUserData(
-        LoggedInUser,
-        AppRes
-      );
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await insertService.processAndInsertUserData(
+      LoggedInUser,
+      AppRes
+    );
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var reasons = [format(ResponseIds.RI_030, [String(ex)])];
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      reasons.push(ResponseIds.RI_015);
-      var response = await AppRes.buildResponse(
-        null,
-        reasons,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var email = LoggedInUser;
-      await deleteServiceDao.removeDataOnFailure([], email.toLowerCase());
-      var response = await AppRes.buildResponse(
-        null,
-        reasons,
-        httpStatus.BAD_GATEWAY,
-        "RI_030"
-      );
-      res.status(httpStatus.BAD_GATEWAY).send(response);
-    }
+    var email = req.loggedInUser;
+    await deleteServiceDao.removeDataOnFailure([], email.toLowerCase());
+    var response = await AppRes.buildResponse(
+      null,
+      reasons,
+      httpStatus.BAD_GATEWAY,
+      "RI_030"
+    );
+    res.status(httpStatus.BAD_GATEWAY).send(response);
   }
 };
 
@@ -423,27 +294,15 @@ module.exports.insertProfilePicture = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] =
+      await insertService.processAndInsertProfilePicture(
+        req,
+        LoggedInUser,
+        AppRes
       );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] =
-        await insertService.processAndInsertProfilePicture(
-          req,
-          LoggedInUser,
-          AppRes
-        );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -468,25 +327,13 @@ module.exports.email = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await emailService.processAndSendEmail(
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await emailService.processAndSendEmail(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -507,26 +354,17 @@ module.exports.email = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
- module.exports.getUserInfo = async function (req, res) {
+module.exports.getUserInfo = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await dashService.getUserData(LoggedInUser, AppRes)
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await dashService.getUserData(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(
@@ -547,29 +385,17 @@ module.exports.email = async function (req, res) {
  * @param {Object} req
  * @param {Object} res
  */
- module.exports.deleteUserData = async function (req, res) {
+module.exports.deleteUserData = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = await utils.decodeJwt(AppRes);
-    if (!LoggedInUser) {
-      logger.error("User is unauthorized");
-      var response = await AppRes.buildResponse(
-        null,
-        ResponseIds.RI_015,
-        httpStatus.UNAUTHORIZED,
-        "RI_015"
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(httpStatus.UNAUTHORIZED).send(response);
-    } else {
-      var [statusCode, response] = await deleteService.processAndDeleteUserData(
-        LoggedInUser,
-        AppRes
-      );
-      AppRes.ApiExecutionEnds();
-      res.status(statusCode).send(response);
-    }
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await deleteService.processAndDeleteUserData(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
