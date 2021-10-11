@@ -98,7 +98,7 @@ module.exports.login = async function (req, res) {
       var email = payload.email;
       var password = payload.password;
       var validUser = await isValidUser(email, password);
-      logger.info(`User Validated: ${validUser}`);
+      logger.info(`UserId: ${email} Validation result: ${validUser}`);
       if (validUser) {
         // create access-token
         var accessToken = jwt.sign({ id: email }, process.env.JWT_SECRET, {
@@ -361,9 +361,9 @@ module.exports.logout = async function (req, res) {
     var response = await AppRes.buildResponse(
       data,
       format(ResponseIds.RI_025, [String(ex)]),
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_025"
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
