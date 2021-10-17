@@ -8,7 +8,6 @@ const { ResponseIds } = require("../../Configs/constants.config");
 const { format } = require("./main_utils");
 const remainderService = require("./remainderService");
 const OOBService = require("./OOBService");
-const quoteService = require("./quoteService");
 const coreServiceDao = require("./coreServiceDao");
 const jwt = require("jsonwebtoken");
 
@@ -86,64 +85,6 @@ module.exports.getConstant = async function (req, res) {
     );
     AppRes.ApiExecutionEnds();
     res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
- * @function getQuotes
- * @async
- * @description fetch random quotes from https://quotes.rest/
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getQuotes = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var [statusCode, response] = await quoteService.processAndGetQuotes(AppRes);
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
- * @function getProfilePicture
- * @async
- * @description Returns profile picture of logged-in user
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getProfilePicture = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var LoggedInUser = req.loggedInUser;
-    logger.info(`logedinuser: ${LoggedInUser}`);
-    var [imgUrl, username] = await coreServiceDao.getImageOfLoggedInUser(
-      LoggedInUser
-    );
-    var result = {
-      name: username,
-      url: imgUrl,
-    };
-    var response = await AppRes.buildResponse(
-      result,
-      format(ResponseIds.RI_006, ["Img Data"]),
-      httpStatus.OK,
-      "RI_006"
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(httpStatus.OK).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
     var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);

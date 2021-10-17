@@ -53,11 +53,6 @@ const {
   registerPayloadRequest,
   fakeInsertPayloadRequest2,
   insertSuccessfulResponse1,
-  fakeAxiosGetData,
-  fakeGetQuotesResponse,
-  fakeAxiosGetDefaultData,
-  fakeGetQuotesResponseForDefaultCategory,
-  fakeAxiosGetEmptyData,
   fakeGetQuoteRequest1,
   fakeGetQuoteRequest2,
   fakeGetProfilePicResponse,
@@ -79,6 +74,10 @@ const {
   userInfoResponse,
   deleteUserDataResp,
   fakeChatData1,
+  fakeAdminData,
+  fakeCustmerData,
+  allUsers,
+  fakeGetAllUsersResp1,
 } = require("../Configs/mockData");
 
 var chatControllerTestPositive = function () {
@@ -204,20 +203,24 @@ var chatControllerTestNegative = function () {
 };
 
 var dashboardControllerTestPositive = function () {
-  it("GET /dashboard/getAdmins - get all admins test", async function () {
+  it("GET /dashboard/users - get all users test1", async function () {
     sinon.stub(loggerUtils, "info");
     sinon.stub(dashDao, "getAllAdmins").returns([]);
-    await userServicesController.getAdmins(fakeChatPOSTRequest, fakeResponse);
+    sinon.stub(dashDao, "getAllCustomer").returns([]);
+    sinon.stub(dashDao, 'getAllUsers').returns([]);
+    await userServicesController.getUsers(fakeChatPOSTRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
   });
-  it("GET /dashboard/getCustomer - Get all customers test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(dashDao, "getAllCustomer").returns([]);
-    await userServicesController.getCustomers(
-      fakeChatPOSTRequest,
-      fakeResponse
-    );
+  it("GET /dashboard/users - get all users test2", async function () {
+    // sinon.stub(loggerUtils, "info");
+    sinon.stub(dashDao, "getAllAdmins").returns([fakeAdminData]);
+    sinon.stub(dashDao, "getAllCustomer").returns([fakeCustmerData]);
+    sinon.stub(dashDao, 'getAllUsers').returns(allUsers);
+    var req = fakeChatPOSTRequest;
+    req["originalUrl"] = "U2FsdGVkX1/WU9y8OOk0IdvYRo499qdQbSEETz0/y5RToDPgHRX3ofLaEcMagN9I"
+    await userServicesController.getUsers(req, fakeResponse);
     assert.match(fakeResponse.statusCode, 200);
+    assert.match(fakeResponse.response, fakeGetAllUsersResp1);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -225,19 +228,14 @@ var dashboardControllerTestPositive = function () {
 };
 
 var dashboardControllerTestNegative = function () {
-  it("GET /dashboard/getAdmins - get all admins test", async function () {
+  it("GET /dashboard/users - get all admins test", async function () {
     sinon.stub(dashDao, "getAllAdmins").throwsException();
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    await userServicesController.getAdmins(fakeRequest, fakeResponse);
-    assert.match(fakeResponse.statusCode, 502);
-  });
-  it("GET /dashboard/getCustomer - Get all customers test", async function () {
     sinon.stub(dashDao, "getAllCustomer").throwsException();
+    sinon.stub(dashDao, 'getAllUsers').throwsException();
     sinon.stub(loggerUtils, "info");
     sinon.stub(loggerUtils, "error");
-    await userServicesController.getCustomers(fakeRequest, fakeResponse);
-    assert.match(fakeResponse.statusCode, 502);
+    await userServicesController.getUsers(fakeRequest, fakeResponse);
+    assert.match(fakeResponse.statusCode, 500);
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -769,82 +767,6 @@ var registerControllerTest = function () {
   });
 };
 
-var getQuotesTest = function () {
-  it("GET /getQuotes - fetch category from url success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(Math, "random").returns(0);
-    sinon.stub(axios, "get").returns(fakeAxiosGetData);
-    await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
-    assert.match(fakeResponse.response, fakeGetQuotesResponse);
-  });
-  it("GET /getQuotes - get default category success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
-    await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
-    assert.match(
-      fakeResponse.response,
-      fakeGetQuotesResponseForDefaultCategory
-    );
-  });
-  it("GET /getQuotes - get default category success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(axios, "get").returns(fakeAxiosGetDefaultData);
-    await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
-    assert.match(
-      fakeResponse.response,
-      fakeGetQuotesResponseForDefaultCategory
-    );
-  });
-  it("GET /getQuotes - exception test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    var stubFunc = sinon.stub(axios, "get");
-    stubFunc.onCall(0).returns(fakeAxiosGetData);
-    stubFunc.onCall(1).returns(fakeAxiosGetEmptyData);
-    await coreServicesController.getQuotes(loginPayloadRequest, fakeResponse);
-    assert.match(fakeResponse.statusCode, 502);
-  });
-  it("GET /getProfilePicture - all tests", async function () {});
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var getProfilePicture = async function () {
-  var testCases = [
-    {
-      name: "GET /getProfilePicture - valid values from db - success tests",
-      fetchValue: ["fake_url", "fake_name"],
-      exp: fakeGetProfilePicResponse,
-      req: fakeGetQuoteRequest1,
-    },
-    {
-      name: "GET /getProfilePicture - no values found from db - success tests",
-      fetchValue: [null, "Abinash Biswal"],
-      exp: fakeGetProfilePicResponse2,
-      req: fakeGetQuoteRequest1,
-    },
-  ];
-  for (const testCase of testCases) {
-    it(testCase.name, async function () {
-      sinon.stub(loggerUtils, "info");
-      sinon.stub(loggerUtils, 'error');
-      sinon.stub(coreServiceDao, "getImageOfLoggedInUser").returns(testCase.fetchValue);
-      await coreServicesController.getProfilePicture(
-        testCase.req,
-        fakeResponse
-      );
-      assert.match(fakeResponse.response, testCase.exp);
-    });
-    afterEach(function () {
-      sinon.verifyAndRestore();
-    });
-  }
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
 var getUserInfo = async function () {
   var testCases = [
     {
@@ -934,7 +856,5 @@ describe("test_insert", insertControllerTest);
 describe("test_login", loginControllerTest);
 describe("test_logout", logoutControllerTest);
 describe("test_register", registerControllerTest);
-describe("test_getQuotes", getQuotesTest);
-describe("test_getProfilePicture", getProfilePicture);
 describe("test_getUserInfo", getUserInfo);
 describe("test_deleteUser", deleteUserInfo);

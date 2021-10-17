@@ -71,18 +71,7 @@ module.exports = {
     RI_033: "Empty properties found in request payload or in query params: {0}",
     RI_034: "Getting exception: {0} while fetching user data",
     RI_035: "Request has been accepted, please check notifications for the updates"
-  },
-  URL: {
-    defaultProfilePictureUrl: "https://www.w3schools.com/howto/img_avatar.png",
-    defaultQuoteCreditUrl: "https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher",
-    defaultQuoteBGImg: "https://theysaidso.com/img/qod/qod-students.jpg",
-    defaultGETCategoryUrl: "https://quotes.rest/qod/categories?language=en"
-  },
-  StringConstant: {
-    defaultQuote: "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
-    defaultAuthor: "Marva Collins",
-    defaultTitle: "Quote of the day for students",
-  },
+  }
 };
 
 module.exports.redisClient = redisClient;
