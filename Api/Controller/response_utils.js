@@ -81,7 +81,7 @@ class AppResponse {
       .fromPairs()                          // {"foo": "bar", "new": "watch"}
       .value();
     return decodedQueryParams;
-    }
+  }
 
   getCommaSepPathParams() {
     const req = this.request;
@@ -238,6 +238,22 @@ class AppResponse {
       this.request.path
     );
     logger.info(message);
+  }
+
+  getRequestHeaders() {
+    var headers = _.has(this.request, "headers") ? this.request.headers : {};
+    return headers;
+  }
+
+  getLocale() {
+    var requestHeaders = this.getRequestHeaders();
+    var AcceptLang = requestHeaders["accept-language"]
+    if(!AcceptLang) {
+      return "en-US";
+    }
+    var LangList = _.split(AcceptLang, ',')
+    var locale = LangList[0];
+    return locale
   }
 }
 
