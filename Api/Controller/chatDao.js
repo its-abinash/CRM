@@ -55,8 +55,9 @@ module.exports.getConversationWithImage = async function (
   receiver
 ) {
   try {
-    var chat = await db.fetchConversationWithImg(sender, receiver);
-    return chat;
+    var SenderToReceiver = await db.fetchConversationWithImg(sender, receiver);
+    var ReceiverToSender = await db.fetchConversationWithImg(receiver, sender);
+    return [SenderToReceiver, ReceiverToSender];
   } catch (exc) {
     throw exc;
   }

@@ -27,11 +27,15 @@ module.exports.processAndGetConversation = async function (
 ) {
   var sender = AppRes.decryptKeyStable(req.params.senderId) || LoggedInUser;
   var receiver = AppRes.decryptKeyStable(req.params.receiverId);
-  var chatList = await chatDao.getConversationWithImage(sender, receiver);
-
+  var [SenderToReceiver, ReceiverToSender] = await chatDao.getConversationWithImage(sender, receiver);
+  var chatList = [...SenderToReceiver, ...ReceiverToSender];
+  chatList.sort(function(senderChat, receiverChat) {
+    return senderChat.timestamp - receiverChat.timestamp
+  });
   for (var eachChat of chatList) {
     eachChat["timestamp"] = lodash.toNumber(eachChat["timestamp"]);
     eachChat["chatmsg"] = AppRes.decryptKey(eachChat["msg"]);
+    eachChat["locale"] = AppRes.getLocale();
     delete eachChat["msg"];
   }
   var response = await AppRes.buildResponse(
