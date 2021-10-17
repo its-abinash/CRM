@@ -85,6 +85,7 @@ module.exports.fakeGETChatRequest2 = {
     senderId: "c2VuZGVyQGdtYWlsLmNvbQ==",
     receiverId: "cmVjZWl2ZXJAZ21haWwuY29t",
   },
+  loggedInUser: "loginuser_fake_email_id",
   path: "/chat",
   method: "POST",
 };
@@ -98,6 +99,15 @@ module.exports.fakeChatData = [
     image: "some encoded string"
   },
 ];
+module.exports.fakeChatData1 = [
+  {
+    sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
+    receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
+    msg: "U2FsdGVkX1/0568a5bCQKN4RqauV23i4IdFIMsCwIAA=",
+    timestamp: "12346",
+    image: "some encoded string"
+  },
+];
 
 module.exports.fakeChatResponse = {
   responseId: "RI_001",
@@ -105,6 +115,12 @@ module.exports.fakeChatResponse = {
   statusCode: 200,
   responseMessage: "Standard response for successful HTTP requests.",
   values: [
+    {
+      sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
+      receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
+      msg: "U2FsdGVkX1/0568a5bCQKN4RqauV23i4IdFIMsCwIAA=",
+      timestamp: "3:39:50 PM",
+    },
     {
       sender: "U2FsdGVkX1+j0LIA57jQBkLANfOUR0Pd0GuiRa5btOMHKLvdZ9FCfixN6Tls4LML",
       receiver: "U2FsdGVkX1/bQP3AECm5O9bkvQy6vNK9wk39baqrU2eMNLdfJmvrd5Bv0r8TY7ik",
