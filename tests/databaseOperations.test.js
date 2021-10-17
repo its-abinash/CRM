@@ -481,6 +481,13 @@ var databaseControllerTest = function () {
     });
     await dbUtils.fetchConversationWithImg("sender@gmail.com", "receiver@gmail.com");
   });
+  it("getUsersBySearchText - test", async function () {
+    var pgStub = fakePgPool({rows: []});
+    var dbUtils = proxyrequire("../Database/databaseOperations", {
+      pg: pgStub,
+    });
+    await dbUtils.getUsersBySearchText("searchText");
+  });
   afterEach(function () {
     sinon.verifyAndRestore();
   });

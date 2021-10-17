@@ -3,26 +3,15 @@ const logger = require("../Logger/log");
 const {
   ResponseIds,
   DATABASE,
-  URL,
 } = require("../../Configs/constants.config");
 const httpStatus = require("http-status");
 const insertServiceDao = require("./insertServiceDao");
 const deleteServiceDao = require("./deleteServiceDao");
 const { insertPayloadSchema } = require("./schema");
-const axios = require("axios").default;
 
 const FAKE_PASSCODE = "fake_code";
 const FAKE_PASSWORD = "Default@123";
 const DEFAULT_ADMIN = false;
-
-var getDefaultImgUrl = async function () {
-  var img_data = await axios.get(URL.defaultProfilePictureUrl, {
-    responseType: "arraybuffer",
-  });
-  var base64Uri = await Buffer.from(img_data.data, "binary").toString("base64");
-  base64Uri = `data:image/png;base64, ${base64Uri}`;
-  return base64Uri;
-};
 
 /**
  * @function processAndInsertUserData
@@ -54,7 +43,7 @@ module.exports.processAndInsertUserData = async function (LoggedInUser, AppRes) 
     var date = new Date();
     date.setDate(date.getDate() + parseInt(payload.remfreq));
     var next_remainder = date.toLocaleDateString();
-    var imgUrl = await getDefaultImgUrl();
+    var imgUrl = null;
     var customerData = [
       payload.name,
       payload.email,

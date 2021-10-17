@@ -14,11 +14,6 @@ router.get("/constants/:constId/:fieldId", coreController.getSpecificFromConstan
 // remainder Endpoints
 router.get("/getLatestRemainderInformation", coreController.latestRemainderInformation);
 
-// quotes Endpoints
-router.get("/getQuotes", coreController.getQuotes);
-
-router.get("/getProfilePicture", coreController.getProfilePicture);
-
 // GetUserType Endpoints
 router.get("/getUserType", coreController.getUserType);
 

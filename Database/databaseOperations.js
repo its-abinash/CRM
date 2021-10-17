@@ -673,16 +673,60 @@ module.exports.fetchConversationWithImg = async function (sender, receiver) {
                    from (
                       select * from conversation
                       where sender = $1 and receiver = $2
-                      or sender = $2 and receiver = $1
                    ) sub
                    inner join customer on
-                   customer.email = receiver
+                   customer.email = $1
                    inner join media on
-                   media.email = receiver
+                   media.email = $1
                    order by timestamp`;
     var res = await db.query(query, [sender, receiver]);
     db.release();
     return res.rows;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @function getUsersBySearchText
+ * @async
+ * @description Fetches all users by given search text. We'll perform a regex match for every column on customers table.
+ * @param {Array} data
+ */
+ module.exports.getUsersBySearchText = async function (searchText) {
+  try {
+    const db = await pool.connect();
+    const query = `select distinct email, name from customer
+                   where
+                   LOWER(email) LIKE LOWER('%${searchText}%') or
+                   LOWER(name) LIKE LOWER('%${searchText}%') or
+                   phone LIKE '%${searchText}%' or
+                   LOWER(gst) LIKE LOWER('%${searchText}%') or
+                   LOWER(firstname) LIKE LOWER('%${searchText}%') or
+                   LOWER(lastname) LIKE LOWER('%${searchText}%')`;
+    var res = await db.query(query);
+    db.release();
+    return res.rows;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @function getImgOfUser
+ * @async
+ * @description Fetches image data of given user
+ * @param {Array} data
+ */
+ module.exports.getImgOfUser = async function (userId) {
+  try {
+    const db = await pool.connect();
+    const query = `select image from media
+                   where
+                   email = $1`;
+    var res = await db.query(query, [userId]);
+    db.release();
+    return res.rows.length == 0 ? null : res.rows[0].image;
   } catch (ex) {
     throw ex;
   }

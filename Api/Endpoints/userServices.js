@@ -8,9 +8,8 @@ const uploadMiddleware = multer({}).single("image");
 var router = express.Router();
 
 // Dashboard Endpoints
-router.get("/dashboard/getCustomer", userController.getCustomers);
-
-router.get("/dashboard/getAdmins", userController.getAdmins)
+// Accepts QueryParams: [admin: Boolean, searchText: String]
+router.get("/dashboard/users", userController.getUsers)
 
 // User Endpoint
 router.get("/user/:userId", userController.getUserInfo)

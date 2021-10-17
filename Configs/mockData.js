@@ -10,6 +10,8 @@ module.exports.fakeChatPOSTRequest = {
     user: "sender@gmail.com",
     password: "password",
   },
+  loggedInUser: "loggedInUser",
+  originalUrl: "?U2FsdGVkX185+ZUftaKEvQvAhiIzRY3QlcQSUAntlBA=",
   body: {
     "payload": "U2FsdGVkX19gTxvETA5pwvCzaFwFATnzvth3aNVVk2Vs/yWuxbheVIfxZG03hl/wLKBsWqKKSGQzq2+AeHa9CJNMAIoeKUXhYdnIbAePkgXm2zv6HEEg29X2pauJDf3QoX5w27cs/iqKQcZmXHOD6A=="
   },
@@ -685,6 +687,9 @@ module.exports.loginPayloadRequest = {
     user: "sender@gmail.com",
     password: "pass",
   },
+  params: {
+    userId: "sender@gmail.com"
+  },
   body: {
     "payload": "U2FsdGVkX1+WXa4uthXqvrCDKBwsXsJ5ia2O0bO2Ke0sBIGV662EOcQCBPbyFgEXRMHQWSsCwnbGfcYZy6dBCKdt64rV64csyIOkPiWPwQs="
   },
@@ -794,103 +799,6 @@ module.exports.registerExceptionResponse = {
   ]
 }
 
-module.exports.fakeAxiosGetData = {
-  data: {
-    contents: {
-      categories: {
-        inspire: "Inspiring Quote of the day",
-        management: "Management Quote of the day",
-        sports: "Sports Quote of the day",
-        life: "Quote of the day about life",
-        funny: "Funny Quote of the day",
-        love: "Quote of the day about Love",
-        art: "Art quote of the day ",
-        students: "Quote of the day for students",
-      },
-      quotes: [
-        {
-          quote: "fake quote",
-          author: "fake author",
-          title: "fake title",
-          background: "fake background",
-          permalink: "fake permalink",
-        },
-      ],
-    },
-    userId: 1,
-    id: 1,
-    title: "fake_title",
-    body: "fake_body",
-  },
-};
-
-module.exports.fakeAxiosGetDefaultData = {
-  data: {
-    contents: {
-      categories: {},
-      quotes: [
-        {
-          quote: "fake quote",
-          author: "fake author",
-          title: "fake title",
-          background: "fake background",
-          permalink: "fake permalink",
-        },
-      ],
-    },
-    userId: 1,
-    id: 1,
-    title: "fake_title",
-    body: "fake_body",
-  },
-};
-
-module.exports.fakeAxiosGetEmptyData = {
-  data: {},
-};
-
-module.exports.fakeGetQuotesResponse = {
-  responseId: "RI_006",
-  status: "OK",
-  statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
-  values: [
-    {
-      quote: "fake quote",
-      author: "fake author",
-      title: "fake title",
-      imgUrl: "fake background",
-      credit: "fake permalink",
-    },
-  ],
-  totalCount: 1,
-  reasons: [
-    'Successfully fetched the quote',
-  ],
-};
-
-module.exports.fakeGetQuotesResponseForDefaultCategory = {
-  responseId: "RI_006",
-  status: "OK",
-  statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
-  values: [
-    {
-      quote:
-        "Don't try to fix the students, fix ourselves first. The good teacher makes the poor student good and the good student superior. When our students fail, we, as teachers, too, have failed.",
-      author: "Marva Collins",
-      title: "Quote of the day for students",
-      imgUrl: "https://theysaidso.com/img/qod/qod-students.jpg",
-      credit:
-        "https://theysaidso.com/quote/marva-collins-dont-try-to-fix-the-students-fix-ourselves-first-the-good-teacher",
-    },
-  ],
-  totalCount: 1,
-  reasons: [
-    `Successfully fetched the quote`,
-  ],
-};
-
 module.exports.fakeGetQuoteRequest1 = {
   path: "/fake_path",
   method: "fake_method",
@@ -966,4 +874,39 @@ module.exports.deleteUserDataResp = {
   reasons: [
     'Successfully removed image of user having userId: sender@gmail.com'
   ]
+}
+
+module.exports.fakeAdminData = {
+  email: "fakeemail@gmail.com",
+  name: "fakeadmin",
+  image: "base64 data"
+}
+
+module.exports.fakeCustmerData = {
+  email: "fakeemail@gmail.com",
+  name: "fakecustomer",
+  image: "base64 data"
+}
+
+module.exports.allUsers = [
+  {
+    email: "user1@gmail.com",
+    name: "user1"
+  },
+  {
+    email: "fakeemail@gmail.com",
+    name: "fakecustomer"
+  }
+]
+
+module.exports.fakeGetAllUsersResp1 = {
+  responseId: 'RI_006',
+  status: 'OK',
+  statusCode: 200,
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [
+    { email: 'fakeemail@gmail.com', name: 'fakecustomer', image: null }
+  ],
+  totalCount: 1,
+  reasons: [ 'Successfully fetched the users' ]
 }

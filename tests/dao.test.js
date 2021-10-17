@@ -58,7 +58,7 @@ var daoControllerTestPositive = function () {
   it("chatDao - getConversationWithImage success test", async function () {
     sinon.stub(dbUtils, "fetchConversationWithImg").returns([]);
     var result = await chatDao.getConversationWithImage(sender, receiver);
-    assert.match(result, [[],[]]);
+    assert.match(result, [[], []]);
   });
   it("coreServicesDao - success test", async function () {
     sinon.stub(dbUtils, "fetchLatestRemainder").returns([]);
@@ -111,9 +111,22 @@ var daoControllerTestPositive = function () {
     sinon.stub(dbUtils, "fetchUserData").returns(["img", "username"]);
     stub.onCall(0).returns(["cus1, cus2"]);
     stub.onCall(1).returns(["admin1, admin2"]);
+    sinon.stub(dbUtils, "getUsersBySearchText").returns([
+      {
+        email: "user1@gmail.com",
+        name: "user1",
+      },
+      {
+        email: "fakeemail@gmail.com",
+        name: "fakecustomer",
+      },
+    ]);
+    sinon.stub(dbUtils, "getImgOfUser").returns(null);
     var cusList = await dashDao.getAllCustomer("loggedinuser@domain.com");
     var adminList = await dashDao.getAllAdmins("loggedinuser@domain.com");
     var userData = await dashDao.getUserData("loggedinuser@domain.com");
+    await dashDao.getAllUsers("my name");
+    await dashDao.getImage("fakeUserId");
     assert.match(userData, ["img", "username"]);
     assert.match(cusList, ["cus1, cus2"]);
     assert.match(adminList, ["admin1, admin2"]);
@@ -134,6 +147,26 @@ var daoControllerTestPositive = function () {
       .throwsException({ name: "CONNERR" });
     try {
       await dashDao.getAllAdmins("loggedinuser@domain.com");
+    } catch (exc) {
+      assert.match(exc.name, "CONNERR");
+    }
+  });
+  it("dashDao - getAllUsers exception test", async function () {
+    sinon
+      .stub(dbUtils, "getUsersBySearchText")
+      .throwsException({ name: "CONNERR" });
+    try {
+      await dashDao.getAllUsers("searchText");
+    } catch (exc) {
+      assert.match(exc.name, "CONNERR");
+    }
+  });
+  it("dashDao - getImgOfUser exception test", async function () {
+    sinon
+      .stub(dbUtils, "getImgOfUser")
+      .throwsException({ name: "CONNERR" });
+    try {
+      await dashDao.getImage("fakeUserId");
     } catch (exc) {
       assert.match(exc.name, "CONNERR");
     }
