@@ -216,8 +216,9 @@ var dashboardControllerTestPositive = function () {
     sinon.stub(dashDao, "getAllAdmins").returns([fakeAdminData]);
     sinon.stub(dashDao, "getAllCustomer").returns([fakeCustmerData]);
     sinon.stub(dashDao, 'getAllUsers').returns(allUsers);
+    sinon.stub(dashDao, "getImage").returns(null);
     var req = fakeChatPOSTRequest;
-    req["originalUrl"] = "U2FsdGVkX1/WU9y8OOk0IdvYRo499qdQbSEETz0/y5RToDPgHRX3ofLaEcMagN9I"
+    req["originalUrl"] = "?U2FsdGVkX1/WU9y8OOk0IdvYRo499qdQbSEETz0/y5RToDPgHRX3ofLaEcMagN9I"
     await userServicesController.getUsers(req, fakeResponse);
     assert.match(fakeResponse.response, fakeGetAllUsersResp1);
   });

@@ -121,10 +121,12 @@ var daoControllerTestPositive = function () {
         name: "fakecustomer",
       },
     ]);
+    sinon.stub(dbUtils, "getImgOfUser").returns(null);
     var cusList = await dashDao.getAllCustomer("loggedinuser@domain.com");
     var adminList = await dashDao.getAllAdmins("loggedinuser@domain.com");
     var userData = await dashDao.getUserData("loggedinuser@domain.com");
     await dashDao.getAllUsers("my name");
+    await dashDao.getImage("fakeUserId");
     assert.match(userData, ["img", "username"]);
     assert.match(cusList, ["cus1, cus2"]);
     assert.match(adminList, ["admin1, admin2"]);
@@ -155,6 +157,16 @@ var daoControllerTestPositive = function () {
       .throwsException({ name: "CONNERR" });
     try {
       await dashDao.getAllUsers("searchText");
+    } catch (exc) {
+      assert.match(exc.name, "CONNERR");
+    }
+  });
+  it("dashDao - getImgOfUser exception test", async function () {
+    sinon
+      .stub(dbUtils, "getImgOfUser")
+      .throwsException({ name: "CONNERR" });
+    try {
+      await dashDao.getImage("fakeUserId");
     } catch (exc) {
       assert.match(exc.name, "CONNERR");
     }
