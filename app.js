@@ -17,7 +17,7 @@ var commonMiddleWare = require("./Api/Controller/commonMiddleware")
  */
 app.use(
   "/",
-  express.json(),
+  express.json({limit: '1mb'}),
   express.urlencoded(CORE.URL_ENCODED_BODY),
   cors(),
   requestTracer.expressMiddleware(),
