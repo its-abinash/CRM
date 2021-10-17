@@ -58,7 +58,7 @@ var daoControllerTestPositive = function () {
   it("chatDao - getConversationWithImage success test", async function () {
     sinon.stub(dbUtils, "fetchConversationWithImg").returns([]);
     var result = await chatDao.getConversationWithImage(sender, receiver);
-    assert.match(result, []);
+    assert.match(result, [[],[]]);
   });
   it("coreServicesDao - success test", async function () {
     sinon.stub(dbUtils, "fetchLatestRemainder").returns([]);

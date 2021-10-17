@@ -10,7 +10,6 @@ const deleteServiceDao = require("../Api/Controller/deleteServiceDao");
 const editServiceDao = require("../Api/Controller/editServiceDao");
 const emailServiceDao = require("../Api/Controller/emailServiceDao");
 const insertServiceDao = require("../Api/Controller/insertServiceDao");
-const utils = require("../Api/Controller/utils");
 const jwt = require("jsonwebtoken");
 const redisMock = require("redis-mock");
 
@@ -41,7 +40,6 @@ const {
   fakeEmailRequest,
   fakeEmailResponse,
   emailWrongPayloadResponse,
-  emailExceptionResponse,
   fakeConstants,
   getSpecificFromConstantsRequest,
   getSpecificFromConstantsResponse,
@@ -66,7 +64,6 @@ const {
   fakeGetProfilePicResponse2,
   insertProfilePictureFailureRes,
   fakeLoginUserResponse,
-  fakeLoginUserExpResponse,
   loginPayloadValidationErrorResponse,
   loginUserValidationErrorResponse,
   loginExceptionResponse,
@@ -76,29 +73,26 @@ const {
   registerExceptionResponse,
   JWTAuthSuccessResponse,
   JWTAuthFailureResponse,
-  JWTUserAuthErrorResponse,
   fakePatchRequest,
-  fakeChatResponse3,
   GetNotificationRequest,
   getNotificationsResponse,
   userInfoResponse,
   deleteUserDataResp,
+  fakeChatData1,
 } = require("../Configs/mockData");
 
 var chatControllerTestPositive = function () {
-  var req = fakeGETChatRequest2
-  req["loggedInUser"] = "loginuser_fake_email_id"
   var testCases = [
     {
       testCaseName: "GET /chat - sender test",
-      req: req,
+      req: fakeGETChatRequest2,
       res: fakeResponse,
       exp: fakeChatResponse,
     }
   ];
   for (const testCase of testCases) {
     it(testCase.testCaseName, async function () {
-      sinon.stub(chatDao, "getConversationWithImage").returns(fakeChatData);
+      sinon.stub(chatDao, "getConversationWithImage").returns([fakeChatData,fakeChatData1]);
       sinon.stub(loggerUtils, "info");
       sinon.stub(loggerUtils, 'error');
       await userServicesController.getConversation(testCase.req, testCase.res);
