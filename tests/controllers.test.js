@@ -212,14 +212,13 @@ var dashboardControllerTestPositive = function () {
     assert.match(fakeResponse.statusCode, 200);
   });
   it("GET /dashboard/users - get all users test2", async function () {
-    // sinon.stub(loggerUtils, "info");
+    sinon.stub(loggerUtils, "info");
     sinon.stub(dashDao, "getAllAdmins").returns([fakeAdminData]);
     sinon.stub(dashDao, "getAllCustomer").returns([fakeCustmerData]);
     sinon.stub(dashDao, 'getAllUsers').returns(allUsers);
     var req = fakeChatPOSTRequest;
     req["originalUrl"] = "U2FsdGVkX1/WU9y8OOk0IdvYRo499qdQbSEETz0/y5RToDPgHRX3ofLaEcMagN9I"
     await userServicesController.getUsers(req, fakeResponse);
-    assert.match(fakeResponse.statusCode, 200);
     assert.match(fakeResponse.response, fakeGetAllUsersResp1);
   });
   afterEach(function () {
