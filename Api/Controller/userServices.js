@@ -19,58 +19,28 @@ router.use(cors());
 
 /**
  * @httpMethod GET
- * @endpoint /dashboard/getCustomer
- * @function getCustomers
+ * @endpoint /dashboard/getUsers
+ * @function getUsers
  * @async
- * @description Get all the customers and send them to client
+ * @description Fetches all users from the db according to queryParams
  * @param {Object} req
  * @param {Object} res
+ * @returns users list
  */
-module.exports.getCustomers = async function (req, res) {
+ module.exports.getUsers = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = req.loggedInUser;
-    var [statusCode, response] = await dashService.processAndGetCustomers(
-      req,
-      LoggedInUser,
+    var [statusCode, response] = await dashService.processAndGetUsers(
+      req.loggedInUser,
       AppRes
     );
     AppRes.ApiExecutionEnds();
     res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
- * @endpoint /dashboard/getAdmins
- * @function getAdmins
- * @async
- * @description Fetches all admins from the db
- * @param {Object} req
- * @param {Object} res
- * @returns List of Admins
- */
-module.exports.getAdmins = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var LoggedInUser = req.loggedInUser;
-    var [statusCode, response] = await dashService.processAndGetAdmins(
-      req,
-      LoggedInUser,
-      AppRes
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.INTERNAL_SERVER_ERROR);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -358,9 +328,9 @@ module.exports.getUserInfo = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = req.loggedInUser;
+    var userId = req.params['userId']
     var [statusCode, response] = await dashService.getUserData(
-      LoggedInUser,
+      userId,
       AppRes
     );
     AppRes.ApiExecutionEnds();
@@ -389,9 +359,9 @@ module.exports.deleteUserData = async function (req, res) {
   var AppRes = new AppResponse(req);
   try {
     AppRes.ApiExecutionBegins();
-    var LoggedInUser = req.loggedInUser;
+    var userId = req.params['userId']
     var [statusCode, response] = await deleteService.processAndDeleteUserData(
-      LoggedInUser,
+      userId,
       AppRes
     );
     AppRes.ApiExecutionEnds();

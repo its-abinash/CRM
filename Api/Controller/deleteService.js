@@ -50,11 +50,11 @@ var processAndGetFinalResponse = async function (
  * @function processAndDeleteUserData
  * @async
  * @description Delete user's all data
- * @param {String} LoggedInUser
+ * @param {String} userId
  * @param {Class} AppRes
  */
 module.exports.processAndDeleteUserData = async function (
-  LoggedInUser,
+  userId,
   AppRes,
   removeall = false
 ) {
@@ -64,17 +64,17 @@ module.exports.processAndDeleteUserData = async function (
     var [fields, values, tables] = getFieldsAndValuesFromQpArgs(qpArgs);
     logger.info(`Delete fields: ${fields} from tables: ${tables}`);
     var dataRemoved = await deleteServiceDao.deleteSpecificUserData(
-      LoggedInUser,
+      userId,
       fields,
       values,
       tables
     );
-    var reasons = [format(ResponseIds.RI_008, ["image", LoggedInUser])];
+    var reasons = [format(ResponseIds.RI_008, ["image", userId])];
     var statusCode = httpStatus.BAD_REQUEST;
     var respCode = "RI_008";
 
     if (dataRemoved) {
-      reasons = [format(ResponseIds.RI_007, ["image", LoggedInUser])];
+      reasons = [format(ResponseIds.RI_007, ["image", userId])];
       statusCode = httpStatus.OK;
       respCode = "RI_007";
     }
@@ -85,10 +85,10 @@ module.exports.processAndDeleteUserData = async function (
   var requestPayload = AppRes.getRequestBody();
   var email = requestPayload.email;
   logger.info(`Request to delete userId: ${email}`);
-  var removeFields = [LoggedInUser, email];
+  var removeFields = [userId, email];
   var [isUserRemoved, isChatRemoved] = await deleteServiceDao.removeUserData(
     removeFields,
-    LoggedInUser
+    userId
   );
   var response = await processAndGetFinalResponse(
     isUserRemoved,
