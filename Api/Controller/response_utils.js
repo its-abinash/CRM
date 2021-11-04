@@ -4,8 +4,6 @@ var main_utils = require("./main_utils");
 var jp = require("jsonpath");
 var { v4: uuid } = require("uuid");
 var { ResponseIds } = require("../../Configs/constants.config");
-const { URL, URLSearchParams } = require("url");
-const qString = require("querystring");
 const CryptoJs = require("crypto-js");
 const _ = require("lodash");
 
@@ -123,9 +121,12 @@ class AppResponse {
       values = [values];
     }
 
-    var reasons = reason;
+    var reasons = [];
     if (reason in ["undefined", null] || !Array.isArray(reason)) {
       reasons = [reason] || ["error"];
+    }
+    if(Array.isArray(reason)) {
+      reasons = [...reasons, ...reason]
     }
     var message = httpStatus[`${statusCode}_MESSAGE`];
     var status = httpStatus[`${statusCode}_NAME`];

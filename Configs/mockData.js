@@ -638,7 +638,7 @@ module.exports.insertSuccessfulResponse1 = {
   values: [],
   totalCount: 0,
   reasons: [
-    "Successfully inserted Profile Picture of user having userId: sender@gmail.com",
+    "Successfully inserted Profile Picture of userId: sender@gmail.com",
   ],
 };
 
@@ -651,7 +651,7 @@ module.exports.insertProfilePictureFailureRes = {
   values: [],
   totalCount: 0,
   reasons: [
-    "Failed to insert Profile Picture of user having userId: sender@gmail.com",
+    "Failed to insert Profile Picture of userId: sender@gmail.com",
   ],
 };
 
@@ -663,7 +663,7 @@ module.exports.insertSuccessfulResponse = {
     "The request has been fulfilled, resulting in the creation of a new resource.",
   values: [],
   totalCount: 0,
-  reasons: ["Successfully inserted data of user having userId: c1@gmail.com"],
+  reasons: ["Successfully inserted data of userId: c1@gmail.com"],
 };
 
 module.exports.insertFailureResponse = {
@@ -674,7 +674,7 @@ module.exports.insertFailureResponse = {
     "The server cannot or will not process the request due to an apparent client error.",
   values: [],
   totalCount: 0,
-  reasons: ["Failed to insert data of user having userId: c1@gmail.com"],
+  reasons: ["Failed to insert data of userId: c1@gmail.com"],
 };
 
 module.exports.loginPayloadRequest = {
@@ -872,7 +872,7 @@ module.exports.deleteUserDataResp = {
   values: [],
   totalCount: 0,
   reasons: [
-    'Successfully removed image of user having userId: sender@gmail.com'
+    'Successfully removed image of userId: sender@gmail.com'
   ]
 }
 

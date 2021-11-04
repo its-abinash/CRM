@@ -152,9 +152,11 @@ var fetchSpecificFromCred = async function (pk_name, pk_value) {
  * @description Fetches the customers for an admin and vice-versa
  * @param {Array} data
  */
-module.exports.fetchAllUsersForGivenUserId = async function (data) {
+module.exports.fetchAllUsersForGivenUserId = async function (data, limit, offset, isSearchTextEmpty) {
   try {
     const db = await pool.connect();
+    var LIMIT = isSearchTextEmpty ? limit : 'ALL'
+    var OFFSET = isSearchTextEmpty ? offset : '0'
     const query = `select distinct customer.email, customer.name, media.image
                    from customer
                    inner join users_map on
@@ -164,7 +166,9 @@ module.exports.fetchAllUsersForGivenUserId = async function (data) {
                    inner join media on
                    media.email = customer.email
                    where
-                   users_map.user_id1 = $1 and credentials.is_admin=$2;`;
+                   users_map.user_id1 = $1 and credentials.is_admin=$2
+                   order by customer.name asc, customer.email asc
+                   limit ${LIMIT} offset ${OFFSET};`;
     var res = await db.query(query, data);
     db.release();
     return res.rows;
