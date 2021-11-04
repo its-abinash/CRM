@@ -9,12 +9,12 @@ const coreServiceDao = require("./coreServiceDao");
 const CUSTOMER_INFO_KEYS = ["email", "name", "phone", "firstname", "lastname"];
 const MEDIA_INFO_KEYS = ["image", "lastmodified", "size", "type", "imagename"];
 
-var getUsers = async function (userId, isAdmin) {
+var getUsers = async function (userId, isAdmin, limit, offset, isSearchTextEmpty) {
   if (isAdmin) {
-    var users = await dashDao.getAllAdmins(userId);
+    var users = await dashDao.getAllAdmins(userId, limit, offset, isSearchTextEmpty);
     return users;
-  }else {
-    var users = await dashDao.getAllCustomer(userId);
+  } else {
+    var users = await dashDao.getAllCustomer(userId, limit, offset, isSearchTextEmpty);
     return users;
   }
 };
@@ -27,7 +27,7 @@ var getImagesOfUsers = async function (users) {
 };
 
 var getCommonUsers = function (userlist1, userlist2) {
-  var result = lodash.intersectionBy(userlist1, userlist2, 'email');
+  var result = lodash.intersectionBy(userlist1, userlist2, "email");
   return result;
 };
 
@@ -43,15 +43,25 @@ module.exports.processAndGetUsers = async function (loggedInUser, AppRes) {
   var qpArgs = AppRes.getQueryParams();
   logger.info(`QueryParams: ${JSON.stringify(qpArgs)}`);
   var userType;
-  if(lodash.isEmpty(qpArgs) || (!lodash.isEmpty(qpArgs) && !lodash.has(qpArgs, 'admin'))) {
+  if (
+    lodash.isEmpty(qpArgs) ||
+    (!lodash.isEmpty(qpArgs) && !lodash.has(qpArgs, "admin"))
+  ) {
     var isAdmin = await coreServiceDao.getUserTypeFromDB(loggedInUser);
     userType = !isAdmin;
-  }else {
+  } else {
     userType = qpArgs["admin"] == "false" ? false : true;
   }
   var searchText = qpArgs["searchText"];
-  var users = await getUsers(loggedInUser, userType);
-
+  var limit = qpArgs["limit"];
+  var offset = qpArgs["offset"];
+  var users = await getUsers(
+    loggedInUser,
+    userType,
+    limit,
+    offset,
+    lodash.isEmpty(searchText)
+  );
   if (lodash.isEmpty(qpArgs) || lodash.isEmpty(searchText)) {
     var response = await AppRes.buildResponse(
       users,

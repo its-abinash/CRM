@@ -85,7 +85,7 @@ var processAndGetFinalResponse = async function (
       logger.info("successfully updated in db");
       response = await AppRes.buildResponse(
         null,
-        format(ResponseIds.RI_009, ["information", email]),
+        format(ResponseIds.RI_009, ["profile informations and credentials", email]),
         httpStatus.OK,
         "RI_009"
       );
@@ -93,7 +93,7 @@ var processAndGetFinalResponse = async function (
       logger.error("failed to update in db");
       response = await AppRes.buildResponse(
         null,
-        format(ResponseIds.RI_010, ["information", email]),
+        format(ResponseIds.RI_010, ["profile informations or credentials", email]),
         httpStatus.BAD_REQUEST,
         "RI_010"
       );

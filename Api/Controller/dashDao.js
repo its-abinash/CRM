@@ -6,10 +6,10 @@ const db = require("../../Database/databaseOperations");
  * @description Fetch all the customers and their details
  * @returns All Customers
  */
-module.exports.getAllCustomer = async function (logged_in_user_id) {
+module.exports.getAllCustomer = async function (logged_in_user_id, limit, offset, isSearchTextEmpty) {
   try {
     var data = [logged_in_user_id, false];
-    var customerList = await db.fetchAllUsersForGivenUserId(data);
+    var customerList = await db.fetchAllUsersForGivenUserId(data, parseInt(limit), parseInt(offset), isSearchTextEmpty);
     return customerList;
   } catch (exc) {
     throw exc;
@@ -21,10 +21,10 @@ module.exports.getAllCustomer = async function (logged_in_user_id) {
  * @async
  * @description Gets admin List from db
  */
-module.exports.getAllAdmins = async function (logged_in_user_id) {
+module.exports.getAllAdmins = async function (logged_in_user_id, limit, offset, isSearchTextEmpty) {
   try {
     var data = [logged_in_user_id, true];
-    var adminList = await db.fetchAllUsersForGivenUserId(data);
+    var adminList = await db.fetchAllUsersForGivenUserId(data, parseInt(limit), parseInt(offset), isSearchTextEmpty);
     return adminList;
   } catch (exc) {
     throw exc;
