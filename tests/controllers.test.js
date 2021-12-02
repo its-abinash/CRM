@@ -260,7 +260,7 @@ var deleteControllerTestNegative = function () {
     sinon.stub(loggerUtils, "error");
     sinon.stub(deleteServiceDao, "removeUserData").returns([false, false]);
     await userServicesController.delete(fakeDeleteUserRequest, fakeResponse);
-    assert.match(fakeResponse.statusCode, 400);
+    assert.match(fakeResponse.statusCode, 200);
   });
   it("POST /delete - deletion of user exception test", async function () {
     sinon.stub(loggerUtils, "info");
@@ -397,76 +397,6 @@ var emailControllerTest = function () {
     sinon.stub(validator, "validate").returns({ valid: true });
     await userServicesController.email(fakeEmailRequest, fakeResponse);
     assert.match(fakeResponse.statusCode, 502);
-  });
-  afterEach(function () {
-    sinon.verifyAndRestore();
-  });
-};
-
-var constantsControllerTest = function () {
-  it("GET /constants - success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.getAllConstants(
-      loginPayloadRequest,
-      fakeResponse
-    );
-    assert.match(fakeResponse.response, fakeConstants);
-  });
-  it("GET /constants/constId/fieldId - success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    await coreServicesController.getSpecificFromConstants(
-      getSpecificFromConstantsRequest,
-      fakeResponse
-    );
-    assert.match(fakeResponse.response, getSpecificFromConstantsResponse);
-  });
-  it("GET /constants/constId/fieldId - fieldId exception test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    var fakeReq = JSON.parse(JSON.stringify(getSpecificFromConstantsRequest));
-    fakeReq["params"]["fieldId"] = "fake_field";
-    await coreServicesController.getSpecificFromConstants(
-      fakeReq,
-      fakeResponse
-    );
-    assert.match(fakeResponse.statusCode, 502);
-    assert.match(
-      fakeResponse.response.reasons[0],
-      "Requested field is not found"
-    );
-  });
-  it("GET /constants/constId/fieldId - field exception test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    var fakeReq = JSON.parse(JSON.stringify(getSpecificFromConstantsRequest));
-    fakeReq["params"]["constId"] = "fake_constId";
-    await coreServicesController.getSpecificFromConstants(
-      fakeReq,
-      fakeResponse
-    );
-    assert.match(fakeResponse.statusCode, 502);
-    assert.match(
-      fakeResponse.response.reasons[0],
-      "Requested constantId not found"
-    );
-  });
-  it("GET /constants/constId - success test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    var fakeReq = JSON.parse(JSON.stringify(getSpecificFromConstantsRequest));
-    await coreServicesController.getConstant(fakeReq, fakeResponse);
-    assert.match(fakeResponse.statusCode, 200);
-  });
-  it("GET /constants/constId - constId exception test", async function () {
-    sinon.stub(loggerUtils, "info");
-    sinon.stub(loggerUtils, "error");
-    var fakeReq = JSON.parse(JSON.stringify(getSpecificFromConstantsRequest));
-    fakeReq["params"]["constId"] = "fake_constId";
-    await coreServicesController.getConstant(fakeReq, fakeResponse);
-    assert.match(
-      fakeResponse.response.reasons[0],
-      "Requested constantId not found"
-    );
   });
   afterEach(function () {
     sinon.verifyAndRestore();
@@ -849,7 +779,6 @@ describe("test_delete_positive", deleteControllerTestPositive);
 describe("test_delete_negative", deleteControllerTestNegative);
 describe("test_edit", editControllerTest);
 describe("test_email", emailControllerTest);
-describe("test_constants", constantsControllerTest);
 describe("test_getLatestRemainders", getLatestRemaindersControllerTest);
 describe("test_getUserType", getUserTypeUtilsControllerTest);
 describe("test_insert", insertControllerTest);

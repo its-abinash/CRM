@@ -198,8 +198,9 @@ module.exports.fakeChatErrorResponse = {
   values: [],
   totalCount: 0,
   reasons: [
-    "Error from database while saving conversation between userId: sender@gmail.com and userId: $receiver@gmail.com",
+    "Error from database while saving conversation between userId: sender@gmail.com and userId: receiver@gmail.com",
   ],
+  translateCodes: [ 'sender@gmail.com', 'receiver@gmail.com' ]
 };
 
 module.exports.fakeDeleteUserRequest = {
@@ -530,15 +531,14 @@ module.exports.fakeLatestRemainderData = [
 ];
 
 module.exports.fakeRemainderResponse = {
-  responseId: "RI_006",
-  status: "OK",
+  responseId: 'RI_006',
+  status: 'OK',
   statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
+  responseMessage: 'Standard response for successful HTTP requests.',
   values: [],
   totalCount: 0,
-  reasons: [
-    'Successfully fetched the remainder information',
-  ],
+  reasons: [ 'Successfully fetched results of remainder information' ],
+  translateCodes: []
 };
 
 module.exports.JWTAuthSuccessResponse = {
@@ -572,25 +572,25 @@ module.exports.JWTUserAuthErrorResponse = {
 }
 
 module.exports.fakeUserTypeResponse = {
-  responseId: "RI_006",
-  status: "OK",
+  responseId: 'RI_006',
+  status: 'OK',
   statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
-  values: [true],
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [ true ],
   totalCount: 1,
-  reasons: ["Successfully fetched the is_admin flag"],
+  reasons: [ 'Successfully fetched results of is_admin flag' ],
+  translateCodes: [ 'is_admin flag' ]
 };
 
 module.exports.fakeLoginUserResponse = {
-  responseId: "RI_006",
-  status: "OK",
+  responseId: 'RI_006',
+  status: 'OK',
   statusCode: 200,
-  responseMessage: "Standard response for successful HTTP requests.",
-  values: ["sender@gmail.com"],
+  responseMessage: 'Standard response for successful HTTP requests.',
+  values: [ 'sender@gmail.com' ],
   totalCount: 1,
-  reasons: [
-    "Successfully fetched the login user",
-  ],
+  reasons: [ 'Successfully fetched results of login user' ],
+  translateCodes: [ 'login user' ]
 };
 
 module.exports.fakeLoginUserExpResponse = {
@@ -846,7 +846,7 @@ module.exports.userInfoResponse = {
   "responseMessage":"Standard response for successful HTTP requests.",
   "values":[
     {
-      "media":{
+      "media": {
         "image":"img_data",
         "size":"1024",
         "lastmodified":"12345",
@@ -861,7 +861,8 @@ module.exports.userInfoResponse = {
     }
   ],
   "totalCount":1,
-  "reasons":["Successfully fetched the user information"]
+  "reasons":["Successfully fetched results of user information"],
+  "translateCodes":["user information"]
 }
 
 module.exports.deleteUserDataResp = {
@@ -908,5 +909,6 @@ module.exports.fakeGetAllUsersResp1 = {
     { email: 'fakeemail@gmail.com', name: 'fakecustomer', image: null }
   ],
   totalCount: 1,
-  reasons: [ 'Successfully fetched the users' ]
+  reasons: [ 'Successfully fetched results of hello' ],
+  translateCodes: [ 'hello' ]
 }

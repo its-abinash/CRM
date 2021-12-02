@@ -4,13 +4,6 @@ var coreController = require("../Controller/coreServices")
 
 var router = express.Router();
 
-// constants Endpoints
-router.get("/constants", coreController.getAllConstants)
-
-router.get("/constants/:constId", coreController.getConstant);
-
-router.get("/constants/:constId/:fieldId", coreController.getSpecificFromConstants)
-
 // remainder Endpoints
 router.get("/getLatestRemainderInformation", coreController.latestRemainderInformation);
 

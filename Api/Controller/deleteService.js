@@ -12,6 +12,7 @@ var processAndGetFinalResponse = async function (
 ) {
   var response = {};
   var success = false;
+  var reason = [];
   if (removedUser) {
     logger.info("Removed user successfully");
     success = true;
@@ -19,9 +20,8 @@ var processAndGetFinalResponse = async function (
     logger.error("Failed to remove user");
     reason.push(`No user found with userId: ${email}`);
   }
-  var reason = [
-    format(success ? ResponseIds.RI_007 : ResponseIds.RI_008,
-           ["userMapping, Conversations", email]),
+  var reason = [format(success ? ResponseIds.RI_007 : ResponseIds.RI_008,
+                       ["userMapping, Conversations", email]),
   ];
   var translateCodes = ["userMapping, Conversations", email];
   if (!removedConversation) {
