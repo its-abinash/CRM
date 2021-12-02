@@ -106,7 +106,8 @@ class AppResponse {
     data = null,
     reason = null,
     statusCode = httpStatus.BAD_REQUEST,
-    responseId = null
+    responseId = null,
+    translateCodes = []
   ) {
     var values = [];
     if (Array.isArray(data)) {
@@ -141,6 +142,7 @@ class AppResponse {
       values: values,
       totalCount: responseLength,
       reasons: reasons,
+      translateCodes: translateCodes
     };
     return response;
   }

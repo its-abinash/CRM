@@ -7,90 +7,12 @@ var logger = require("../Logger/log");
 const { ResponseIds } = require("../../Configs/constants.config");
 const { format } = require("./main_utils");
 const remainderService = require("./remainderService");
-const OOBService = require("./OOBService");
 const coreServiceDao = require("./coreServiceDao");
 const jwt = require("jsonwebtoken");
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(cors());
-
-/**
- * @httpMethod GET
- * @function getAllConstants
- * @description Gets all CONSTANTS
- * @async
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getAllConstants = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var [statusCode, response] = await OOBService.processAndGetAllConstants(
-      req,
-      AppRes
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(
-      null,
-      ex,
-      httpStatus.BAD_REQUEST,
-      "RI_015"
-    );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
- * @function getSpecificFromConstants
- * @description Gets a field of specific CONSTANT from CONSTANTS
- * @async
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getSpecificFromConstants = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var [statusCode, response] =
-      await OOBService.processAndGetSpecificFromConstants(req, AppRes);
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
-
-/**
- * @httpMethod GET
- * @function getConstant
- * @description Gets specific CONSTANT
- * @param {Object} req
- * @param {Object} res
- */
-module.exports.getConstant = async function (req, res) {
-  var AppRes = new AppResponse(req);
-  try {
-    AppRes.ApiExecutionBegins();
-    var [statusCode, response] = await OOBService.processAndGetConstant(
-      req,
-      AppRes
-    );
-    AppRes.ApiExecutionEnds();
-    res.status(statusCode).send(response);
-  } catch (ex) {
-    AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
-  }
-};
 
 /**
  * @function getUserType
@@ -111,7 +33,8 @@ module.exports.getUserType = async function (req, res) {
       isAdmin,
       format(ResponseIds.RI_006, ["is_admin flag"]),
       httpStatus.OK,
-      "RI_006"
+      "RI_006",
+      ["is_admin flag"]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.OK).send(response);
@@ -137,7 +60,8 @@ module.exports.getLoginUser = async function (req, res) {
       req.loggedInUser,
       format(ResponseIds.RI_006, ["login user"]),
       httpStatus.OK,
-      "RI_006"
+      "RI_006",
+      ["login user"]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.OK).send(response);

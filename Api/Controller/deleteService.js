@@ -11,38 +11,33 @@ var processAndGetFinalResponse = async function (
   AppRes
 ) {
   var response = {};
+  var success = false;
+  var reason = [];
   if (removedUser) {
     logger.info("Removed user successfully");
-    var reason = [
-      format(ResponseIds.RI_007, ["userMapping, Conversations", email]),
-    ];
-    if (!removedConversation) {
-      reason.push(`No conversation found for userId: ${email}`);
-    }
-    response = await AppRes.buildResponse(
-      null,
-      reason,
-      httpStatus.OK,
-      "RI_007"
-    );
+    success = true;
   } else {
     logger.error("Failed to remove user");
-    var reason = [
-      format(ResponseIds.RI_008, ["userMapping, Conversations", email]),
-    ];
-    if (!removedConversation) {
-      reason.push(`No conversation found for userId: ${email}`);
-    }
-    if (!removedUser) {
-      reason.push(`No user found with userId: ${email}`);
-    }
-    response = await AppRes.buildResponse(
-      null,
-      reason,
-      httpStatus.BAD_REQUEST,
-      "RI_008"
-    );
+    reason.push(`No user found with userId: ${email}`);
   }
+  var reason = [format(success ? ResponseIds.RI_007 : ResponseIds.RI_008,
+                       ["userMapping, Conversations", email]),
+  ];
+  var translateCodes = ["userMapping, Conversations", email];
+  if (!removedConversation) {
+    reason.push(`No conversation found for userId: ${email}`);
+    translateCodes = [email]
+  }
+  if(!success) {
+    translateCodes = [email]
+  }
+  response = await AppRes.buildResponse(
+    null,
+    reason,
+    httpStatus.OK,
+    "RI_007",
+    translateCodes
+  );
   return response;
 };
 
@@ -70,6 +65,7 @@ module.exports.processAndDeleteUserData = async function (
       tables
     );
     var reasons = [format(ResponseIds.RI_008, ["image", userId])];
+    var translateCodes = ["image", userId]
     var statusCode = httpStatus.BAD_REQUEST;
     var respCode = "RI_008";
 
@@ -78,7 +74,13 @@ module.exports.processAndDeleteUserData = async function (
       statusCode = httpStatus.OK;
       respCode = "RI_007";
     }
-    var response = await AppRes.buildResponse(null, reasons, statusCode, respCode);
+    var response = await AppRes.buildResponse(
+      null,
+      reasons,
+      statusCode,
+      respCode,
+      translateCodes
+    );
     return [response.statusCode, response];
   }
 

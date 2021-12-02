@@ -42,7 +42,8 @@ module.exports.processAndGetConversation = async function (
     chatList,
     format(ResponseIds.RI_001, [sender, receiver]),
     httpStatus.OK,
-    "RI_001"
+    "RI_001",
+    [sender, receiver]
   );
   return response;
 };
@@ -83,6 +84,7 @@ module.exports.processAndSaveConversation = async function (
     var timestamp = payload.timestamp;
 
     var reason = format(ResponseIds.RI_002, [sender, receiver]);
+    var translateCodes = [sender, receiver]
     var statusCode = httpStatus.BAD_REQUEST;
     var responseId = "RI_002";
 
@@ -103,7 +105,8 @@ module.exports.processAndSaveConversation = async function (
       null,
       reason,
       statusCode,
-      responseId
+      responseId,
+      translateCodes
     );
     return [statusCode, response];
   }

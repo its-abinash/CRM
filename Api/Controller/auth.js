@@ -113,7 +113,8 @@ module.exports.login = async function (req, res) {
           data,
           format(ResponseIds.RI_019, [email]),
           httpStatus.OK,
-          "RI_019"
+          "RI_019",
+          [email]
         );
         AppRes.ApiExecutionEnds();
         res.status(httpStatus.OK).send(response);
@@ -122,7 +123,8 @@ module.exports.login = async function (req, res) {
           data,
           format(ResponseIds.RI_021, [email, "Wrong userId or Password"]),
           httpStatus.BAD_REQUEST,
-          "RI_021"
+          "RI_021",
+          [email, "Wrong userId or Password"]
         );
         AppRes.ApiExecutionEnds();
         res.status(httpStatus.BAD_REQUEST).send(response);
@@ -138,7 +140,8 @@ module.exports.login = async function (req, res) {
       data,
       format(ResponseIds.RI_020, [email, ex]),
       httpStatus.INTERNAL_SERVER_ERROR,
-      "RI_020"
+      "RI_020",
+      [email, ex]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
@@ -273,7 +276,8 @@ module.exports.register = async function (req, res) {
           null,
           format(ResponseIds.RI_022, [email]),
           httpStatus.CONFLICT,
-          "RI_022"
+          "RI_022",
+          [email]
         );
         AppRes.ApiExecutionEnds();
         res.status(httpStatus.CONFLICT).send(response);
@@ -293,7 +297,8 @@ module.exports.register = async function (req, res) {
             null,
             format(ResponseIds.RI_016, [email]),
             httpStatus.CREATED,
-            "RI_016"
+            "RI_016",
+            [email]
           );
           AppRes.ApiExecutionEnds();
           res.status(httpStatus.CREATED).send(response);
@@ -303,12 +308,10 @@ module.exports.register = async function (req, res) {
           await removeDataOnFailure(requestPayload.email);
           var response = await AppRes.buildResponse(
             null,
-            format(ResponseIds.RI_018, [
-              email,
-              "error saving userdata in our databse",
-            ]),
+            format(ResponseIds.RI_018, [email, "error saving userdata in our databse"]),
             httpStatus.BAD_REQUEST,
-            "RI_018"
+            "RI_018",
+            [email, "error saving userdata in our databse"]
           );
           AppRes.ApiExecutionEnds();
           res.status(httpStatus.BAD_REQUEST).send(response);
@@ -323,7 +326,8 @@ module.exports.register = async function (req, res) {
       null,
       format(ResponseIds.RI_017, [email, ex]),
       httpStatus.INTERNAL_SERVER_ERROR,
-      "RI_017"
+      "RI_017",
+      [email, ex]
     );
     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
@@ -348,7 +352,8 @@ module.exports.logout = async function (req, res) {
       data,
       format(ResponseIds.RI_031, [loggedInUser]),
       httpStatus.OK,
-      "RI_031"
+      "RI_031",
+      [loggedInUser]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.OK).send(response);
@@ -362,7 +367,8 @@ module.exports.logout = async function (req, res) {
       data,
       format(ResponseIds.RI_025, [String(ex)]),
       httpStatus.INTERNAL_SERVER_ERROR,
-      "RI_025"
+      "RI_025",
+      [String(ex)]
     );
     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }

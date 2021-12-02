@@ -67,7 +67,8 @@ module.exports.processAndGetUsers = async function (loggedInUser, AppRes) {
       users,
       format(ResponseIds.RI_006, [userType ? "getAdmins" : "getCustomers"]),
       httpStatus.OK,
-      "RI_006"
+      "RI_006",
+      [userType ? "getAdmins" : "getCustomers"]
     );
     return [httpStatus.OK, response];
   }
@@ -77,9 +78,10 @@ module.exports.processAndGetUsers = async function (loggedInUser, AppRes) {
 
   var response = await AppRes.buildResponse(
     users,
-    format(ResponseIds.RI_006, ["users"]),
+    format(ResponseIds.RI_006, [searchText]),
     httpStatus.OK,
-    "RI_006"
+    "RI_006",
+    [searchText]
   );
   return [httpStatus.OK, response];
 };
@@ -115,7 +117,8 @@ module.exports.getUserData = async function (userId, AppRes) {
     results,
     format(ResponseIds.RI_006, ["user information"]),
     httpStatus.OK,
-    "RI_006"
+    "RI_006",
+    ["user information"]
   );
   return [httpStatus.OK, response];
 };
