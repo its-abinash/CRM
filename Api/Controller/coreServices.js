@@ -111,7 +111,8 @@ module.exports.getUserType = async function (req, res) {
       isAdmin,
       format(ResponseIds.RI_006, ["is_admin flag"]),
       httpStatus.OK,
-      "RI_006"
+      "RI_006",
+      ["is_admin flag"]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.OK).send(response);
@@ -137,7 +138,8 @@ module.exports.getLoginUser = async function (req, res) {
       req.loggedInUser,
       format(ResponseIds.RI_006, ["login user"]),
       httpStatus.OK,
-      "RI_006"
+      "RI_006",
+      ["login user"]
     );
     AppRes.ApiExecutionEnds();
     res.status(httpStatus.OK).send(response);

@@ -37,11 +37,11 @@ module.exports = {
   },
   ResponseIds: {
     RI_001: "Conversations between userId: {0} and userId: {1} are successfully retrieved",
-    RI_002: "Error from database while saving conversation between userId: {0} and userId: ${1}",
+    RI_002: "Error from database while saving conversation between userId: {0} and userId: {1}",
     RI_003: "Conversations between userId: {0} and userId: {1} are successfully inserted in Database",
     RI_004: "Invalid payload/request_body",
     RI_005: "Execution of {0} {1} finished in {2} msecs, which has generated {3} MB of memory",
-    RI_006: "Successfully fetched the {0}",
+    RI_006: "Successfully fetched results of {0}",
     RI_007: "Successfully removed {0} of userId: {1}",
     RI_008: "Failed to remove {0} of userId: {1}",
     RI_009: "Successfully updated {0} of userId: {1}",

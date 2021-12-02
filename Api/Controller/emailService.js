@@ -36,7 +36,8 @@ module.exports.sendEmailUtil = async function (requestPayload) {
       null,
       format(ResponseIds.RI_013, [payload.to]),
       httpStatus.OK,
-      "RI_013"
+      "RI_013",
+      [payload.to]
     );
   } catch (exception) {
     logger.error(`Exception while sending email: ${String(exception)}`)

@@ -87,7 +87,8 @@ var processAndGetFinalResponse = async function (
         null,
         format(ResponseIds.RI_009, ["profile informations and credentials", email]),
         httpStatus.OK,
-        "RI_009"
+        "RI_009",
+        ["profile informations and credentials", email]
       );
     } else {
       logger.error("failed to update in db");
@@ -95,7 +96,8 @@ var processAndGetFinalResponse = async function (
         null,
         format(ResponseIds.RI_010, ["profile informations or credentials", email]),
         httpStatus.BAD_REQUEST,
-        "RI_010"
+        "RI_010",
+        ["profile informations or credentials", email]
       );
     }
   }
