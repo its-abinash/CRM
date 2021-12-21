@@ -350,6 +350,20 @@ var insertPayloadSchema = JSON.parse(JSON.stringify(updatePayloadSchema))
 insertPayloadSchema["required"] = ["email", "name", "phone", "remfreq", "gst"]
 insertPayloadSchema["properties"]["gst"] = {"$ref": "/chatPostMessageSchema"}
 
+var createBlogSchema = {
+	"type": "object",
+    "properties" :{
+    	"title": {"type": "string"},
+        "descriptionText": {"type": "string"},
+        "descriptionHTML": {"type": "string"},
+        "authorId": {"type": "string"},
+        "authorName": {"type": "string"},
+        "createdAt": {"type": "string"},
+        "lastUpdatedAt": {"type": "string"}
+    },
+    "required": ["authorId"]
+}
+
 validator.addSchema(responseIdSchema, "/responseIdSchema")
 validator.addSchema(defaultResponseSchema, "/defaultResponseSchema")
 validator.addSchema(statusSchema, "/statusSchema")
@@ -367,6 +381,7 @@ validator.addSchema(nameSchema, "/nameSchema")
 validator.addSchema(phoneNumberSchema, "/phoneNumberSchema")
 validator.addSchema(remainderSchema, "/remainderSchema")
 validator.addSchema(passwordSchema, "/passwordSchema")
+validator.addSchema(createBlogSchema, "/createBlogSchema")
 
 module.exports.responseSchema = responseSchema
 module.exports.chatPostPayloadSchema = chatPostPayloadSchema
@@ -377,3 +392,4 @@ module.exports.validator = validator
 module.exports.registrationSchema = registrationSchema
 module.exports.loginPayloadSchema = loginPayloadSchema
 module.exports.patchPayloadSchema = patchPayloadSchema
+module.exports.createBlogSchema = createBlogSchema

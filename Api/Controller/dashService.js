@@ -62,6 +62,7 @@ module.exports.processAndGetUsers = async function (loggedInUser, AppRes) {
     offset,
     lodash.isEmpty(searchText)
   );
+  logger.info(`XXXXXXXXXXXXXXXXXXXXXX isAdmin: ${userType}, limit: ${limit}, offser: ${offset}, users: ${JSON.stringify(users)}`)
   if (lodash.isEmpty(qpArgs) || lodash.isEmpty(searchText)) {
     var response = await AppRes.buildResponse(
       users,

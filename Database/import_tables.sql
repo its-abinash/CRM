@@ -48,3 +48,15 @@ CREATE TABLE IF NOT EXISTS public.media
         ON DELETE NO ACTION
         NOT VALID
 );
+CREATE TABLE IF NOT EXISTS public.blogs
+(
+    "blogId" text NOT NULL,
+    title text,
+    "descriptionText" text,
+    "descriptionHTML" text,
+    "createdAt" text,
+    "lastUpdatedOn" text,
+    author text,
+    "authorId" text,
+    PRIMARY KEY ("blogId")
+);

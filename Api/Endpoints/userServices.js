@@ -41,4 +41,7 @@ router.post("/insert/profilePicture", uploadMiddleware, userController.insertPro
 // Email Endpoints
 router.post("/email", userController.email);
 
+// Create blog-post API
+router.post("/createPost", userController.createPost)
+
 module.exports = router;

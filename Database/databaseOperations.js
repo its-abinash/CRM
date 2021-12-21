@@ -156,7 +156,7 @@ module.exports.fetchAllUsersForGivenUserId = async function (data, limit, offset
   try {
     const db = await pool.connect();
     var LIMIT = isSearchTextEmpty ? limit : 'ALL'
-    var OFFSET = isSearchTextEmpty ? offset : '0'
+    var OFFSET = isSearchTextEmpty ? offset - 1 : '0'
     const query = `select distinct customer.email, customer.name, media.image
                    from customer
                    inner join users_map on
@@ -720,7 +720,7 @@ module.exports.fetchConversationWithImg = async function (sender, receiver) {
  * @function getImgOfUser
  * @async
  * @description Fetches image data of given user
- * @param {Array} data
+ * @param {String} userId
  */
  module.exports.getImgOfUser = async function (userId) {
   try {
@@ -731,6 +731,36 @@ module.exports.fetchConversationWithImg = async function (sender, receiver) {
     var res = await db.query(query, [userId]);
     db.release();
     return res.rows.length == 0 ? null : res.rows[0].image;
+  } catch (ex) {
+    throw ex;
+  }
+};
+
+/**
+ * @function insertBlogDetails
+ * @async
+ * @description Add blog details
+ * @param {Object} blogDetails
+ */
+ module.exports.insertBlogDetails = async function (blogDetails) {
+  try {
+    const db = await pool.connect();
+    var data = [
+      blogDetails.blogId,
+      blogDetails.title,
+      blogDetails.descriptionText,
+      blogDetails.descriptionHTML,
+      blogDetails.createdAt,
+      blogDetails.lastUpdatedAt,
+      blogDetails.authorName,
+      blogDetails.authorId,
+    ]
+    const query = `insert into
+                   blogs (blogId, title, descriptionText, descriptionHTML, createdAt, lastUpdatedAt, authorName, authorId)
+                   values ($1, $2, $3, $4, $5, $6, $7, $8)`;
+    var res = await db.query(query, data);
+    db.release();
+    return true;
   } catch (ex) {
     throw ex;
   }

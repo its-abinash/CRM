@@ -198,7 +198,7 @@ class AppResponse {
   }
 
   getStartMessage() {
-    var message = `Execution of ${this.request.method} ${this.request.path} begins`;
+    var message = `Execution of ${this.request.method} ${this.request.originalUrl} begins`;
     return message;
   }
 

@@ -20,3 +20,12 @@ module.exports.insertUserData = async function (tableID, data) {
     throw exc;
   }
 };
+
+module.exports.createBlogDetails = async function (blogDetails) {
+  try {
+    var detailsInsertedInDB = await db.insertBlogDetails(blogDetails);
+    return detailsInsertedInDB;
+  } catch (exc) {
+    throw exc;
+  }
+};

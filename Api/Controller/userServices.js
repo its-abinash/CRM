@@ -68,8 +68,8 @@ module.exports.getConversation = async function (req, res) {
     res.status(httpStatus.OK).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.INTERNAL_SERVER_ERROR);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -129,8 +129,8 @@ module.exports.getNotification = async function (req, res) {
     res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.INTERNAL_SERVER_ERROR);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -158,8 +158,8 @@ module.exports.delete = async function (req, res) {
     res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.INTERNAL_SERVER_ERROR);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -184,9 +184,9 @@ module.exports.edit = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_027, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -211,9 +211,9 @@ module.exports.updateUserProperty = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_027, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -244,10 +244,10 @@ module.exports.insert = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       reasons,
-      httpStatus.BAD_GATEWAY,
+      httpStatus.INTERNAL_SERVER_ERROR,
       "RI_030"
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -278,9 +278,9 @@ module.exports.insertProfilePicture = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_028, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -309,9 +309,9 @@ module.exports.email = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_029, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -340,9 +340,9 @@ module.exports.getUserInfo = async function (req, res) {
     var response = await AppRes.buildResponse(
       null,
       format(ResponseIds.RI_034, [String(ex)]),
-      httpStatus.BAD_GATEWAY
+      httpStatus.INTERNAL_SERVER_ERROR
     );
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
 
@@ -368,7 +368,38 @@ module.exports.deleteUserData = async function (req, res) {
     res.status(statusCode).send(response);
   } catch (ex) {
     AppRes.ApiReportsError(ex);
-    var response = await AppRes.buildResponse(null, ex, httpStatus.BAD_GATEWAY);
-    res.status(httpStatus.BAD_GATEWAY).send(response);
+    var response = await AppRes.buildResponse(null, ex, httpStatus.INTERNAL_SERVER_ERROR);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
+  }
+};
+
+/**
+ * @httpMethod POST
+ * @endpoint /createPost
+ * @function createPost
+ * @async
+ * @description Add a new blog/article
+ * @param {Object} req
+ * @param {Object} res
+ */
+ module.exports.createPost = async function (req, res) {
+  var AppRes = new AppResponse(req);
+  try {
+    AppRes.ApiExecutionBegins();
+    var LoggedInUser = req.loggedInUser;
+    var [statusCode, response] = await deleteService.processAndDeleteUserData(
+      LoggedInUser,
+      AppRes
+    );
+    AppRes.ApiExecutionEnds();
+    res.status(statusCode).send(response);
+  } catch (ex) {
+    AppRes.ApiReportsError(ex);
+    var response = await AppRes.buildResponse(
+      null,
+      ex,
+      httpStatus.INTERNAL_SERVER_ERROR
+    );
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(response);
   }
 };
